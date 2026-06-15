@@ -61,34 +61,47 @@
       </div>
     </article>
   {{ else }}
-    <article class="page-block article-single">
-      {{ with .Params.cover }}
-        <div class="article-cover">
-          <img src="{{ . | relURL }}" alt="{{ $.Title }}">
-        </div>
+    {{ $toc := .TableOfContents }}
+    <section class="page-block article-layout{{ if ne $toc "" }} article-layout--with-toc{{ end }}">
+      {{ if ne $toc "" }}
+        <aside class="article-toc" aria-label="文章大纲">
+          <div class="article-toc__inner">
+            <p class="article-toc__kicker">ON THIS PAGE</p>
+            <div class="article-toc__content">
+              {{ $toc }}
+            </div>
+          </div>
+        </aside>
       {{ end }}
-      <header class="page-head">
-        <p class="page-kicker">ARTICLE</p>
-        {{ with .Params.series }}
-          <p class="article-series">{{ index . 0 }}</p>
+      <article class="article-single">
+        {{ with .Params.cover }}
+          <div class="article-cover">
+            <img src="{{ . | relURL }}" alt="{{ $.Title }}">
+          </div>
         {{ end }}
-        <h1>{{ .Title }}</h1>
-        <div class="single-meta">
-          <span>{{ .Date.Format "2006-01-02" }}</span>
-          {{ with .Params.categories }}<span>{{ delimit . " / " }}</span>{{ end }}
-          {{ with .Params.tags }}<span># {{ delimit . " # " }}</span>{{ end }}
-        </div>
-      </header>
-      <div class="page-copy content-body">
-        {{ .Content }}
-      </div>
-      {{ with .Params.tags }}
-        <div class="single-tags">
-          {{ range . }}
-            <a href="{{ "tags/" | relURL }}{{ . | urlize }}/"># {{ . }}</a>
+        <header class="page-head">
+          <p class="page-kicker">ARTICLE</p>
+          {{ with .Params.series }}
+            <p class="article-series">{{ index . 0 }}</p>
           {{ end }}
+          <h1>{{ .Title }}</h1>
+          <div class="single-meta">
+            <span>{{ .Date.Format "2006-01-02" }}</span>
+            {{ with .Params.categories }}<span>{{ delimit . " / " }}</span>{{ end }}
+            {{ with .Params.tags }}<span># {{ delimit . " # " }}</span>{{ end }}
+          </div>
+        </header>
+        <div class="page-copy content-body">
+          {{ .Content }}
         </div>
-      {{ end }}
-    </article>
+        {{ with .Params.tags }}
+          <div class="single-tags">
+            {{ range . }}
+              <a href="{{ "tags/" | relURL }}{{ . | urlize }}/"># {{ . }}</a>
+            {{ end }}
+          </div>
+        {{ end }}
+      </article>
+    </section>
   {{ end }}
 {{ end }}
