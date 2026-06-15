@@ -1,6 +1,6 @@
 +++
 title = "Java  安全  学习路线"
-date = 2026-06-15T16:15:00+08:00
+date = 2026-06-14T23:15:00+08:00
 draft = false
 description = "由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。"
 tags = ["Java安全", "安全研究"]
@@ -12,8 +12,6 @@ cover = "/images/posts/java-security-banner.svg"
 ## 前言
 
 由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。这一篇先把学习地图整理出来，后续每一个专题再逐步展开。
-
-## 正文
 
 IDEA-（IDEA安装，如何调试）
 

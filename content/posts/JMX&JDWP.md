@@ -13,8 +13,6 @@ cover = "/images/posts/java-security-banner.svg"
 
 由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。这篇文章收录在「Java 安全 持续学习」系列中，用来沉淀对应主题的分析与记录。
 
-## 正文
-
 ## JMX定义
 
 **JMX（Java Management Extensions）** 是 Java 平台上用于管理和监控应用程序、系统对象以及 JVM 自身的一套标准技术。

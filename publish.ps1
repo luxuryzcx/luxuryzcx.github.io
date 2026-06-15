@@ -56,7 +56,7 @@ if (-not $SkipSourcePush) {
 }
 
 Write-Step "构建 Hugo 静态站点"
-hugo --minify
+hugo --minify --cleanDestinationDir
 
 $publicDir = Join-Path $repoRoot "public"
 if (-not (Test-Path -LiteralPath $publicDir)) {

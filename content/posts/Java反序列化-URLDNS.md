@@ -13,8 +13,6 @@ cover = "/images/posts/java-security-banner.svg"
 
 由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。这篇文章收录在「Java 安全 持续学习」系列中，用来沉淀对应主题的分析与记录。
 
-## 正文
-
 ## URLDNS
 
 用来测试是否存在反序列化的探测器（盲打测试）
