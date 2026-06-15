@@ -62,6 +62,30 @@
     </article>
   {{ else }}
     {{ $toc := .TableOfContents }}
+    {{ $series := .Params.series }}
+    {{ $categories := .Params.categories }}
+    {{ $tags := .Params.tags }}
+    {{ $heroMain := .Title }}
+    {{ with $series }}{{ $heroMain = index . 0 }}{{ end }}
+    {{ if and (eq $heroMain .Title) $categories }}{{ $heroMain = index $categories 0 }}{{ end }}
+    {{ if and (eq $heroMain .Title) $tags }}{{ $heroMain = index $tags 0 }}{{ end }}
+    {{ $heroSecondary := .Title }}
+    {{ if eq $heroSecondary $heroMain }}
+      {{ with $categories }}
+        {{ if ne (index . 0) $heroMain }}{{ $heroSecondary = index . 0 }}{{ end }}
+      {{ end }}
+    {{ end }}
+    {{ if eq $heroSecondary $heroMain }}
+      {{ with $tags }}
+        {{ if ne (index . 0) $heroMain }}{{ $heroSecondary = index . 0 }}{{ end }}
+      {{ end }}
+    {{ end }}
+    {{ if eq $heroSecondary $heroMain }}
+      {{ $heroSecondary = site.Title }}
+    {{ end }}
+    {{ $heroCommandSeed := $heroMain }}
+    {{ if eq (trim $heroCommandSeed " ") "" }}{{ $heroCommandSeed = .Title }}{{ end }}
+    {{ $heroCommandText := printf "./%s" (upper (replace (replace $heroCommandSeed " " "_" ) "-" "_" )) }}
     <section class="page-block article-layout{{ if ne $toc "" }} article-layout--with-toc{{ end }}">
       {{ if ne $toc "" }}
         <aside class="article-toc" aria-label="文章大纲">
@@ -74,11 +98,22 @@
         </aside>
       {{ end }}
       <article class="article-single">
-        {{ with .Params.cover }}
-          <div class="article-cover">
-            <img src="{{ . | relURL }}" alt="{{ $.Title }}">
+        <section class="article-hero-card" aria-label="{{ .Title }}">
+          <div class="article-hero-card__glow article-hero-card__glow--cyan"></div>
+          <div class="article-hero-card__glow article-hero-card__glow--pink"></div>
+          <div class="article-hero-card__glow article-hero-card__glow--amber"></div>
+          <p class="article-hero-card__command">1ux4ry@archive:~# {{ $heroCommandText }}</p>
+          <div class="article-hero-card__title">
+            <span class="article-hero-card__title-main">{{ $heroMain }}</span>
+            <span class="article-hero-card__title-sub">{{ $heroSecondary }}</span>
           </div>
-        {{ end }}
+          <p class="article-hero-card__meta">
+            {{ with $categories }}{{ delimit . " / " }}{{ end }}{{ if and $categories $series }} / {{ end }}{{ with $series }}{{ delimit . " / " }}{{ end }}{{ if or $categories $series }} / {{ end }}{{ site.Title }}
+          </p>
+          {{ with .Description }}
+            <p class="article-hero-card__desc">{{ . }}</p>
+          {{ end }}
+        </section>
         <header class="page-head">
           <p class="page-kicker">ARTICLE</p>
           {{ with .Params.series }}
