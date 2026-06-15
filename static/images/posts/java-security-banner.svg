@@ -23,17 +23,16 @@
   <text x="110" y="330" fill="#77DDFF" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="150" font-weight="700">JAVA</text>
   <text x="110" y="450" fill="#EA75DF" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="150" font-weight="700">SECURITY</text>
   <text x="110" y="560" fill="#627590" font-family="'Noto Sans SC', sans-serif" font-size="42">安全研究 / Java 安全 持续学习 / 1ux4ry Archive</text>
-  <rect x="970" y="120" width="520" height="420" rx="34" fill="#212635"/>
-  <rect x="970" y="120" width="520" height="70" rx="34" fill="#2A3041"/>
-  <circle cx="1022" cy="155" r="14" fill="#FF4966"/>
-  <circle cx="1064" cy="155" r="14" fill="#FFA41B"/>
-  <circle cx="1106" cy="155" r="14" fill="#1EC78F"/>
-  <text x="1325" y="164" fill="#7789A7" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="26" font-weight="700">terminal</text>
-  <text x="1030" y="255" fill="#24B6FF" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="34">1ux4ry@archive:~$</text>
-  <text x="1282" y="255" fill="#D5F6E8" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="34">whoami</text>
-  <text x="1030" y="330" fill="#D5F6E8" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="32">1ux4ry</text>
-  <line x1="1030" y1="388" x2="1430" y2="388" stroke="#2C5C74"/>
-  <text x="1030" y="465" fill="#24B6FF" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="34">1ux4ry@archive:~$</text>
-  <text x="1282" y="465" fill="#D5F6E8" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="34">cat flag.txt</text>
-  <text x="1030" y="532" fill="#FFB01F" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="32">flag{W3lc0m3_T0_My_B10g}</text>
+  <g opacity="0.92">
+    <rect x="980" y="172" width="420" height="270" rx="44" fill="#FFFFFF" fill-opacity="0.74" stroke="#D8E6F8"/>
+    <rect x="1018" y="210" width="166" height="166" rx="36" fill="#111217"/>
+    <circle cx="1101" cy="293" r="70" fill="#FFF9F2"/>
+    <path d="M1068 247H1091V338H1068V247Z" fill="#111217"/>
+    <path d="M1097 247H1120V338H1097V247Z" fill="#111217"/>
+    <path d="M1130 247C1168 267 1183 294 1183 338H1130V247Z" fill="#111217"/>
+    <path d="M1130 247L1160 276L1147 289L1116 260L1130 247Z" fill="#F08A44"/>
+    <text x="1230" y="266" fill="#0F172A" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="44" font-weight="700">Java</text>
+    <text x="1230" y="320" fill="#0F172A" font-family="'Space Grotesk', 'Noto Sans SC', sans-serif" font-size="44" font-weight="700">Security</text>
+    <text x="1230" y="370" fill="#5E6C84" font-family="'Noto Sans SC', sans-serif" font-size="24">安全研究专栏</text>
+  </g>
 </svg>
