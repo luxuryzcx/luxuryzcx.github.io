@@ -585,12 +585,13 @@ body::before {
 
 .article-single {
   max-width: 920px;
+  width: 100%;
 }
 
 .article-layout--with-toc {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  gap: 34px;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 42px;
   align-items: start;
 }
 
@@ -600,57 +601,57 @@ body::before {
 
 .article-toc__inner {
   position: sticky;
-  top: 104px;
-  padding: 18px 18px 20px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(214, 227, 242, 0.96);
-  box-shadow: 0 18px 40px rgba(129, 153, 181, 0.16);
-  backdrop-filter: blur(12px);
+  top: 112px;
+  padding: 28px 26px 28px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(220, 229, 240, 0.96);
+  box-shadow: 0 20px 50px rgba(114, 138, 164, 0.16);
+  backdrop-filter: blur(14px);
 }
 
 .article-toc__kicker {
-  margin: 0 0 14px;
-  color: var(--accent);
+  margin: 0 0 18px;
+  color: #253047;
   font-family: "Space Grotesk", sans-serif;
-  font-size: 0.82rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
 }
 
 .article-toc__content nav > ul {
   margin: 0;
-  padding: 0;
-  list-style: none;
+  padding-left: 1.15rem;
+  list-style: disc;
 }
 
 .article-toc__content ul {
   margin: 0;
-  padding-left: 0;
-  list-style: none;
+  padding-left: 1.15rem;
+  list-style: disc;
 }
 
 .article-toc__content li + li {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .article-toc__content li ul {
-  margin-top: 8px;
-  padding-left: 14px;
-  border-left: 1px solid rgba(183, 204, 229, 0.85);
+  margin-top: 10px;
+  padding-left: 1.2rem;
+  border-left: 1px solid rgba(183, 204, 229, 0.75);
 }
 
 .article-toc__content a {
-  display: block;
-  color: var(--muted);
+  color: #6a37d5;
   text-decoration: none;
-  line-height: 1.55;
-  font-size: 0.96rem;
+  line-height: 1.6;
+  font-size: 1rem;
+  font-weight: 600;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .article-toc__content a:hover {
-  color: var(--accent);
+  color: #8b5cf6;
   transform: translateX(2px);
 }
 
