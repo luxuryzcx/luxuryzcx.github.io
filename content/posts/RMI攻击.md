@@ -1,6 +1,6 @@
 +++
 title = "RMI攻击"
-date = 2026-06-15T20:00:00+08:00
+date = 2026-06-15T18:35:00+08:00
 draft = false
 description = "由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。"
 tags = ["Java安全", "安全研究"]
