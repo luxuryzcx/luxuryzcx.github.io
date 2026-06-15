@@ -7,7 +7,7 @@ tags = ["Java安全", "安全研究"]
 categories = ["安全研究"]
 series = ["Java 安全 持续学习"]
 pin = false
-cover = "/images/posts/java-security-banner.svg"
+cover = "/images/posts/java-security-cover-clean.svg"
 +++
 ## 前言
 
