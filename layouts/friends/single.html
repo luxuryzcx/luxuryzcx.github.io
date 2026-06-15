@@ -1,0 +1,22 @@
+{{ define "main" }}
+  <section class="page-block">
+    <header class="page-head">
+      <p class="page-kicker">FRIENDS</p>
+      <h1>{{ .Title }}</h1>
+      <div class="page-copy">{{ .Content }}</div>
+    </header>
+
+    <div class="friends-grid">
+      {{ range site.Data.friends.links }}
+        <article class="friend-card">
+          <div class="friend-card__top">
+            <h2><a href="{{ .url }}">{{ .name }}</a></h2>
+            <span>{{ .tag }}</span>
+          </div>
+          <p>{{ .desc }}</p>
+          <a class="friend-card__link" href="{{ .url }}">访问站点</a>
+        </article>
+      {{ end }}
+    </div>
+  </section>
+{{ end }}

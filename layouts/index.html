@@ -1,0 +1,37 @@
+{{ define "main" }}
+  {{ partial "profile-hero.html" . }}
+
+  <main class="post-stream">
+    {{ $posts := where site.RegularPages "Section" "posts" }}
+    {{ range $posts.ByDate.Reverse }}
+      <article class="post-row{{ if .Params.pin }} is-pinned{{ end }}">
+        <div class="post-row__main">
+          <h2 class="post-row__title">
+            {{ if .Params.pin }}<span class="pin">PIN</span>{{ end }}
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          </h2>
+          <div class="post-row__meta">
+            <span>{{ site.Params.author }}</span>
+            <span>发布于 {{ .Date.Format "2006-01-02" }}</span>
+            {{ with .Params.categories }}
+              <span>收录于 {{ delimit . " / " }}</span>
+            {{ end }}
+          </div>
+          <p class="post-row__desc">
+            {{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}
+          </p>
+          <a class="post-row__readmore" href="{{ .RelPermalink }}">阅读全文</a>
+        </div>
+        <div class="post-row__side">
+          {{ with .Params.tags }}
+            <div class="tag-stack">
+              {{ range . }}
+                <a href="{{ "tags/" | relURL }}{{ . | urlize }}/"># {{ . }}</a>
+              {{ end }}
+            </div>
+          {{ end }}
+        </div>
+      </article>
+    {{ end }}
+  </main>
+{{ end }}

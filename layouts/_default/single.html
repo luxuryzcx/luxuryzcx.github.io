@@ -1,0 +1,86 @@
+{{ define "main" }}
+  {{ $base := .File.BaseFileName }}
+  {{ if eq $base "archives" }}
+    <section class="page-block">
+      <header class="page-head">
+        <p class="page-kicker">ARCHIVES</p>
+        <h1>{{ .Title }}</h1>
+        <div class="page-copy">{{ .Content }}</div>
+      </header>
+
+      {{ $posts := where site.RegularPages "Section" "posts" }}
+      {{ range $items := $posts.GroupByDate "2006" }}
+        <section class="year-group">
+          <h2 class="year-group__title">{{ .Key }}</h2>
+          <div class="archive-list">
+            {{ range .Pages.ByDate.Reverse }}
+              <article class="archive-item archive-item--row">
+                <div>
+                  <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+                  <p>{{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}</p>
+                </div>
+                <div class="archive-item__meta">
+                  <span>{{ .Date.Format "01-02" }}</span>
+                  {{ with .Params.categories }}<span>{{ delimit . " / " }}</span>{{ end }}
+                </div>
+              </article>
+            {{ end }}
+          </div>
+        </section>
+      {{ end }}
+    </section>
+  {{ else if eq $base "friends" }}
+    <section class="page-block">
+      <header class="page-head">
+        <p class="page-kicker">FRIENDS</p>
+        <h1>{{ .Title }}</h1>
+        <div class="page-copy">{{ .Content }}</div>
+      </header>
+
+      <div class="friends-grid">
+        {{ range site.Data.friends.links }}
+          <article class="friend-card">
+            <div class="friend-card__top">
+              <h2><a href="{{ .url }}">{{ .name }}</a></h2>
+              <span>{{ .tag }}</span>
+            </div>
+            <p>{{ .desc }}</p>
+            <a class="friend-card__link" href="{{ .url }}">访问站点</a>
+          </article>
+        {{ end }}
+      </div>
+    </section>
+  {{ else if eq $base "about" }}
+    <article class="page-block article-single">
+      <header class="page-head">
+        <p class="page-kicker">PAGE</p>
+        <h1>{{ .Title }}</h1>
+      </header>
+      <div class="page-copy content-body">
+        {{ .Content }}
+      </div>
+    </article>
+  {{ else }}
+    <article class="page-block article-single">
+      <header class="page-head">
+        <p class="page-kicker">ARTICLE</p>
+        <h1>{{ .Title }}</h1>
+        <div class="single-meta">
+          <span>{{ .Date.Format "2006-01-02" }}</span>
+          {{ with .Params.categories }}<span>{{ delimit . " / " }}</span>{{ end }}
+          {{ with .Params.tags }}<span># {{ delimit . " # " }}</span>{{ end }}
+        </div>
+      </header>
+      <div class="page-copy content-body">
+        {{ .Content }}
+      </div>
+      {{ with .Params.tags }}
+        <div class="single-tags">
+          {{ range . }}
+            <a href="{{ "tags/" | relURL }}{{ . | urlize }}/"># {{ . }}</a>
+          {{ end }}
+        </div>
+      {{ end }}
+    </article>
+  {{ end }}
+{{ end }}

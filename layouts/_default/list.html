@@ -1,0 +1,31 @@
+{{ define "main" }}
+  {{ $pageTitle := .Title }}
+  {{ if and (eq .Kind "taxonomyTerm") (eq .Data.Plural "categories") }}{{ $pageTitle = "分类" }}{{ end }}
+  {{ if and (eq .Kind "taxonomyTerm") (eq .Data.Plural "tags") }}{{ $pageTitle = "标签" }}{{ end }}
+  <section class="page-block">
+    <header class="page-head">
+      <p class="page-kicker">
+        {{ if eq .Kind "taxonomy" }}CATEGORY{{ else if eq .Kind "section" }}ARCHIVE{{ else }}PAGE{{ end }}
+      </p>
+      <h1>{{ $pageTitle }}</h1>
+      {{ with .Content }}<div class="page-copy">{{ . }}</div>{{ end }}
+    </header>
+
+    {{ if eq .Kind "taxonomy" }}
+      <div class="taxonomy-summary">
+        <span>{{ len .Pages }} 篇内容</span>
+        <a href="{{ "archives/" | relURL }}">查看完整归档</a>
+      </div>
+    {{ end }}
+
+    <div class="archive-list">
+      {{ range .Pages.ByDate.Reverse }}
+        <article class="archive-item">
+          <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+          <p>{{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify }}{{ end }}</p>
+          <span>{{ .Date.Format "2006-01-02" }}</span>
+        </article>
+      {{ end }}
+    </div>
+  </section>
+{{ end }}

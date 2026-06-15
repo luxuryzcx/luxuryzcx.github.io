@@ -1,0 +1,23 @@
+[[links]]
+name = "PaperMod"
+url = "https://adityatelange.github.io/hugo-PaperMod/"
+desc = "一个做得很干净的 Hugo 主题站，适合看信息结构。"
+tag = "Hugo"
+
+[[links]]
+name = "Hugo Docs"
+url = "https://gohugo.io/documentation/"
+desc = "官方文档，后面你扩功能基本都会回来查它。"
+tag = "Docs"
+
+[[links]]
+name = "CSS-Tricks"
+url = "https://css-tricks.com/"
+desc = "做布局和细节打磨时很实用。"
+tag = "Frontend"
+
+[[links]]
+name = "Exploit Notes"
+url = "https://example.org/"
+desc = "这里先放一个占位，你后面可以直接换成真实朋友站。"
+tag = "Security"
