@@ -1,11 +1,11 @@
 +++
 title = "参考喜欢的博客之后，如何重构出自己的首页"
 date = 2026-06-12T20:10:00+08:00
-draft = false
+draft = true
 description = "借鉴布局节奏，但不复制他人的人格与气味。"
 tags = ["UI", "Hugo", "Design"]
 categories = ["设计重构"]
-pin = true
+pin = false
 +++
 
 真正值得借鉴的，通常不是某个阴影值或者按钮样式，而是页面里的阅读节奏。

@@ -1,7 +1,7 @@
 +++
 title = "凌晨写完代码后，我还是想给自己留一点文字空间"
 date = 2026-06-08T23:30:00+08:00
-draft = false
+draft = true
 description = "博客不是展示墙，它更像和长期自我的一次稳定通信。"
 tags = ["Writing", "Notes"]
 categories = ["生活随笔"]
