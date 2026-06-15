@@ -46,11 +46,57 @@ async function runTerminalAnimation(root) {
   }
 }
 
+function initCodeBlocks() {
+  const blocks = document.querySelectorAll(".content-body pre");
+  for (const block of blocks) {
+    if (block.parentElement?.classList.contains("code-block")) {
+      continue;
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "code-block";
+
+    const toolbar = document.createElement("div");
+    toolbar.className = "code-block__toolbar";
+
+    const code = block.querySelector("code");
+    const lang = (code?.dataset.lang || code?.className || "")
+      .replace("language-", "")
+      .trim();
+
+    const label = document.createElement("span");
+    label.className = "code-block__lang";
+    label.textContent = lang || "code";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "code-block__copy";
+    button.textContent = "Copy";
+
+    button.addEventListener("click", async () => {
+      const text = code?.innerText || block.innerText || "";
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = "Copied";
+      } catch {
+        button.textContent = "Failed";
+      }
+
+      window.setTimeout(() => {
+        button.textContent = "Copy";
+      }, 1400);
+    });
+
+    toolbar.append(label, button);
+    block.parentNode.insertBefore(wrapper, block);
+    wrapper.append(toolbar, block);
+  }
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   const terminal = document.querySelector("[data-terminal]");
-  if (!terminal) {
-    return;
+  if (terminal) {
+    runTerminalAnimation(terminal);
   }
-
-  runTerminalAnimation(terminal);
+  initCodeBlocks();
 });

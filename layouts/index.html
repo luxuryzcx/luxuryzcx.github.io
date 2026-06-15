@@ -3,7 +3,8 @@
 
   <main class="post-stream">
     {{ $posts := where site.RegularPages "Section" "posts" }}
-    {{ range $posts.ByDate.Reverse }}
+    {{ $paginator := .Paginate ($posts.ByDate.Reverse) }}
+    {{ range $paginator.Pages }}
       <article class="post-row{{ if .Params.pin }} is-pinned{{ end }}">
         <div class="post-row__main">
           <h2 class="post-row__title">
@@ -33,5 +34,6 @@
         </div>
       </article>
     {{ end }}
+    {{ partial "pagination.html" $paginator }}
   </main>
 {{ end }}

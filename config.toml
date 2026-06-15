@@ -2,6 +2,17 @@ baseURL = "https://luxuryzcx.github.io/"
 defaultContentLanguage = "zh-cn"
 title = "1ux4ry Archive"
 
+[pagination]
+  pagerSize = 10
+
+[markup]
+  [markup.highlight]
+    style = "github-dark"
+    lineNos = false
+    codeFences = true
+    guessSyntax = true
+    noClasses = false
+
 [params]
   author = "1ux4ry"
   subtitle = "把技术、审美和日常观察整理成长期作品。"
