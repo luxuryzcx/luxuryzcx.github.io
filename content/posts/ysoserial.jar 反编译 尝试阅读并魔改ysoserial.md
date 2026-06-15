@@ -1,6 +1,6 @@
 +++
 title = "ysoserial.jar 反编译 尝试阅读并魔改ysoserial"
-date = 2026-06-15T18:30:00+08:00
+date = 2026-06-14T21:30:00+08:00
 draft = false
 description = "由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。"
 tags = ["Java安全", "安全研究"]
