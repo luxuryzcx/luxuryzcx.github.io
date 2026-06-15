@@ -1023,3 +1023,100 @@ body::before {
   background: rgba(119, 221, 255, 0.3);
   border-radius: 999px;
 }
+
+.taxonomy-cloud-page {
+  padding-top: 32px;
+}
+
+.taxonomy-cloud-head {
+  text-align: center;
+}
+
+.taxonomy-cloud-head__desc {
+  margin: 0 auto;
+  max-width: 680px;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.taxonomy-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 20px;
+  margin-top: 34px;
+}
+
+.taxonomy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: 16px;
+  text-decoration: none;
+  color: #425775;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  box-shadow: 0 10px 24px rgba(136, 150, 168, 0.16);
+  backdrop-filter: blur(12px);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.taxonomy-chip:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 30px rgba(109, 127, 152, 0.22);
+  filter: saturate(1.06);
+}
+
+.taxonomy-chip__label {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.taxonomy-chip__count {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ff5f9c;
+}
+
+.taxonomy-chip--peach {
+  background: rgba(255, 234, 228, 0.92);
+}
+
+.taxonomy-chip--violet {
+  background: rgba(207, 191, 236, 0.9);
+}
+
+.taxonomy-chip--mint {
+  background: rgba(212, 248, 230, 0.92);
+}
+
+.taxonomy-chip--sky {
+  background: rgba(193, 227, 255, 0.92);
+}
+
+.taxonomy-chip--gold {
+  background: rgba(255, 238, 182, 0.92);
+}
+
+.taxonomy-chip--ice {
+  background: rgba(231, 245, 244, 0.94);
+}
+
+.taxonomy-chip--lime {
+  background: rgba(174, 237, 189, 0.92);
+}
+
+.taxonomy-chip--rose {
+  background: rgba(228, 199, 237, 0.92);
+}
+
+.taxonomy-chip--aqua {
+  background: rgba(181, 236, 228, 0.92);
+}
+
+.taxonomy-chip--sand {
+  background: rgba(245, 233, 204, 0.94);
+}
+

@@ -1,19 +1,30 @@
 {{ define "main" }}
   {{ $pageTitle := .Title }}
-  {{ if eq .Data.Plural "categories" }}{{ $pageTitle = "分类" }}{{ end }}
-  {{ if eq .Data.Plural "tags" }}{{ $pageTitle = "标签" }}{{ end }}
-  <section class="page-block">
-    <header class="page-head">
-      <p class="page-kicker">TERMS</p>
+  {{ $pageDesc := "按关键词快速定位内容。" }}
+  {{ if eq .Data.Plural "categories" }}
+    {{ $pageTitle = "文章分类" }}
+    {{ $pageDesc = "按专题聚合内容，适合系统阅读。" }}
+  {{ end }}
+  {{ if eq .Data.Plural "tags" }}
+    {{ $pageTitle = "文章标签" }}
+    {{ $pageDesc = "按细粒度主题索引文章，适合快速跳转。" }}
+  {{ end }}
+  {{ $palettes := slice "peach" "violet" "mint" "sky" "gold" "ice" "lime" "rose" "aqua" "sand" }}
+
+  <section class="page-block taxonomy-cloud-page">
+    <header class="page-head taxonomy-cloud-head">
+      <p class="page-kicker">TAXONOMY</p>
       <h1>{{ $pageTitle }}</h1>
+      <p class="taxonomy-cloud-head__desc">{{ $pageDesc }}</p>
     </header>
 
-    <div class="archive-list">
-      {{ range .Data.Terms.Alphabetical }}
-        <article class="archive-item">
-          <h2><a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a></h2>
-          <p>{{ .Count }} 篇内容</p>
-        </article>
+    <div class="taxonomy-cloud" role="list">
+      {{ range $i, $term := .Data.Terms.ByCount }}
+        {{ $tone := index $palettes (mod $i (len $palettes)) }}
+        <a class="taxonomy-chip taxonomy-chip--{{ $tone }}" href="{{ $term.Page.RelPermalink }}" role="listitem">
+          <span class="taxonomy-chip__label">{{ $term.Page.Title }}</span>
+          <span class="taxonomy-chip__count">{{ $term.Count }}</span>
+        </a>
       {{ end }}
     </div>
   </section>
