@@ -38,7 +38,7 @@
       </header>
 
       <div class="friends-grid">
-        {{ range site.Data.friends.links }}
+        {{ range hugo.Data.friends.links }}
           <article class="friend-card">
             <div class="friend-card__top">
               <h2><a href="{{ .url }}">{{ .name }}</a></h2>
@@ -62,8 +62,16 @@
     </article>
   {{ else }}
     <article class="page-block article-single">
+      {{ with .Params.cover }}
+        <div class="article-cover">
+          <img src="{{ . | relURL }}" alt="{{ $.Title }}">
+        </div>
+      {{ end }}
       <header class="page-head">
         <p class="page-kicker">ARTICLE</p>
+        {{ with .Params.series }}
+          <p class="article-series">{{ index . 0 }}</p>
+        {{ end }}
         <h1>{{ .Title }}</h1>
         <div class="single-meta">
           <span>{{ .Date.Format "2006-01-02" }}</span>

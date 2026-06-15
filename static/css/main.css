@@ -655,3 +655,68 @@ body::before {
     font-size: 1rem;
   }
 }
+
+
+.article-cover {
+  margin: 0 0 26px;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(119, 221, 255, 0.22);
+  box-shadow: 0 26px 52px rgba(43, 76, 120, 0.14);
+}
+
+.article-cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.article-series {
+  margin: 6px 0 0;
+  color: var(--terminal-blue);
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.content-body h2,
+.content-body h3 {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2.2rem;
+  margin-bottom: 0.9rem;
+  padding: 0.48rem 0.95rem 0.48rem 0.8rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(36, 182, 255, 0.14), rgba(255, 255, 255, 0.9));
+  border: 1px solid rgba(36, 182, 255, 0.16);
+  box-shadow: 0 16px 34px rgba(39, 114, 199, 0.08);
+}
+
+.content-body h2::before,
+.content-body h3::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--terminal-amber));
+  box-shadow: 0 0 0 4px rgba(255, 176, 31, 0.12);
+}
+
+.content-body h2 {
+  font-size: 1.5rem;
+}
+
+.content-body h3 {
+  font-size: 1.16rem;
+}
+
+.content-body img {
+  display: block;
+  max-width: 100%;
+  margin: 22px 0;
+  border-radius: 18px;
+  border: 1px solid rgba(217, 228, 239, 0.92);
+  box-shadow: var(--shadow);
+}

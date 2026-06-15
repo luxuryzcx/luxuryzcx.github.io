@@ -7,7 +7,7 @@
     </header>
 
     <div class="friends-grid">
-      {{ range site.Data.friends.links }}
+      {{ range hugo.Data.friends.links }}
         <article class="friend-card">
           <div class="friend-card__top">
             <h2><a href="{{ .url }}">{{ .name }}</a></h2>
