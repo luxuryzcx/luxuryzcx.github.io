@@ -1,26 +1,31 @@
 {{ $paginator := . }}
 {{ if gt $paginator.TotalPages 1 }}
   <nav class="pager" aria-label="文章分页">
-    {{ with $paginator.Prev }}
-      <a class="pager__link pager__link--prev" href="{{ .URL }}">上一页</a>
-    {{ else }}
-      <span class="pager__link pager__link--ghost">上一页</span>
-    {{ end }}
+    <div class="pager__shell">
+      {{ with $paginator.Prev }}
+        <a class="pager__link pager__link--prev" href="{{ .URL }}">← 上一页</a>
+      {{ else }}
+        <span class="pager__link pager__link--ghost">← 上一页</span>
+      {{ end }}
 
-    <div class="pager__numbers">
-      {{ range $paginator.Pagers }}
-        {{ if eq .PageNumber $paginator.PageNumber }}
-          <span class="pager__number is-active">{{ .PageNumber }}</span>
-        {{ else }}
-          <a class="pager__number" href="{{ .URL }}">{{ .PageNumber }}</a>
-        {{ end }}
+      <div class="pager__center">
+        <div class="pager__numbers">
+          {{ range $paginator.Pagers }}
+            {{ if eq .PageNumber $paginator.PageNumber }}
+              <span class="pager__number is-active">{{ .PageNumber }}</span>
+            {{ else }}
+              <a class="pager__number" href="{{ .URL }}">{{ .PageNumber }}</a>
+            {{ end }}
+          {{ end }}
+        </div>
+        <p class="pager__status">第 {{ $paginator.PageNumber }} 页，共 {{ $paginator.TotalPages }} 页</p>
+      </div>
+
+      {{ with $paginator.Next }}
+        <a class="pager__link pager__link--next" href="{{ .URL }}">下一页 →</a>
+      {{ else }}
+        <span class="pager__link pager__link--ghost">下一页 →</span>
       {{ end }}
     </div>
-
-    {{ with $paginator.Next }}
-      <a class="pager__link pager__link--next" href="{{ .URL }}">下一页</a>
-    {{ else }}
-      <span class="pager__link pager__link--ghost">下一页</span>
-    {{ end }}
   </nav>
 {{ end }}

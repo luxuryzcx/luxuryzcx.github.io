@@ -332,13 +332,36 @@ body::before {
 
 
 .pager {
+  margin: 28px 0 10px;
+  padding: 18px 0 6px;
+}
+
+.pager__shell {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin: 28px 0 10px;
-  padding: 18px 0 6px;
+  gap: 18px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px 18px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 252, 255, 0.82)),
+    linear-gradient(135deg, rgba(36, 182, 255, 0.12), rgba(234, 117, 223, 0.08));
+  border: 1px solid rgba(190, 219, 244, 0.9);
+  box-shadow:
+    0 16px 36px rgba(43, 76, 120, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.pager__center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: min(420px, 100%);
 }
 
 .pager__numbers {
@@ -357,22 +380,39 @@ body::before {
   padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid rgba(217, 228, 239, 0.95);
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 22px rgba(43, 76, 120, 0.1);
   color: var(--ink);
   text-decoration: none;
   font-weight: 700;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.pager__link:hover,
+.pager__number:hover {
+  transform: translateY(-1px);
+  border-color: rgba(36, 182, 255, 0.26);
+  box-shadow: 0 14px 26px rgba(43, 76, 120, 0.14);
 }
 
 .pager__number.is-active {
   background: linear-gradient(135deg, #24b6ff, #78deff);
   border-color: rgba(36, 182, 255, 0.28);
   color: #0f2438;
+  box-shadow: 0 14px 26px rgba(36, 182, 255, 0.22);
 }
 
 .pager__link--ghost {
   opacity: 0.45;
   cursor: default;
+  pointer-events: none;
+}
+
+.pager__status {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .post-row {
@@ -701,7 +741,16 @@ body::before {
   }
 
   .pager {
-    justify-content: center;
+    padding-top: 12px;
+  }
+
+  .pager__shell {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .pager__center {
+    min-width: 0;
   }
 }
 
