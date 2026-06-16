@@ -13,13 +13,18 @@ title = "1ux4ry Archive"
     guessSyntax = true
     noClasses = false
 
+  [markup.tableOfContents]
+    startLevel = 1
+    endLevel = 3
+    ordered = false
+
 [params]
   author = "1ux4ry"
-  subtitle = "把技术、审美和日常观察整理成长期作品。"
+  subtitle = "十年一觉扬州梦，赢得青楼薄姓名"
   description = "一个以安全研究、前端重构和长期写作为核心的个人博客。"
   avatar = "/images/avatar-mark.svg"
   email = "hello@example.com"
-  github = "https://github.com/"
+  github = "https://github.com/luxuryzcx"
   rss = "/index.xml"
 
 [taxonomies]
@@ -51,6 +56,10 @@ title = "1ux4ry Archive"
     name = "友链"
     url = "/friends/"
     weight = 6
+  [[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/luxuryzcx"
+    weight = 7
 
 [outputs]
   home = ["HTML", "RSS"]
