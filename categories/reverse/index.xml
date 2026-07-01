@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Reverse on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/categories/reverse/</link><description>Recent content in Reverse on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 16 Jun 2026 15:59:44 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/categories/reverse/index.xml" rel="self" type="application/rss+xml"/><item><title>2024.11.30-2024.12.05</title><link>https://luxuryzcx.github.io/posts/20241130-20241205/</link><pubDate>Tue, 16 Jun 2026 15:59:44 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/20241130-20241205/</guid><description>&lt;h1 id="1swpuctf-2022-新生赛upx"&gt;1.[SWPUCTF 2022 新生赛]upx&lt;/h1&gt;
+&lt;p&gt;查壳，发现需要脱壳，脱壳完毕后64位&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1732432457971-76214cd9-097a-4fa5-a138-f3dfc8e78514.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;拖进ida64中，找到主函数&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1732432495324-024ad6bc-95a1-45de-8cc7-cfe62f1683d9.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;简单的分析以下，指输入的值只要异或2就行，写个脚本&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;a = &amp;#39;LQQAVDyWRZ]3q]zmpf]uc{]vm]glap{rv]dnce&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;b = &amp;#39;&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;for i in range(38):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; b+=chr(ord(a[i])^2)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;print(b) 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1732432551953-3afc4ac5-49b1-4242-875a-ac88e9586ae3.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;补一个花括号&lt;/p&gt;
+&lt;p&gt;NSSCTF{UPX_1s_xord_way_to_encrypt_flag}&lt;/p&gt;
+&lt;h1 id="2666"&gt;2.666&lt;/h1&gt;
+&lt;p&gt;打开附件，查壳，无壳64位&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1732441406120-bfae7166-4148-4e38-89f9-9f3a3eba56a2.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;拖入ida64中，查看main函数，发现有个假的flag&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1732501458021-514cda7b-803e-4d16-bdeb-ea07edc0e872.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;分析可知，输入的为v5,然后v5进行加密，然后进行判断，如果v5和key值相等，则输出你是正确的，否则输出错误，跳转到encode函数&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1732501989346-aeb05433-e02b-4d0b-ab6b-9e15e0244bb6.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;点击encodeflag,可以看到加密的flag&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1732502303280-2cf542c6-d1b9-4762-9b2e-f7ed8d06ecc3.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;izwhroz&amp;quot;&amp;ldquo;w&amp;quot;v.K&amp;rdquo;.Ni&lt;/p&gt;
+&lt;p&gt;对for循环进行分析&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;for ( i = 0; i &amp;lt; key; i += 3 ) //三位一个，循环6次
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v3[i + 64] = key ^ (a1[i] + 6); 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v3[i + 33] = (a1[i + 1] - 6) ^ key; //a1改变v3,v3改变a2,返回a2为s
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; v3[i + 2] = a1[i + 2] ^ 6 ^ key;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; *(_BYTE *)(a2 + i) = v3[i + 64];
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; *(_BYTE *)(a2 + i + 1LL) = v3[i + 33];
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; *(_BYTE *)(a2 + i + 2LL) = v3[i + 2];
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; return a2;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;发现先要减，再加，再异或，写出脚本即可，其中key为什么等于18，因为题目就是666&lt;/p&gt;</description></item><item><title>2024.11.22-2024.11.29</title><link>https://luxuryzcx.github.io/posts/20241122-20241129/</link><pubDate>Tue, 16 Jun 2026 15:59:02 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/20241122-20241129/</guid><description>&lt;h1 id="1-nssctf-2022-spring-recruiteasy-python"&gt;1. [NSSCTF 2022 Spring Recruit]easy Python&lt;/h1&gt;
+&lt;p&gt;打开附件，是一段python加密代码&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;import string
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;def encode(string,string2):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; tmp_str = str()
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ret = str()
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; bit_string_str = string.encode()
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; remain = len( string ) % 3
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; remain_str = str()
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; for char in bit_string_str:
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; b_char = (bin(char)[2:])
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; b_char = &amp;#39;0&amp;#39;*(8-len(b_char)) + b_char
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; tmp_str += b_char
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; for i in range(len(tmp_str)//6):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; temp_nub = int(tmp_str[i*6:6*(i+1)],2)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ret += string2[temp_nub]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; if remain==2:
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; remain_str = tmp_str[-4:] + &amp;#39;0&amp;#39;*2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; temp_nub = int(remain_str,2)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ret += string2[temp_nub] + &amp;#34;=&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; elif remain==1:
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; remain_str = tmp_str[-2:] + &amp;#39;0&amp;#39;*4
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; temp_nub = int(remain_str,2)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ret += string2[temp_nub] + &amp;#34;=&amp;#34;*2
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; return ret.replace(&amp;#34;=&amp;#34;,&amp;#34;&amp;#34;)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;res = encode(input(),string.ascii_uppercase+string.ascii_lowercase+string.digits+&amp;#39;+/&amp;#39;)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;if res == &amp;#34;TlNTQ1RGe2Jhc2U2NCEhfQ&amp;#34;:
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; print(&amp;#34;good!&amp;#34;)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;else:
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; print(&amp;#34;bad!&amp;#34;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;分析一波，因为不是去除了==所以不是4的倍数，所以爆破写出解密脚本&lt;/p&gt;</description></item><item><title>2024.11.14-2024.11.21</title><link>https://luxuryzcx.github.io/posts/20241114-20241121/</link><pubDate>Tue, 16 Jun 2026 15:58:18 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/20241114-20241121/</guid><description>&lt;h1 id="1-hdctf-2023easy_re"&gt;1. [HDCTF 2023]easy_re&lt;/h1&gt;
+&lt;p&gt;下载附件，看看有无壳&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731669989887-318060d7-4e65-47db-a590-1643c5da20bb.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;有壳进行脱壳&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731670053129-2d8d0269-f1c3-4995-b69c-150a606ab7c9.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;脱壳完成看看，发现无壳了&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731670300594-911b8add-feb8-4ec9-8d2d-c1a4acc474da.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;拖进ida里，看到base64字符串&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731670458564-1eea9372-1ff1-40af-8a02-466913e97df5.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;试着解密一下&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731670627193-b5e48439-4af0-42cc-bd78-b3a20c20413a.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;HDCTF{Y0u_h@v2_//@57er3d_7he_r3v3rs3}&lt;/p&gt;
+&lt;h1 id="2-litctf-2023ez_xor"&gt;2. [LitCTF 2023]ez_XOR&lt;/h1&gt;
+&lt;p&gt;查壳，无壳，32位&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731673115971-b3780c77-b476-4358-8a1a-7daa55ea9fd0.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;拖ida32里，发现主函数&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731673528570-e10e8fc0-224c-41c7-aeeb-52c9c89890f4.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;发现它的异或为9.因为是3*3，写个脚本&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731673628593-a0016ea7-bb05-4379-b808-f2bd2c26747e.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;LitCTF{XOR_1s_3asy_to_OR}&lt;/p&gt;
+&lt;h1 id="3-moectf-2022reverse入门指北"&gt;3. [MoeCTF 2022]Reverse入门指北&lt;/h1&gt;
+&lt;p&gt;下载附件并打开&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731674324955-ab1a64b4-6a26-4278-92fd-f752b6f4d555.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;末尾就有flag&lt;/p&gt;
+&lt;h1 id="4hnctf-2022-week2esy_flower"&gt;4.[HNCTF 2022 WEEK2]e@sy_flower&lt;/h1&gt;
+&lt;p&gt;查壳，发现无，32位&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731720755633-346dd242-2cea-47e6-93c6-bba81af7f0e2.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;拖进ida32中，发现花指令&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731720844299-704a3cbc-1714-4083-bcfa-ed98bd772567.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;进行修改，把E9H换成90H&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731720940331-47d6b4c5-16cc-46a1-a370-62a2efbd3baa.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;接着按F5就进去伪代码分析。&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731721290800-0da38181-bb2c-45bd-add7-ff2b6f2fa542.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;进行了两段加密，只有第一段需要认真看端详，第二段无脑套用就可以了，因为是亦或可以直接套不用逆向。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;s = &amp;#34;c~scvdzKCEoDEZ[^roDICUMC&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;flag = &amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;for i in range(len(s)):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; flag+=chr(ord(s[i])^0x30)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;print(flag)
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;ff = &amp;#39;&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;flag = &amp;#34;SNCSFTJ{su_tujknB_tyse}s&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;for j in range(12):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; ff += flag[2*j+1]+flag[2*j]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;print(ff)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731721461709-e7f2cc94-8294-49d0-bd36-f97585573640.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item><item><title>2024.11.07-2024.11.13</title><link>https://luxuryzcx.github.io/posts/20241107-20241113/</link><pubDate>Tue, 16 Jun 2026 15:55:08 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/20241107-20241113/</guid><description>&lt;h1 id="1-swpuctf-2022-新生赛android"&gt;1. [SWPUCTF 2022 新生赛]android&lt;/h1&gt;
+&lt;p&gt;用jadx打开，然后搜索NSS关键字&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730888212863-252a718c-8e30-4ea9-96fc-1c21a28ac10d.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;NSSCTF{a_simple_Android}&lt;/p&gt;
+&lt;h1 id="2-swpu-2024-新生引导ez_ssti"&gt;2. [SWPU 2024 新生引导]ez_SSTI&lt;/h1&gt;
+&lt;p&gt;模板注入题目，直接焚靖可以秒了&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730888581636-8def22c0-cb71-4c6d-8214-370dfd1e4745.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;填入数据 ls /&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730889111029-61cf0cf5-1887-4709-94ed-1ca677a9e69c.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后 cat /flag即可&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730889162925-5d9e5882-ebee-4373-aee7-a67527481f24.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;获取成功&lt;/p&gt;
+&lt;p&gt;NSSCTF{2111e7ad-97c5-40d5-9a3b-a2f657bd45e8}&lt;/p&gt;
+&lt;h1 id="3swpuctf-2024-秋季新生赛the-future"&gt;3.[SWPUCTF 2024 秋季新生赛]The future&lt;/h1&gt;
+&lt;p&gt;直接?file=/flag 即可&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730890122333-16616d35-fe3a-4c8e-a5e2-1c00383e59dd.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="4swpuctf-2024-秋季新生赛怎么多了个没用的php文件"&gt;4.[SWPUCTF 2024 秋季新生赛]怎么多了个没用的php文件&lt;/h1&gt;
+&lt;p&gt;根据题目名称：提示怎么多了个没用的php文件&lt;/p&gt;
+&lt;p&gt;同时根据题目描述：notion.php 是一个没啥用的php文件，不知道被设计出来是干什么的，出题人傻啦？&lt;/p&gt;
+&lt;p&gt;可以利用&lt;code&gt;.user.ini&lt;/code&gt;文件&lt;/p&gt;
+&lt;p&gt;第一步：上传&lt;code&gt;.user.ini&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;创建一个&lt;code&gt;.user.ini&lt;/code&gt;文件，写入如下内容：&lt;/p&gt;
+&lt;p&gt;auto_prepend_file = 1.png&lt;/p&gt;
+&lt;p&gt;第二步：上传一句话木马（1.png）&lt;/p&gt;
+&lt;p&gt;创建一个1.txt文件，文件内容为如下内容，之后后缀改成png&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;第三步：使用蚁剑连接&lt;/p&gt;
+&lt;p&gt;使用蚁剑连接：http://node6.anna.nssctf.cn:28920/uploads/notion.php&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730890823510-588725e6-de90-420a-9e57-ae15e5f3b663.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;NSSCTF{d2056ace-365d-4a90-8c86-3d98f8884b37}&lt;/p&gt;
+&lt;h1 id="5swpuctf-2024-秋季新生赛php躲猫猫"&gt;5.[SWPUCTF 2024 秋季新生赛]PHP躲猫猫&lt;/h1&gt;
+&lt;p&gt;get方式传参&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730891828621-1221be3c-bb17-4f04-a503-f1fab275db4c.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;post传参&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730891859159-df44830b-6ed8-4e69-9c93-01f35ef977cc.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;进去到 /getfile.php 那里&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1730891905056-a0732f85-c7ce-4841-b3d2-0f1110edf97e.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;经典的md5绕过与文件包含题目&lt;/p&gt;
+&lt;p&gt;get /getfile.php?CTF=s878926199a&amp;amp;&amp;amp;ATM=s1665632922a&lt;/p&gt;</description></item></channel></rss>

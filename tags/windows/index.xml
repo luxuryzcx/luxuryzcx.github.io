@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Windows on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/tags/windows/</link><description>Recent content in Windows on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 16 Jun 2026 00:07:42 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/tags/windows/index.xml" rel="self" type="application/rss+xml"/><item><title>Windows 入侵排查思路</title><link>https://luxuryzcx.github.io/posts/windows-%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF/</link><pubDate>Tue, 16 Jun 2026 00:07:42 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/windows-%E5%85%A5%E4%BE%B5%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF/</guid><description>&lt;h1 id="查账号安全"&gt;查账号安全&lt;/h1&gt;
+&lt;h1 id="查登录日志"&gt;查登录日志&lt;/h1&gt;
+&lt;p&gt;事件查看器&lt;/p&gt;
+&lt;p&gt;重点关注 4624（登录成功） 和4776（身份验证尝试）&lt;/p&gt;
+&lt;h1 id="可疑进程连接"&gt;可疑进程/连接&lt;/h1&gt;
+&lt;p&gt;netstat 查异常ID&lt;/p&gt;
+&lt;h1 id="计划任务操作"&gt;计划任务/操作&lt;/h1&gt;
+&lt;p&gt;输入 taskschd.msc 打开计划任务程序&lt;/p&gt;
+&lt;h1 id="分析中间件和应用日志"&gt;分析中间件和应用日志&lt;/h1&gt;
+&lt;h1 id="安全日志系统日志应用程序日志"&gt;安全日志/系统日志/应用程序日志&lt;/h1&gt;
+&lt;p&gt;C:\Windows\System32\winevt\Logs\Security.evtx &amp;mdash;-安全日志&lt;/p&gt;
+&lt;p&gt;C:\Windows\System32\winevt\Logs\System.evtx &amp;mdash;&amp;ndash; 系统日志&lt;/p&gt;
+&lt;p&gt;C:\Windows\System32\winevt\Logs\Application.evtx &amp;mdash;-应用程序日志&lt;/p&gt;
+&lt;h1 id="远程桌面登录日志"&gt;远程桌面登录日志&lt;/h1&gt;
+&lt;p&gt;C:\Windows\System32\winevt\Logs\Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx&lt;/p&gt;
+&lt;h1 id="计划任务执行日志"&gt;计划任务执行日志&lt;/h1&gt;
+&lt;p&gt;C:\Windows\System32\winevt\Logs\Microsoft-Windows-TaskScheduler%4Operational.evtx&lt;/p&gt;
+&lt;h1 id="日志工具批量分析"&gt;日志工具批量分析&lt;/h1&gt;
+&lt;p&gt;LogParser,EventLog Explorer&lt;/p&gt;</description></item></channel></rss>
