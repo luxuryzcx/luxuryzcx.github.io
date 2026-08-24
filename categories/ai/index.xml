@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>AI on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/categories/ai/</link><description>Recent content in AI on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 16 Jun 2026 00:19:11 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/categories/ai/index.xml" rel="self" type="application/rss+xml"/><item><title>AI中转站-快速搭建</title><link>https://luxuryzcx.github.io/posts/ai%E4%B8%AD%E8%BD%AC%E7%AB%99-%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA/</link><pubDate>Tue, 16 Jun 2026 00:19:11 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/ai%E4%B8%AD%E8%BD%AC%E7%AB%99-%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA/</guid><description>&lt;h1 id="前置"&gt;前置&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;mkdir&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;opt&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sub2api&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;cd&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;opt&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sub2api&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;curl&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;sSL&lt;/span&gt; &lt;span class="nl"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/docker-deploy.sh | bash
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;docker&lt;/span&gt; &lt;span class="n"&gt;compose&lt;/span&gt; &lt;span class="n"&gt;up&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;docker&lt;/span&gt; &lt;span class="n"&gt;compose&lt;/span&gt; &lt;span class="n"&gt;logs&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;sub2api&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sed&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;/^&lt;/span&gt;&lt;span class="n"&gt;ADMIN_PASSWORD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="err"&gt;*/&lt;/span&gt;&lt;span class="n"&gt;ADMIN_PASSWORD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;you_password&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;env&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sed&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;/^&lt;/span&gt;&lt;span class="n"&gt;SERVER_PORT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="err"&gt;*/&lt;/span&gt;&lt;span class="n"&gt;SERVER_PORT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;2390&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;env&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//38.76.203.187:2390/login
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;admin&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;sub2api&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;local&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="mi"&gt;12&lt;/span&gt;&lt;span class="n"&gt;SqweR&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511234648049.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="分组管理"&gt;分组管理&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511234957640.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="创建新分组"&gt;创建新分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235320699.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="分组名称"&gt;分组名称&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235336745.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="选择平台"&gt;选择平台&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235354950.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="费率倍数"&gt;费率倍数&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235454464.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="专属分组"&gt;专属分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235824188.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="保存分组"&gt;保存分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235803908.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="添加账号"&gt;添加账号&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235853076.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="添加新账号"&gt;添加新账号&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235912035.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="账号名称"&gt;账号名称&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235942147.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="选择平台-1"&gt;选择平台&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235953730.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="授权方式"&gt;授权方式&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000013888.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="优先级"&gt;优先级&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000028977.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="分配分组"&gt;分配分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000047778.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="保存账号"&gt;保存账号&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000103331.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="生成密钥"&gt;生成密钥&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000116785.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="创建密钥"&gt;创建密钥&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000140044.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="密钥名称"&gt;密钥名称&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000157002.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="选择分组"&gt;选择分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000212984.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="生成并复制"&gt;生成并复制&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000232150.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item><item><title>codex上搭建kali mcp 文件</title><link>https://luxuryzcx.github.io/posts/codex%E4%B8%8A%E6%90%AD%E5%BB%BAkali-mcp-%E6%96%87%E4%BB%B6/</link><pubDate>Mon, 15 Jun 2026 23:28:25 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/codex%E4%B8%8A%E6%90%AD%E5%BB%BAkali-mcp-%E6%96%87%E4%BB%B6/</guid><description>&lt;p&gt;项目地址&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/Wh0am123/MCP-Kali-Server"&gt;https://github.com/Wh0am123/MCP-Kali-Server&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;文件架构&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260422172441982.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="原理"&gt;原理&lt;/h1&gt;
+&lt;p&gt;mcp (model context protocol) 模型文本协议&lt;/p&gt;
+&lt;p&gt;其中kali_server.py是放在kali端的 mcp_server.py是放在codex，claude或者其他agent端的 ，通过api调用kali上面的工具或者命令进行执行然后返回agnet端进行回应，通俗易懂的来说，指导kali的角色不再是人，而是agent，而人只需要指导agent的大致方向即可。&lt;/p&gt;
+&lt;h1 id="配置"&gt;配置&lt;/h1&gt;
+&lt;p&gt;kali端&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;python3&lt;/span&gt; &lt;span class="n"&gt;kali_server&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;py&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="mi"&gt;5000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;遇到这样的回显就成功了&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;┌──&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;venv&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="err"&gt;─&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;kali&lt;/span&gt;&lt;span class="err"&gt;㉿&lt;/span&gt;&lt;span class="n"&gt;kali&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;~/&lt;/span&gt;&lt;span class="n"&gt;Desktop&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;└─$&lt;/span&gt; &lt;span class="n"&gt;python3&lt;/span&gt; &lt;span class="n"&gt;kali_server&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;py&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="mi"&gt;5000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;2026&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt; &lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;45&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;11&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;783&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="n"&gt;Starting&lt;/span&gt; &lt;span class="n"&gt;Kali&lt;/span&gt; &lt;span class="n"&gt;Linux&lt;/span&gt; &lt;span class="n"&gt;Tools&lt;/span&gt; &lt;span class="n"&gt;API&lt;/span&gt; &lt;span class="n"&gt;Server&lt;/span&gt; &lt;span class="n"&gt;on&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="mi"&gt;5000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;Serving&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;kali_server&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;Debug&lt;/span&gt; &lt;span class="nl"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;2026&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt; &lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;45&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;11&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;793&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="nl"&gt;WARNING&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;This&lt;/span&gt; &lt;span class="n"&gt;is&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;development&lt;/span&gt; &lt;span class="n"&gt;server&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="n"&gt;Do&lt;/span&gt; &lt;span class="n"&gt;not&lt;/span&gt; &lt;span class="n"&gt;use&lt;/span&gt; &lt;span class="n"&gt;it&lt;/span&gt; &lt;span class="n"&gt;in&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;production&lt;/span&gt; &lt;span class="n"&gt;deployment&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="n"&gt;Use&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;production&lt;/span&gt; &lt;span class="n"&gt;WSGI&lt;/span&gt; &lt;span class="n"&gt;server&lt;/span&gt; &lt;span class="n"&gt;instead&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;Running&lt;/span&gt; &lt;span class="n"&gt;on&lt;/span&gt; &lt;span class="n"&gt;all&lt;/span&gt; &lt;span class="nf"&gt;addresses&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.0.0.0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;Running&lt;/span&gt; &lt;span class="n"&gt;on&lt;/span&gt; &lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//127.0.0.1:5000
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;Running&lt;/span&gt; &lt;span class="n"&gt;on&lt;/span&gt; &lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//61.139.2.130:5000
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;2026&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt; &lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;45&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;11&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;794&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="n"&gt;Press&lt;/span&gt; &lt;span class="n"&gt;CTRL&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;C&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;quit&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后返回codex端&lt;/p&gt;
+&lt;p&gt;在设置-MCP服务器-添加服务器&lt;/p&gt;
+&lt;p&gt;然后那个mcp_server.py放在你想要放置的位置就好了&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260422173010133.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="测试"&gt;测试&lt;/h1&gt;
+&lt;p&gt;重启codex 会发现mcp已经在运行了&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260422173112434.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;在kali端 启动&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;python3&lt;/span&gt; &lt;span class="n"&gt;kali_server&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;py&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="mi"&gt;5000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;回到codex&lt;/p&gt;
+&lt;p&gt;给codex命令&lt;/p&gt;
+&lt;p&gt;调用 kali 的 execute_command 工具，执行 pwd，并把返回结果告诉我&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260422173405222.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;发现已经执行成功了&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;2026&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt; &lt;span class="mo"&gt;05&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mo"&gt;07&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;43&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;899&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="mf"&gt;61.139.2.1&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;Apr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2026&lt;/span&gt; &lt;span class="mo"&gt;05&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mo"&gt;07&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;43&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;GET /health HTTP/1.1&amp;#34;&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;2026&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt; &lt;span class="mo"&gt;05&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;08&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;33&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mo"&gt;05&lt;/span&gt;&lt;span class="mi"&gt;9&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="n"&gt;Executing&lt;/span&gt; &lt;span class="nl"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;pwd&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;2026&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mo"&gt;04&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt; &lt;span class="mo"&gt;05&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;08&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;33&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mo"&gt;063&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="mf"&gt;61.139.2.1&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;22&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;Apr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2026&lt;/span&gt; &lt;span class="mo"&gt;05&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;08&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;33&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;POST /api/command HTTP/1.1&amp;#34;&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;下面200 的 都是调用成功的&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260422173550754.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item></channel></rss>

