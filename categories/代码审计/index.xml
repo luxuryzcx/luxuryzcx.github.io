@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>代码审计 on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/</link><description>Recent content in 代码审计 on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Mon, 15 Jun 2026 20:03:34 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/index.xml" rel="self" type="application/rss+xml"/><item><title>RuoYi代码审计</title><link>https://luxuryzcx.github.io/posts/ruoyi%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/</link><pubDate>Mon, 15 Jun 2026 20:03:34 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/ruoyi%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/</guid><description>&lt;h1 id="1环境搭建"&gt;1.环境搭建&lt;/h1&gt;
+&lt;h2 id="1漏洞复现环境"&gt;1.漏洞复现环境&lt;/h2&gt;
+&lt;p&gt;JDK &amp;gt;=1.8（推荐1.8版本）
+IDEA 2023
+若依后台管理系统v4,2
+若依后台管理系统v4.5&lt;/p&gt;
+&lt;h2 id="2参数修改"&gt;2.参数修改&lt;/h2&gt;
+&lt;p&gt;配置Maven&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319102213.png"
+ alt="Pasted image 20250319102213"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;端口修改&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319101509.png"
+ alt="Pasted image 20250319101509"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;数据库修改&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319101601.png"
+ alt="Pasted image 20250319101601"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;导入数据库&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319102522.png"
+ alt="Pasted image 20250319102522"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319102702.png"
+ alt="Pasted image 20250319102702"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319102745.png"
+ alt="Pasted image 20250319102745"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h2 id="3启动"&gt;3.启动&lt;/h2&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319102934.png"
+ alt="Pasted image 20250319102934"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319103014.png"
+ alt="Pasted image 20250319103014"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;打开网页看一看 8081的发现访问成功&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319103050.png"
+ alt="Pasted image 20250319103050"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="2漏洞分析"&gt;2.漏洞分析&lt;/h1&gt;
+&lt;h2 id="1弱口令"&gt;1.弱口令&lt;/h2&gt;
+&lt;p&gt;发现若依的弱口令会写在前端&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319103606.png"
+ alt="Pasted image 20250319103606"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;不包括admin/admin123,若依还有其他的弱口令，以下是常见的若依账号密码集合&lt;/p&gt;
+&lt;p&gt;用户：admin ruoyi druid
+密码：123456 admin druid admin123 admin888&lt;/p&gt;
+&lt;p&gt;其实若依的漏洞点多在后端，前端的话除了一个弱口令，和一个shiro框架，基本都在后端了&lt;/p&gt;
+&lt;p&gt;登录进来&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319111807.png"
+ alt="Pasted image 20250319111807"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h2 id="2指纹识别"&gt;2.指纹识别&lt;/h2&gt;
+&lt;p&gt;随便抓一个包，像这一种的就是经典的ruoyi，remember me&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxuryzcx.github.io/images/posts/ruoyi%e4%bb%a3%e7%a0%81%e5%ae%a1%e8%ae%a1/pasted-image-20250319112339.png"
+ alt="Pasted image 20250319112339"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h2 id="3快速检测"&gt;3.快速检测&lt;/h2&gt;
+&lt;p&gt;使用若依综合利用工具&lt;/p&gt;</description></item></channel></rss>

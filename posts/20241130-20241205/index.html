@@ -1,0 +1,713 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>2024.11.30-2024.12.05 | 1ux4ry Archive</title><meta name=description content="CTF 记录"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><a href=#1swpuctf-2022-新生赛upx>1.[SWPUCTF 2022 新生赛]upx</a></li><li><a href=#2666>2.666</a></li><li><a href=#3reversing-x64elf-100>3.Reversing-x64Elf-100</a></li><li><a href=#4base>4.base</a></li><li><a href=#5reverse_2>5.reverse_2</a></li><li><a href=#6xor>6.xor</a></li><li><a href=#7不一样的flag>7.不一样的flag</a></li><li><a href=#8simplerev>8.simplerev</a></li><li><a href=#9actf新生赛2020easyre>9.[ACTF新生赛2020]easyre</a></li><li><a href=#10java逆向解密>10.Java逆向解密</a></li><li><a href=#11guess-the-number>11.Guess-the-Number</a></li><li><a href=#12easy_re>12.easy_re</a></li><li><a href=#13lgniteme>13.lgniteMe</a></li><li><a href=#14actf新生赛2020rome>14.[ACTF新生赛2020]rome</a></li><li><a href=#15wustctf2020level1>15.[WUSTCTF2020]level1</a></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label=2024.11.30-2024.12.05><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./CTF</p><div class=article-hero-card__title><span class=article-hero-card__title-main>CTF</span>
+<span class=article-hero-card__title-sub>2024.11.30-2024.12.05</span></div><p class=article-hero-card__meta>CTF / Reverse / CTF / Reverse / 1ux4ry Archive</p><p class=article-hero-card__desc>CTF 记录</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>CTF</p><h1>2024.11.30-2024.12.05</h1><div class=single-meta><span>2026-06-16</span>
+<span>CTF / Reverse</span>
+<span># CTF # Reverse</span></div></header><div class="page-copy content-body"><h1 id=1swpuctf-2022-新生赛upx>1.[SWPUCTF 2022 新生赛]upx</h1><p>查壳，发现需要脱壳，脱壳完毕后64位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732432457971-76214cd9-097a-4fa5-a138-f3dfc8e78514.png alt loading=lazy decoding=async></figure></p><p>拖进ida64中，找到主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732432495324-024ad6bc-95a1-45de-8cc7-cfe62f1683d9.png alt loading=lazy decoding=async></figure></p><p>简单的分析以下，指输入的值只要异或2就行，写个脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>a =  &#39;LQQAVDyWRZ]3q]zmpf]uc{]vm]glap{rv]dnce&#39;
+</span></span><span class=line><span class=cl>b = &#39;&#39;
+</span></span><span class=line><span class=cl>for i in range(38):
+</span></span><span class=line><span class=cl>    b+=chr(ord(a[i])^2)
+</span></span><span class=line><span class=cl>print(b)    
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732432551953-3afc4ac5-49b1-4242-875a-ac88e9586ae3.png alt loading=lazy decoding=async></figure></p><p>补一个花括号</p><p>NSSCTF{UPX_1s_xord_way_to_encrypt_flag}</p><h1 id=2666>2.666</h1><p>打开附件，查壳，无壳64位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732441406120-bfae7166-4148-4e38-89f9-9f3a3eba56a2.png alt loading=lazy decoding=async></figure></p><p>拖入ida64中，查看main函数，发现有个假的flag</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732501458021-514cda7b-803e-4d16-bdeb-ea07edc0e872.png alt loading=lazy decoding=async></figure></p><p>分析可知，输入的为v5,然后v5进行加密，然后进行判断，如果v5和key值相等，则输出你是正确的，否则输出错误，跳转到encode函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732501989346-aeb05433-e02b-4d0b-ab6b-9e15e0244bb6.png alt loading=lazy decoding=async></figure></p><p>点击encodeflag,可以看到加密的flag</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732502303280-2cf542c6-d1b9-4762-9b2e-f7ed8d06ecc3.png alt loading=lazy decoding=async></figure></p><p>izwhroz"&ldquo;w"v.K&rdquo;.Ni</p><p>对for循环进行分析</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>for ( i = 0; i &lt; key; i += 3 )        //三位一个，循环6次
+</span></span><span class=line><span class=cl>  {
+</span></span><span class=line><span class=cl>    v3[i + 64] = key ^ (a1[i] + 6);      
+</span></span><span class=line><span class=cl>    v3[i + 33] = (a1[i + 1] - 6) ^ key;    //a1改变v3,v3改变a2,返回a2为s
+</span></span><span class=line><span class=cl>    v3[i + 2] = a1[i + 2] ^ 6 ^ key;
+</span></span><span class=line><span class=cl>    *(_BYTE *)(a2 + i) = v3[i + 64];
+</span></span><span class=line><span class=cl>    *(_BYTE *)(a2 + i + 1LL) = v3[i + 33];
+</span></span><span class=line><span class=cl>    *(_BYTE *)(a2 + i + 2LL) = v3[i + 2];
+</span></span><span class=line><span class=cl>  }
+</span></span><span class=line><span class=cl>  return a2;
+</span></span></code></pre></div><p>发现先要减，再加，再异或，写出脚本即可，其中key为什么等于18，因为题目就是666</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>a2=&#34;izwhroz\&#34;\&#34;w\&#34;v.K\&#34;.Ni&#34;
+</span></span><span class=line><span class=cl>key=18
+</span></span><span class=line><span class=cl>v3=&#34;&#34;
+</span></span><span class=line><span class=cl>flag=&#34;&#34;
+</span></span><span class=line><span class=cl>#print(len(a2))
+</span></span><span class=line><span class=cl>for i in range(0,18,3):
+</span></span><span class=line><span class=cl>	v3=a2[i]
+</span></span><span class=line><span class=cl>	flag+=chr((ord(v3)^key) - 6)
+</span></span><span class=line><span class=cl>	v3=a2[i+1]
+</span></span><span class=line><span class=cl>	flag+=chr((ord(v3)^key) +6)
+</span></span><span class=line><span class=cl>	v3=a2[i+2]
+</span></span><span class=line><span class=cl>	flag+=chr((ord(v3)^key)^6)
+</span></span><span class=line><span class=cl>print(flag)
+</span></span></code></pre></div><p>输出</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732503442341-25bcaed0-d4e7-44d0-8f89-8716b0b79868.png alt loading=lazy decoding=async></figure></p><p>另一种代码方式</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>a2 = &#34;izwhroz\&#34;\&#34;w\&#34;v.K\&#34;.Ni&#34;
+</span></span><span class=line><span class=cl>key = 18
+</span></span><span class=line><span class=cl>flag = &#34;&#34;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>for i in range(0, len(a2), 3):
+</span></span><span class=line><span class=cl>    if i + 2 &lt; len(a2):  # 确保不会越界
+</span></span><span class=line><span class=cl>        flag += chr((ord(a2[i]) ^ key) - 6)
+</span></span><span class=line><span class=cl>        flag += chr((ord(a2[i + 1]) ^ key) + 6)
+</span></span><span class=line><span class=cl>        flag += chr((ord(a2[i + 2]) ^ key) ^ 6)
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>print(flag)
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732504374399-919903e6-9ec2-4db2-95bb-94ea96013873.png alt loading=lazy decoding=async></figure></p><p>unctf{b66_6b6_66b}</p><h1 id=3reversing-x64elf-100>3.Reversing-x64Elf-100</h1><p>打开附件，查壳，发现无壳且64位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732521067478-16da6490-4cfe-4b98-be6a-77f7a0980dec.png alt loading=lazy decoding=async></figure></p><p>拖入ida64中，进入主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732521316137-12d851f6-60f9-48e2-91fc-0a0467966e29.png alt loading=lazy decoding=async></figure></p><p>没发现什么东西，继续点点点</p><p>发现开始前有一段字符串</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732521359436-651482af-117a-4a45-8f54-12f24d8c376d.png alt loading=lazy decoding=async></figure></p><p>还是没有什么有用的信息，继续点点点，点到了一个函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732522186012-26743ed2-e62d-49b2-b501-30507f66c481.png alt loading=lazy decoding=async></figure></p><p>就决定是你了，拖进ai写一下</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>def reverse_engineer():
+</span></span><span class=line><span class=cl>    # 定义固定字符串
+</span></span><span class=line><span class=cl>    fixed_strings = [&#34;Dufhbmf&#34;, &#34;pG`imos&#34;, &#34;ewUglpt&#34;]
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    # 初始化结果字符串
+</span></span><span class=line><span class=cl>    result_string = &#34;&#34;
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    # 循环12次以构建12个字符的字符串
+</span></span><span class=line><span class=cl>    for i in range(12):
+</span></span><span class=line><span class=cl>        # 计算当前要使用的固定字符串
+</span></span><span class=line><span class=cl>        current_str = fixed_strings[i % 3]
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        # 计算当前要比较的字符位置
+</span></span><span class=line><span class=cl>        char_pos = 2 * (i // 3)
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        # 获取固定字符串中的字符
+</span></span><span class=line><span class=cl>        fixed_char = current_str[char_pos]
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        # 根据条件计算输入字符串中对应位置的字符
+</span></span><span class=line><span class=cl>        # 因为条件是：fixed_char - input_char == 1
+</span></span><span class=line><span class=cl>        # 所以 input_char = fixed_char - 1
+</span></span><span class=line><span class=cl>        input_char = chr(ord(fixed_char) - 1)
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        # 将计算得到的字符添加到结果字符串
+</span></span><span class=line><span class=cl>        result_string += input_char
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    return result_string
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># 调用函数并打印结果
+</span></span><span class=line><span class=cl>print(reverse_engineer())
+</span></span></code></pre></div><p>输出flag</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732523958663-70bed139-41ba-4272-b8cc-3e8be46f6349.png alt loading=lazy decoding=async></figure></p><p>Code_Talkers</p><h1 id=4base>4.base</h1><p>查壳，发现无壳，且64位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732601773069-65bdf8b0-b420-4506-9a84-000990364d80.png alt loading=lazy decoding=async></figure></p><p>拖入ida64中，进入主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732618673773-140d700e-515b-45f1-bc59-b461435b3405.png alt loading=lazy decoding=async></figure></p><p>发现字符串不对劲，看着像base64编码，然后解密看看一波‘</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732618761309-120e383c-f490-411d-8cc9-bea7a75b0d7e.png alt loading=lazy decoding=async></figure></p><p>发现是乱码，肯定不能直接出答案，所以我们点击一下函数试试，点击base64函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732619243878-7c195fb4-2cae-4f0d-9237-0e7480033397.png alt loading=lazy decoding=async></figure></p><p>查看编码表看看有没有换表</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732619365608-9335f699-c5e3-40b7-bfe5-5f60e19a217d.png alt loading=lazy decoding=async></figure></p><p>可以看到是明显换表了的</p><p>一般的base64表</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
+</span></span></code></pre></div><p>而他的base64表</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>abcdefghijklmnopqrstuvwxyz0123456789+/ABCDEFGHIJKLMNOPQRSTUVWXYZ
+</span></span></code></pre></div><p>写一个脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>import base64
+</span></span><span class=line><span class=cl>new = &#34;abcdefghijklmnopqrstuvwxyz0123456789+/ABCDEFGHIJKLMNOPQRSTUVWXYZ&#34;  
+</span></span><span class=line><span class=cl>old = &#34;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&#34;
+</span></span><span class=line><span class=cl>flag = &#39;&#39;
+</span></span><span class=line><span class=cl>mapper = str.maketrans(new,old)
+</span></span><span class=line><span class=cl>enc = &#34;1wX/yRrA4RfR2wj72Qv52x3L5qa=&#34;
+</span></span><span class=line><span class=cl>decoded = enc.translate(mapper)
+</span></span><span class=line><span class=cl>flag = base64.b64decode(decoded)
+</span></span><span class=line><span class=cl>print(flag)
+</span></span></code></pre></div><p>运行</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732619972818-22984cd0-9104-4d2c-b1e4-d37657c11156.png alt loading=lazy decoding=async></figure></p><h1 id=5reverse_2>5.reverse_2</h1><p>打开附件，查壳，发现无壳且64位，且是linux可执行文件</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732621806984-d248c8ae-c658-475d-9f3d-832453aeb8af.png alt loading=lazy decoding=async></figure></p><p>拖进ida64位中，查看主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732621843346-16809e12-b030-425e-a70c-375e8b3b1225.png alt loading=lazy decoding=async></figure></p><p>点击flag</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732621896421-78d7a512-0331-42a0-a348-a92ee6b9abd3.png alt loading=lazy decoding=async></figure></p><p>我们发现了这个flag {hacking_for_fun} 发现提交不对 查看源代码</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732621996953-672a4944-4460-43c8-93ac-c3639951df24.png alt loading=lazy decoding=async></figure></p><p>发现对于遍历flag里的数且ascill都为105或者114时，就会替换成49，根据这个逻辑，来写一个脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>a = &#39;{hacking_for_fun}&#39;
+</span></span><span class=line><span class=cl>b = &#39;&#39;
+</span></span><span class=line><span class=cl>for i in range(len(a)):
+</span></span><span class=line><span class=cl>    if (ord(a[i]) ==105) or (ord(a[i]) ==114):
+</span></span><span class=line><span class=cl>        b+=a.replace(a[i],chr(49))
+</span></span><span class=line><span class=cl>print(b)        
+</span></span></code></pre></div><p>输出</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732622864298-226ddcd0-5bc1-45db-8574-a53683aa1e40.png alt loading=lazy decoding=async></figure></p><p>{hacking_fo1_fun}</p><h1 id=6xor>6.xor</h1><p>打开附件，查壳，发现无壳且64位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732626033482-e369c2ee-5421-4f00-a769-c5552007aa37.png alt loading=lazy decoding=async></figure></p><p>拖进ida64里，查看主函数，发现是一个很明显的异或操作</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732672700597-39941069-ae02-4384-8c24-5d004a0fe8b1.png alt loading=lazy decoding=async></figure></p><p>点击数据就会到达存储数据的界面</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732672808597-f3932741-f16c-4b64-8467-8611fa98bc75.png alt loading=lazy decoding=async></figure></p><p>按住shift+e可以提取出来数据</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732672849123-e93447dc-3616-4390-b9f1-4829334df99e.png alt loading=lazy decoding=async></figure></p><p>可以看到数据已经提取出来了</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732672894561-cfb3f211-c012-4bd9-8236-60d23565e226.png alt loading=lazy decoding=async></figure></p><p>然后对于主函数</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>if ( strlen(__b) != 33 )
+</span></span><span class=line><span class=cl>    goto LABEL_7;
+</span></span><span class=line><span class=cl>  for ( i = 1; i &lt; 33; ++i )
+</span></span><span class=line><span class=cl>    __b[i] ^= __b[i - 1];
+</span></span><span class=line><span class=cl>  if ( !strncmp(__b, global, 0x21uLL) )
+</span></span><span class=line><span class=cl>    printf(&#34;Success&#34;);
+</span></span></code></pre></div><p>分析可知，它的解密逻辑是将字符串里的每一个字符异或这个字符串里的前一个字符</p><p>而且字符串长度为33位才行</p><p>写出解密脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>data = bytearray([
+</span></span><span class=line><span class=cl>  0x66, 0x0A, 0x6B, 0x0C, 0x77, 0x26, 0x4F, 0x2E, 0x40, 0x11,
+</span></span><span class=line><span class=cl>  0x78, 0x0D, 0x5A, 0x3B, 0x55, 0x11, 0x70, 0x19, 0x46, 0x1F,
+</span></span><span class=line><span class=cl>  0x76, 0x22, 0x4D, 0x23, 0x44, 0x0E, 0x67, 0x06, 0x68, 0x0F,
+</span></span><span class=line><span class=cl>  0x47, 0x32, 0x4F, 
+</span></span><span class=line><span class=cl>])
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># 检查数据长度是否为33
+</span></span><span class=line><span class=cl>if len(data) != 33:
+</span></span><span class=line><span class=cl>    print(&#34;数据长度不正确&#34;)
+</span></span><span class=line><span class=cl>else:
+</span></span><span class=line><span class=cl>    # 应用逆向异或操作
+</span></span><span class=line><span class=cl>    for i in range(31, 0, -1):  # 从32开始倒序到1
+</span></span><span class=line><span class=cl>        data[i] ^= data[i - 1]
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    # 打印解密后的数据
+</span></span><span class=line><span class=cl>    print(&#34;解密后的数据:&#34;, data)
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>   
+</span></span></code></pre></div><p>输出</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732673560742-aa316ff1-39b2-4948-9211-b34e663c97cf.png alt loading=lazy decoding=async></figure></p><p>根据做题经验可知，少了个}，然后去掉O</p><p>拼凑一下</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732673520921-7b343a74-e958-4fed-81d2-4db2ebbba736.png alt loading=lazy decoding=async></figure></p><p>flag{QianQiuWanDai_YiTongJiangHu}</p><h1 id=7不一样的flag>7.不一样的flag</h1><p>打开附件，查壳，无壳，发现是32位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732674655025-099ad844-e3f5-43cd-8386-f13ade3b0daa.png alt loading=lazy decoding=async></figure></p><p>拖入ida中，打开主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732674681389-ef649086-cc4b-40ef-a88a-74ccb7ae8459.png alt loading=lazy decoding=async></figure></p><p>原代码如下</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=ne>int</span> <span class=n>__cdecl</span> <span class=n>__noreturn</span> <span class=n>main</span><span class=p>(</span><span class=ne>int</span> <span class=n>argc</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>argv</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>envp</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>_BYTE</span> <span class=n>v3</span><span class=p>[</span><span class=mi>29</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>17</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>35</span><span class=n>h</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>    <span class=ne>int</span> <span class=n>v4</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>34</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>18</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=ne>int</span> <span class=n>v5</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>38</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>14</span><span class=n>h</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>    <span class=ne>int</span> <span class=n>i</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>3</span><span class=n>Ch</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>10</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>_BYTE</span> <span class=n>v7</span><span class=p>[</span><span class=mi>12</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>40</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=n>Ch</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>__main</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>v3</span><span class=p>[</span><span class=mi>26</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=o>*</span><span class=p>(</span><span class=n>_WORD</span> <span class=o>*</span><span class=p>)</span><span class=o>&amp;</span><span class=n>v3</span><span class=p>[</span><span class=mi>27</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>v4</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>strcpy</span><span class=p>(</span><span class=n>v3</span><span class=p>,</span> <span class=s2>&#34;*11110100001010000101111#&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span> <span class=mi>1</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>puts</span><span class=p>(</span><span class=s2>&#34;you can choose one action to execute&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>puts</span><span class=p>(</span><span class=s2>&#34;1 up&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>puts</span><span class=p>(</span><span class=s2>&#34;2 down&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>puts</span><span class=p>(</span><span class=s2>&#34;3 left&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>printf</span><span class=p>(</span><span class=s2>&#34;4 right</span><span class=se>\n</span><span class=s2>:&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=n>scanf</span><span class=p>(</span><span class=s2>&#34;</span><span class=si>%d</span><span class=s2>&#34;</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>v5</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span> <span class=n>v5</span> <span class=o>==</span> <span class=mi>2</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=o>++*</span><span class=p>(</span><span class=n>_DWORD</span> <span class=o>*</span><span class=p>)</span><span class=o>&amp;</span><span class=n>v3</span><span class=p>[</span><span class=mi>25</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span> <span class=k>if</span> <span class=p>(</span> <span class=n>v5</span> <span class=o>&gt;</span> <span class=mi>2</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span> <span class=n>v5</span> <span class=o>==</span> <span class=mi>3</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=o>--</span><span class=n>v4</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=k>else</span>
+</span></span><span class=line><span class=cl>            <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>(</span> <span class=n>v5</span> <span class=o>!=</span> <span class=mi>4</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>                    <span class=n>LABEL_13</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=n>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>                <span class=o>++</span><span class=n>v4</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span> <span class=n>v5</span> <span class=o>!=</span> <span class=mi>1</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=n>goto</span> <span class=n>LABEL_13</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=o>--*</span><span class=p>(</span><span class=n>_DWORD</span> <span class=o>*</span><span class=p>)</span><span class=o>&amp;</span><span class=n>v3</span><span class=p>[</span><span class=mi>25</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=mi>1</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span> <span class=o>*</span><span class=p>(</span><span class=n>_DWORD</span> <span class=o>*</span><span class=p>)</span><span class=o>&amp;</span><span class=n>v3</span><span class=p>[</span><span class=mi>4</span> <span class=o>*</span> <span class=n>i</span> <span class=o>+</span> <span class=mi>25</span><span class=p>]</span> <span class=o>&gt;=</span> <span class=mi>5</span><span class=n>u</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=n>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span> <span class=n>v7</span><span class=p>[</span><span class=mi>5</span> <span class=o>*</span> <span class=o>*</span><span class=p>(</span><span class=n>_DWORD</span> <span class=o>*</span><span class=p>)</span><span class=o>&amp;</span><span class=n>v3</span><span class=p>[</span><span class=mi>25</span><span class=p>]</span> <span class=o>-</span> <span class=mi>41</span> <span class=o>+</span> <span class=n>v4</span><span class=p>]</span> <span class=o>==</span> <span class=mi>49</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span> <span class=n>v7</span><span class=p>[</span><span class=mi>5</span> <span class=o>*</span> <span class=o>*</span><span class=p>(</span><span class=n>_DWORD</span> <span class=o>*</span><span class=p>)</span><span class=o>&amp;</span><span class=n>v3</span><span class=p>[</span><span class=mi>25</span><span class=p>]</span> <span class=o>-</span> <span class=mi>41</span> <span class=o>+</span> <span class=n>v4</span><span class=p>]</span> <span class=o>==</span> <span class=mi>35</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>puts</span><span class=p>(</span><span class=s2>&#34;</span><span class=se>\n</span><span class=s2>ok, the order you enter is the flag!&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=n>exit</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>可以看到字符串出现了*以及#</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732674741986-ab1b5b77-cff6-466a-a530-fe94dc7c417d.png alt loading=lazy decoding=async></figure></p><p>加上方向键</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732674763874-1e542e38-346b-49e1-8da3-180f1b0f7566.png alt loading=lazy decoding=async></figure></p><p>可知这是一个经典的迷宫题</p><p>所以我们只要打印出迷宫的路径就能做出来了，附上代码</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>def convert_to_board(pattern, rows, cols):
+</span></span><span class=line><span class=cl>    # 确保模式长度是rows * cols
+</span></span><span class=line><span class=cl>    if len(pattern) != rows * cols:
+</span></span><span class=line><span class=cl>        raise ValueError(&#34;Pattern length does not match the specified dimensions.&#34;)
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    board = []
+</span></span><span class=line><span class=cl>    for i in range(0, len(pattern), cols):
+</span></span><span class=line><span class=cl>        row = list(pattern[i:i+cols])
+</span></span><span class=line><span class=cl>        board.append(row)
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    return board
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>def print_board(board):
+</span></span><span class=line><span class=cl>    for row in board:
+</span></span><span class=line><span class=cl>        print(&#39; &#39;.join(row))
+</span></span><span class=line><span class=cl>    print()
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># 给定的字符串
+</span></span><span class=line><span class=cl>pattern = &#34;*11110100001010000101111#&#34;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># 补充字符串到25个字符
+</span></span><span class=line><span class=cl>if len(pattern) &lt; 25:
+</span></span><span class=line><span class=cl>    pattern += &#39; &#39; * (25 - len(pattern))
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># 转换为5x5的二维数组
+</span></span><span class=line><span class=cl>board = convert_to_board(pattern, 5, 5)
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># 打印二维数组
+</span></span><span class=line><span class=cl>print_board(board)
+</span></span></code></pre></div><p>运行一下</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732674991653-7104ddaf-2f4e-45ad-a800-7a0a12166a64.png alt loading=lazy decoding=async></figure></p><p>找到迷宫路径</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>* 1 1 1 1
+</span></span><span class=line><span class=cl>0 1 0 0 0
+</span></span><span class=line><span class=cl>0 1 0 1 0
+</span></span><span class=line><span class=cl>0 0 0 1 0
+</span></span><span class=line><span class=cl>1 1 1 1 #
+</span></span></code></pre></div><p>再根据下面的数字可以走出迷宫了，也可以手搓一个，不过这个迷宫比较小，可以手搓</p><p><figure class=content-figure><img src="https://cdn.nlark.com/yuque/0/2024/png/46138799/1732674763874-1e542e38-346b-49e1-8da3-180f1b0f7566.png?x-oss-process=image%2Fformat%2Cwebp" alt loading=lazy decoding=async></figure></p><p>先猜测*是出口，一般也是迷宫题从上到下的</p><p>222441144222</p><p>最终flag{222441144222}</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732675174664-512b8565-1c54-4db0-99bb-c133c3a25026.png alt loading=lazy decoding=async></figure></p><h1 id=8simplerev>8.simplerev</h1><p>打开附件，查壳，发现无壳且64位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732757070639-dd29dcc1-ba5d-4d18-ba32-f85210ff1299.png alt loading=lazy decoding=async></figure></p><p>拖入ida64中，找到主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732757315552-2fc43d5a-4d56-4bb4-bcc7-aa1346c66c1e.png alt loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=ne>int</span> <span class=n>__fastcall</span> <span class=n>__noreturn</span> <span class=n>main</span><span class=p>(</span><span class=ne>int</span> <span class=n>argc</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>argv</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>envp</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v3</span><span class=p>;</span> <span class=o>//</span> <span class=n>eax</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=n>v4</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=n>Fh</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>1</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>while</span> <span class=p>(</span> <span class=mi>1</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span> <span class=mi>1</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>printf</span><span class=p>(</span><span class=s2>&#34;Welcome to CTF game!</span><span class=se>\n</span><span class=s2>Please input d/D to start or input q/Q to quit this program: &#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=n>v4</span> <span class=o>=</span> <span class=n>getchar</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span> <span class=n>v4</span> <span class=o>!=</span> <span class=mi>100</span> <span class=o>&amp;&amp;</span> <span class=n>v4</span> <span class=o>!=</span> <span class=mi>68</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>Decry</span><span class=p>(</span><span class=s2>&#34;Welcome to CTF game!</span><span class=se>\n</span><span class=s2>Please input d/D to start or input q/Q to quit this program: &#34;</span><span class=p>,</span> <span class=n>argv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span> <span class=n>v4</span> <span class=o>==</span> <span class=mi>113</span> <span class=o>||</span> <span class=n>v4</span> <span class=o>==</span> <span class=mi>81</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=n>Exit</span><span class=p>(</span><span class=s2>&#34;Welcome to CTF game!</span><span class=se>\n</span><span class=s2>Please input d/D to start or input q/Q to quit this program: &#34;</span><span class=p>,</span> <span class=n>argv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>puts</span><span class=p>(</span><span class=s2>&#34;Input fault format!&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>v3</span> <span class=o>=</span> <span class=n>getchar</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>putchar</span><span class=p>(</span><span class=n>v3</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>分析可知如果v4传入的数据不同时满足100和68的话，那么程序会直接退出，如果v4传入的数据有一个满足113或者81时都能使程序运行</p><p>进入到decry界面</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>nsigned</span> <span class=n>__int64</span> <span class=n>Decry</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=n>v1</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=n>Fh</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>51</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v2</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>10</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>50</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v3</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>14</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>4</span><span class=n>Ch</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>i</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>18</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>48</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v5</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>1</span><span class=n>Ch</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>44</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=n>src</span><span class=p>[</span><span class=mi>8</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>20</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>40</span><span class=n>h</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>  <span class=n>__int64</span> <span class=n>v7</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>28</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>38</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v8</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>30</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>30</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=n>__int64</span> <span class=n>v9</span><span class=p>[</span><span class=mi>2</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>40</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>20</span><span class=n>h</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v10</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>50</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>10</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=n>unsigned</span> <span class=n>__int64</span> <span class=n>v11</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>58</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>8</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>v11</span> <span class=o>=</span> <span class=n>__readfsqword</span><span class=p>(</span><span class=mh>0x28</span><span class=n>u</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=o>*</span><span class=p>(</span><span class=n>_QWORD</span> <span class=o>*</span><span class=p>)</span><span class=n>src</span> <span class=o>=</span> <span class=mh>0x534C43444E</span><span class=n>LL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v7</span> <span class=o>=</span> <span class=s1>&#39;</span><span class=se>\0</span><span class=s1>&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v8</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v9</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>=</span> <span class=mh>0x776F646168</span><span class=n>LL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v9</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=n>LL</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v10</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>text</span> <span class=o>=</span> <span class=n>join</span><span class=p>(</span><span class=n>key3</span><span class=p>,</span> <span class=p>(</span><span class=k>const</span> <span class=n>char</span> <span class=o>*</span><span class=p>)</span><span class=n>v9</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>strcpy</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>key1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>strcat</span><span class=p>(</span><span class=n>key</span><span class=p>,</span> <span class=n>src</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>v2</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v3</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>getchar</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=n>v5</span> <span class=o>=</span> <span class=n>strlen</span><span class=p>(</span><span class=n>key</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>for</span> <span class=p>(</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>v5</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span> <span class=n>key</span><span class=p>[</span><span class=n>v3</span> <span class=o>%</span> <span class=n>v5</span><span class=p>]</span> <span class=o>&gt;</span> <span class=mi>64</span> <span class=o>&amp;&amp;</span> <span class=n>key</span><span class=p>[</span><span class=n>v3</span> <span class=o>%</span> <span class=n>v5</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=mi>90</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=n>key</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>key</span><span class=p>[</span><span class=n>v3</span> <span class=o>%</span> <span class=n>v5</span><span class=p>]</span> <span class=o>+</span> <span class=mi>32</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=o>++</span><span class=n>v3</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=n>printf</span><span class=p>(</span><span class=s2>&#34;Please input your flag:&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>while</span> <span class=p>(</span> <span class=mi>1</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>v1</span> <span class=o>=</span> <span class=n>getchar</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span> <span class=n>v1</span> <span class=o>==</span> <span class=mi>10</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span> <span class=n>v1</span> <span class=o>==</span> <span class=mi>32</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=o>++</span><span class=n>v2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span> <span class=n>v1</span> <span class=o>&lt;=</span> <span class=mi>96</span> <span class=o>||</span> <span class=n>v1</span> <span class=o>&gt;</span> <span class=mi>122</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span> <span class=n>v1</span> <span class=o>&gt;</span> <span class=mi>64</span> <span class=o>&amp;&amp;</span> <span class=n>v1</span> <span class=o>&lt;=</span> <span class=mi>90</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>          <span class=n>str2</span><span class=p>[</span><span class=n>v2</span><span class=p>]</span> <span class=o>=</span> <span class=p>(</span><span class=n>v1</span> <span class=o>-</span> <span class=mi>39</span> <span class=o>-</span> <span class=n>key</span><span class=p>[</span><span class=n>v3</span> <span class=o>%</span> <span class=n>v5</span><span class=p>]</span> <span class=o>+</span> <span class=mi>97</span><span class=p>)</span> <span class=o>%</span> <span class=mi>26</span> <span class=o>+</span> <span class=mi>97</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>          <span class=o>++</span><span class=n>v3</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=k>else</span>
+</span></span><span class=line><span class=cl>      <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=n>str2</span><span class=p>[</span><span class=n>v2</span><span class=p>]</span> <span class=o>=</span> <span class=p>(</span><span class=n>v1</span> <span class=o>-</span> <span class=mi>39</span> <span class=o>-</span> <span class=n>key</span><span class=p>[</span><span class=n>v3</span> <span class=o>%</span> <span class=n>v5</span><span class=p>]</span> <span class=o>+</span> <span class=mi>97</span><span class=p>)</span> <span class=o>%</span> <span class=mi>26</span> <span class=o>+</span> <span class=mi>97</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=o>++</span><span class=n>v3</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span> <span class=o>!</span><span class=p>(</span><span class=n>v3</span> <span class=o>%</span> <span class=n>v5</span><span class=p>)</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>putchar</span><span class=p>(</span><span class=mi>32</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=o>++</span><span class=n>v2</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span> <span class=o>!</span><span class=n>strcmp</span><span class=p>(</span><span class=n>text</span><span class=p>,</span> <span class=n>str2</span><span class=p>)</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>puts</span><span class=p>(</span><span class=s2>&#34;Congratulation!</span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>else</span>
+</span></span><span class=line><span class=cl>    <span class=n>puts</span><span class=p>(</span><span class=s2>&#34;Try again!</span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>__readfsqword</span><span class=p>(</span><span class=s1>&#39;(&#39;</span><span class=p>)</span> <span class=o>^</span> <span class=n>v11</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>发现对程序做了一次加密,用ai来分析一下</p><ul><li><code>text</code>通过将<code>key3</code>和<code>v9</code>拼接起来形成。</li><li><code>key</code>开始时复制了<code>key1</code>的内容，然后追加了<code>src</code>的内容。</li><li>之后，对<code>key</code>中的每个字符进行了处理：如果字符在大写字母范围内，则将其转换为小写。</li></ul><p>点击到下图</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732757990576-16b1d754-400e-436f-9512-1802643323b6.png alt loading=lazy decoding=async></figure></p><p>然后的整个加密逻辑就是：有一个常量字符串key,以及src的值，v9的值，最终的key=key1+src</p><p>text=key3+shadow，将密钥中的大写字母转为小写字母，用户输入flag并逐字节进行加密，大写则减去偏移量，并根据密钥进行加减操作，如果是小写字母，则类似处理，其余字母保持不变，加密后的结果存储在字符串里并与text进行比较</p><p>脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>key = &#34;ADSFKNDCLS&#34;
+</span></span><span class=line><span class=cl>key = list(key)  #adsfkndlcs
+</span></span><span class=line><span class=cl>text = &#34;killshadow&#34;
+</span></span><span class=line><span class=cl>v2 = 0
+</span></span><span class=line><span class=cl>v3 = 0
+</span></span><span class=line><span class=cl>v5 = len(key)
+</span></span><span class=line><span class=cl>for i in range(0, v5):
+</span></span><span class=line><span class=cl>    if (ord(key[v3 % v5]) &gt; 64) and (ord(key[v3 % v5]) &lt;= 90):
+</span></span><span class=line><span class=cl>        key[i] = chr(ord(key[v3 % v5]) + 32)
+</span></span><span class=line><span class=cl>    v3 = v3 + 1  #这个循环其实是把key的大写转换成了小写了
+</span></span><span class=line><span class=cl>v1 = &#39;&#39;
+</span></span><span class=line><span class=cl>key = &#39;adsfkndcls&#39;
+</span></span><span class=line><span class=cl>for i in range(len(key)):
+</span></span><span class=line><span class=cl>    for j in range(0, 15):
+</span></span><span class=line><span class=cl>        tmp = chr(ord(text[i]) - 97 + 26 * j - 97 + ord(key[v3 % len(key)]) + 39)
+</span></span><span class=line><span class=cl>        if ord(tmp) &gt;= 65 and ord(tmp) &lt;= 90:
+</span></span><span class=line><span class=cl>            v1 += tmp
+</span></span><span class=line><span class=cl>            break
+</span></span><span class=line><span class=cl>    v3 = v3 + 1
+</span></span><span class=line><span class=cl>print(v1)
+</span></span></code></pre></div><p>输出</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732760221867-1ba254ed-e981-45fe-b6ec-794b7691375d.png alt loading=lazy decoding=async></figure></p><p>KLDQCUDFZO</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1732760247921-1c64704b-8963-4a7e-8cbb-0ff798b9ee40.png alt loading=lazy decoding=async></figure></p><h1 id=9actf新生赛2020easyre>9.[ACTF新生赛2020]easyre</h1><p>查壳，有壳，且32位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733319517270-315cb669-956a-497d-9700-b8facdd23326.png alt loading=lazy decoding=async></figure></p><p>开始脱壳</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733319592450-750c773f-000a-470b-8de1-27095397635b.png alt loading=lazy decoding=async></figure></p><p>再次查壳，发现无壳</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733319629715-4da543a0-fe66-4a04-a24d-a2cc8daaa591.png alt loading=lazy decoding=async></figure>拖进ida32位里，主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733319684548-f80dc90e-4c23-4ed1-a94d-92c4bcf3c9f5.png alt loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=ne>int</span> <span class=n>__cdecl</span> <span class=n>main</span><span class=p>(</span><span class=ne>int</span> <span class=n>argc</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>argv</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>envp</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=n>v4</span><span class=p>[</span><span class=mi>12</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>12</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>2</span><span class=n>Eh</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v5</span><span class=p>[</span><span class=mi>3</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>1</span><span class=n>Eh</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>22</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=n>v6</span><span class=p>[</span><span class=mi>5</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>2</span><span class=n>Ah</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>16</span><span class=n>h</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v7</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>2</span><span class=n>Fh</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>11</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v8</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>33</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=n>Dh</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v9</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>37</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>9</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=n>v10</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>3</span><span class=n>Bh</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>5</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>i</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>3</span><span class=n>Ch</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>4</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>__main</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=n>qmemcpy</span><span class=p>(</span><span class=n>v4</span><span class=p>,</span> <span class=s2>&#34;*F&#39;</span><span class=se>\&#34;</span><span class=s2>N,</span><span class=se>\&#34;</span><span class=s2>(I?+@&#34;</span><span class=p>,</span> <span class=n>sizeof</span><span class=p>(</span><span class=n>v4</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>  <span class=n>printf</span><span class=p>(</span><span class=s2>&#34;Please input:&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=n>scanf</span><span class=p>(</span><span class=s2>&#34;</span><span class=si>%s</span><span class=s2>&#34;</span><span class=p>,</span> <span class=n>v6</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span> <span class=n>v6</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>!=</span> <span class=mi>65</span> <span class=o>||</span> <span class=n>v6</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=o>!=</span> <span class=mi>67</span> <span class=o>||</span> <span class=n>v6</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span> <span class=o>!=</span> <span class=mi>84</span> <span class=o>||</span> <span class=n>v6</span><span class=p>[</span><span class=mi>3</span><span class=p>]</span> <span class=o>!=</span> <span class=mi>70</span> <span class=o>||</span> <span class=n>v6</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span> <span class=o>!=</span> <span class=mi>123</span> <span class=o>||</span> <span class=n>v10</span> <span class=o>!=</span> <span class=mi>125</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v5</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>=</span> <span class=n>v7</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v5</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=n>v8</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v5</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span> <span class=o>=</span> <span class=n>v9</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>for</span> <span class=p>(</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=mi>11</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span> <span class=n>v4</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>!=</span> <span class=n>_data_start__</span><span class=p>[</span><span class=o>*</span><span class=p>((</span><span class=n>char</span> <span class=o>*</span><span class=p>)</span><span class=n>v5</span> <span class=o>+</span> <span class=n>i</span><span class=p>)</span> <span class=o>-</span> <span class=mi>1</span><span class=p>]</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=n>printf</span><span class=p>(</span><span class=s2>&#34;You are correct!&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>分析可知只要输入的数与qmemcpy里面的数进行对比遍历再减一就能得到正确答案了</p><p>然后12次循环，意为输入的字符串有12个字符长度，找一下对比的数组</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733321191099-73f5656f-1ed4-4d1b-b9d8-f28ee54b1efe.png alt loading=lazy decoding=async></figure>提取一下</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733321341725-5ab7551c-e826-4eab-b1d5-93c4dc22a611.png alt loading=lazy decoding=async></figure></p><p>}|{zyxwvutsrqponmlkjihgfedcba`_^][ZYXWVUTSRQPONMLKJIHGFEDCBA@?>=&lt;;:9876543210/.-,+*)(&rsquo;,27h,&rsquo;&%$# !"</p><p>写个脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>v4 = [42, 70, 39, 34, 78, 44, 34, 40, 73, 63, 43, 64] # 字符串有特殊字符为了避免语法错误就这么写了/(ㄒoㄒ)/~~
+</span></span><span class=line><span class=cl>flag = &#39;&#39;
+</span></span><span class=line><span class=cl>key = &#39;~}|{zyxwvutsrqponmlkjihgfedcba`_^]\[ZYXWVUTSRQPONMLKJIHGFEDCBA@?&gt;=&lt;;:9876543210/.-,+*)(\&#39;&amp;%$# !&#34;&#39;
+</span></span><span class=line><span class=cl>for i in v4:
+</span></span><span class=line><span class=cl>    flag += chr(key.find(chr(i)) + 1)
+</span></span><span class=line><span class=cl>    print(flag)
+</span></span><span class=line><span class=cl>print(flag)
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733321460159-b04ce6bd-91b2-4a2a-8ba1-515580767a12.png alt loading=lazy decoding=async></figure></p><p>包上flag</p><p>flag{U9X_1S_W6@T?}</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733321499882-b92026d4-a4a7-441c-932a-0f8c12cb6b62.png alt loading=lazy decoding=async></figure></p><h1 id=10java逆向解密>10.Java逆向解密</h1><p>下载就是java附件</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733323881105-e560b6eb-ea28-4921-a008-0752e753e96d.png alt loading=lazy decoding=async></figure></p><p>对于这种java之类的直接丢进jd-gui当中</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733323923636-36081095-d2ca-4c7d-98cf-add2a2b68cb0.png alt loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>mport java.util.ArrayList;
+</span></span><span class=line><span class=cl>import java.util.Scanner;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>public class Reverse {
+</span></span><span class=line><span class=cl>    public static void main(String[] args) {
+</span></span><span class=line><span class=cl>        Scanner s = new Scanner(System.in);
+</span></span><span class=line><span class=cl>        System.out.println(&#34;Please input the flag );
+</span></span><span class=line><span class=cl>        String str = s.next();
+</span></span><span class=line><span class=cl>        System.out.println(&#34;Your input is );
+</span></span><span class=line><span class=cl>        System.out.println(str);
+</span></span><span class=line><span class=cl>        char[] stringArr = str.toCharArray();
+</span></span><span class=line><span class=cl>        Encrypt(stringArr);
+</span></span><span class=line><span class=cl>    }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    public static void Encrypt(char[] arr) {
+</span></span><span class=line><span class=cl>        ArrayList&lt;Integer&gt; Resultlist = new ArrayList&lt;&gt;();
+</span></span><span class=line><span class=cl>        for (int i = 0; i &lt; arr.length; i++) {
+</span></span><span class=line><span class=cl>            int result = arr[i] + 64 ^ 0x20;
+</span></span><span class=line><span class=cl>            Resultlist.add(Integer.valueOf(result));
+</span></span><span class=line><span class=cl>        } 
+</span></span><span class=line><span class=cl>        int[] KEY = { 
+</span></span><span class=line><span class=cl>            180, 136, 137, 147, 191, 137, 147, 191, 148, 136, 
+</span></span><span class=line><span class=cl>            133, 191, 134, 140, 129, 135, 191, 65 };
+</span></span><span class=line><span class=cl>        ArrayList&lt;Integer&gt; KEYList = new ArrayList&lt;&gt;();
+</span></span><span class=line><span class=cl>        for (int j = 0; j &lt; KEY.length; j++)
+</span></span><span class=line><span class=cl>        KEYList.add(Integer.valueOf(KEY[j])); 
+</span></span><span class=line><span class=cl>        System.out.println(&#34;Result:&#34;);
+</span></span><span class=line><span class=cl>        if (Resultlist.equals(KEYList)) {
+</span></span><span class=line><span class=cl>            System.out.println(&#34;Congratulations);
+</span></span><span class=line><span class=cl>        } else {
+</span></span><span class=line><span class=cl>            System.err.println(&#34;Error);
+</span></span><span class=line><span class=cl>        } 
+</span></span><span class=line><span class=cl>    }
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></div><p>分析可知输入的值要先+64再异或0x20,所以逆向就是先异或0x20,再-64</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>a = [180, 136, 137, 147, 191, 137, 147, 191, 148, 136, 
+</span></span><span class=line><span class=cl>     133, 191, 134, 140, 129, 135, 191, 65 ]
+</span></span><span class=line><span class=cl>b = &#39;&#39;
+</span></span><span class=line><span class=cl>for i in range(len(a)):
+</span></span><span class=line><span class=cl>    char_code = (a[i] ^ 0x20) - 64
+</span></span><span class=line><span class=cl>    if 0 &lt;= char_code &lt; 0x110000:
+</span></span><span class=line><span class=cl>        b += chr(char_code)
+</span></span><span class=line><span class=cl>    else:
+</span></span><span class=line><span class=cl>        b += &#39;?&#39;
+</span></span><span class=line><span class=cl>print(b)    
+</span></span></code></pre></div><p>输出</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733324363649-e6d8cf42-49c0-479b-ab79-8a8a89b5179e.png alt loading=lazy decoding=async></figure></p><p>flag{This_is_the_flag_!}</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733324268422-9e5b0b51-63b7-4d50-a500-976e42943133.png alt loading=lazy decoding=async></figure></p><h1 id=11guess-the-number>11.Guess-the-Number</h1><p>打开发现是jar后缀文件，用jd-gui打开</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733453735453-e8c0103c-7d24-4d9b-8864-24de1bc92e4d.png alt loading=lazy decoding=async></figure></p><p>源码如下</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>import java.math.BigInteger;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>public class guess {
+</span></span><span class=line><span class=cl>  static String XOR(String _str_one, String _str_two) {
+</span></span><span class=line><span class=cl>    BigInteger i1 = new BigInteger(_str_one, 16);
+</span></span><span class=line><span class=cl>    BigInteger i2 = new BigInteger(_str_two, 16);
+</span></span><span class=line><span class=cl>    BigInteger res = i1.xor(i2);
+</span></span><span class=line><span class=cl>    String result = res.toString(16);
+</span></span><span class=line><span class=cl>    return result;
+</span></span><span class=line><span class=cl>  }
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  public static void main(String[] args) {
+</span></span><span class=line><span class=cl>    int guess_number = 0;
+</span></span><span class=line><span class=cl>    int my_num = 349763335;
+</span></span><span class=line><span class=cl>    int my_number = 1545686892;
+</span></span><span class=line><span class=cl>    int flag = 345736730;
+</span></span><span class=line><span class=cl>    if (args.length &gt; 0) {
+</span></span><span class=line><span class=cl>      try {
+</span></span><span class=line><span class=cl>        guess_number = Integer.parseInt(args[0]);
+</span></span><span class=line><span class=cl>        if (my_number / 5 == guess_number) {
+</span></span><span class=line><span class=cl>          String str_one = &#34;4b64ca12ace755516c178f72d05d7061&#34;;
+</span></span><span class=line><span class=cl>          String str_two = &#34;ecd44646cfe5994ebeb35bf922e25dba&#34;;
+</span></span><span class=line><span class=cl>          my_num += flag;
+</span></span><span class=line><span class=cl>          String answer = XOR(str_one, str_two);
+</span></span><span class=line><span class=cl>          System.out.println(&#34;your flag is: &#34; + answer);
+</span></span><span class=line><span class=cl>        } else {
+</span></span><span class=line><span class=cl>          System.err.println(&#34;wrong guess!&#34;);
+</span></span><span class=line><span class=cl>          System.exit(1);
+</span></span><span class=line><span class=cl>        } 
+</span></span><span class=line><span class=cl>      } catch (NumberFormatException e) {
+</span></span><span class=line><span class=cl>        System.err.println(&#34;please enter an integer \nexample: java -jar guess 12&#34;);
+</span></span><span class=line><span class=cl>        System.exit(1);
+</span></span><span class=line><span class=cl>      } 
+</span></span><span class=line><span class=cl>    } else {
+</span></span><span class=line><span class=cl>      System.err.println(&#34;wrong guess!&#34;);
+</span></span><span class=line><span class=cl>      int num = 1000000;
+</span></span><span class=line><span class=cl>      num++;
+</span></span><span class=line><span class=cl>      System.exit(1);
+</span></span><span class=line><span class=cl>    } 
+</span></span><span class=line><span class=cl>  }
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></div><p>分析可知</p><p>程序要求输入一个数字。然后进行比对再进行异或</p><p>写个脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl> 
+</span></span><span class=line><span class=cl>a=0x4b64ca12ace755516c178f72d05d7061
+</span></span><span class=line><span class=cl>b=0xecd44646cfe5994ebeb35bf922e25dba
+</span></span><span class=line><span class=cl>c=a^b
+</span></span><span class=line><span class=cl>print(hex(c))
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733453884713-4eff5329-3dfb-45f4-851e-50fa535a3081.png alt loading=lazy decoding=async></figure></p><p>0xa7b08c546302cc1fd2a4d48bf2bf2ddb</p><p>成功解出</p><p>当然这一题也可以提交<code>309137378</code>结果都能出来</p><h1 id=12easy_re>12.easy_re</h1><p>查壳，发现无壳，是简单的32位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733469959265-16a8f2e8-99e0-4ffa-abab-d3c69f546cf1.png alt loading=lazy decoding=async></figure></p><p>拖进ida32中</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733469990901-c6d09901-3b73-453d-be33-e8fba6f65aad.png alt loading=lazy decoding=async></figure></p><p>没有发现与flag有关的信息，查看字符串</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733470070973-083a1ff6-02f2-48e5-8308-3326581ae0f4.png alt loading=lazy decoding=async></figure></p><p>发现了flag，尝试提交一波</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733470104764-242acc2f-85ff-4fe4-9b43-9dd0cb103e4d.png alt loading=lazy decoding=async></figure></p><p>发现答案不对，这是个假flag</p><p>回到主函数，源代码如下</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=ne>int</span> <span class=n>__cdecl</span> <span class=n>main</span><span class=p>(</span><span class=ne>int</span> <span class=n>argc</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>argv</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>envp</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v3</span><span class=p>;</span> <span class=o>//</span> <span class=n>edx</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=o>*</span><span class=n>v4</span><span class=p>;</span> <span class=o>//</span> <span class=n>esi</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=n>v5</span><span class=p>;</span> <span class=o>//</span> <span class=n>al</span>
+</span></span><span class=line><span class=cl>  <span class=n>unsigned</span> <span class=ne>int</span> <span class=n>i</span><span class=p>;</span> <span class=o>//</span> <span class=n>edx</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v7</span><span class=p>;</span> <span class=o>//</span> <span class=n>eax</span>
+</span></span><span class=line><span class=cl>  <span class=n>char</span> <span class=n>Arglist</span><span class=p>[</span><span class=mi>16</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>2</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>24</span><span class=n>h</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>  <span class=n>__int64</span> <span class=n>v10</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>12</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>14</span><span class=n>h</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>  <span class=ne>int</span> <span class=n>v11</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>1</span><span class=n>Ah</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=n>Ch</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>  <span class=n>__int16</span> <span class=n>v12</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>esp</span><span class=o>+</span><span class=mi>1</span><span class=n>Eh</span><span class=p>]</span> <span class=p>[</span><span class=n>ebp</span><span class=o>-</span><span class=mi>8</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=n>sub_401020</span><span class=p>(</span><span class=n>Format</span><span class=p>,</span> <span class=n>Arglist</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
+</span></span><span class=line><span class=cl>  <span class=n>v11</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v12</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=o>*</span><span class=p>(</span><span class=n>_OWORD</span> <span class=o>*</span><span class=p>)</span><span class=n>Arglist</span> <span class=o>=</span> <span class=mi>0</span><span class=n>i64</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>v10</span> <span class=o>=</span> <span class=mi>0</span><span class=n>i64</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=n>sub_401050</span><span class=p>(</span><span class=s2>&#34;</span><span class=si>%s</span><span class=s2>&#34;</span><span class=p>,</span> <span class=p>(</span><span class=n>char</span><span class=p>)</span><span class=n>Arglist</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span> <span class=n>strlen</span><span class=p>(</span><span class=n>Arglist</span><span class=p>)</span> <span class=o>==</span> <span class=mi>24</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>  <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>v3</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>v4</span> <span class=o>=</span> <span class=p>(</span><span class=n>char</span> <span class=o>*</span><span class=p>)</span><span class=o>&amp;</span><span class=n>v10</span> <span class=o>+</span> <span class=mi>7</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>do</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>v5</span> <span class=o>=</span> <span class=o>*</span><span class=n>v4</span><span class=o>--</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=n>byte_40336C</span><span class=p>[</span><span class=n>v3</span><span class=o>++</span><span class=p>]</span> <span class=o>=</span> <span class=n>v5</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>while</span> <span class=p>(</span> <span class=n>v3</span> <span class=o>&lt;</span> <span class=mi>24</span> <span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mh>0x18</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=n>byte_40336C</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=p>(</span><span class=n>byte_40336C</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span> <span class=o>^</span> <span class=mi>6</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>v7</span> <span class=o>=</span> <span class=n>strcmp</span><span class=p>(</span><span class=n>byte_40336C</span><span class=p>,</span> <span class=n>aXircjR2twsv3pt</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span> <span class=n>v7</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=n>v7</span> <span class=o>=</span> <span class=n>v7</span> <span class=o>&lt;</span> <span class=mi>0</span> <span class=err>?</span> <span class=o>-</span><span class=mi>1</span> <span class=p>:</span> <span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span> <span class=o>!</span><span class=n>v7</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=n>sub_401020</span><span class=p>(</span><span class=s2>&#34;right</span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>,</span> <span class=n>Arglist</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
+</span></span><span class=line><span class=cl>      <span class=n>system</span><span class=p>(</span><span class=s2>&#34;pause&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>分析可知，传入的字符串数组是一个24位，而且必须传入的要先加一，再异或6才行</p><p>我们点击aXircjR2twsv3pt</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733470258010-a2dcd1dd-d6e7-4d34-9384-d02b5d772a05.png alt loading=lazy decoding=async></figure></p><p>只要传入的数字与他比对，根据逆过程，先异或再减一那么就能得到flag了</p><p>提取，注意这里的提取用shirt+e提取，不然单纯地复制粘贴会没用(数据会缺失)</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733470610512-05c974d2-7135-4414-80bf-71623b14a8a5.png alt loading=lazy decoding=async></figure></p><p>写一个脚本</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733470975111-261e6021-0572-41dc-85c8-3b492815fee8.png alt loading=lazy decoding=async></figure></p><p>但是注意到flag是逆序的，我们改动一下</p><p>最终脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>a = &#39;xIrCj~&lt;r|2tWsv3PtI\x7Fzndka&#39;
+</span></span><span class=line><span class=cl>b = &#39;&#39;
+</span></span><span class=line><span class=cl>for i in range(24):
+</span></span><span class=line><span class=cl>    b+=chr((ord(a[i])^6)-1)
+</span></span><span class=line><span class=cl>print(b[::-1])    
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733471057133-3fd15cbf-e523-487b-95d5-af7ba0ed594c.png alt loading=lazy decoding=async></figure></p><p>flag{xNqU4otPq3ys9wkDsN}</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733471118739-cbea42ad-cf05-4aa2-a18f-6c523a463017.png alt loading=lazy decoding=async></figure></p><h1 id=13lgniteme>13.lgniteMe</h1><p>查壳，无壳，发现是32位</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733472422365-9d1b5ee2-7092-4b16-bb20-538e686b111b.png alt loading=lazy decoding=async></figure></p><p>拖进ida32中，进入主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733472477612-8c14bde5-9c87-4e89-8329-628ad95817bd.png alt loading=lazy decoding=async></figure></p><p>发现了EIS{这个典型flag包裹的片段，继续分析可知，再sub_4011C0这个函数有着关键作用</p><p>点开</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733472766821-3c099658-0221-45e2-bad0-07739c88d17e.png alt loading=lazy decoding=async></figure></p><p>源代码</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>bool __cdecl sub_4011C0(char *Str)
+</span></span><span class=line><span class=cl>{
+</span></span><span class=line><span class=cl>  int v2; // [esp+50h] [ebp-B0h]
+</span></span><span class=line><span class=cl>  char Str2[32]; // [esp+54h] [ebp-ACh] BYREF
+</span></span><span class=line><span class=cl>  int v4; // [esp+74h] [ebp-8Ch]
+</span></span><span class=line><span class=cl>  int v5; // [esp+78h] [ebp-88h]
+</span></span><span class=line><span class=cl>  size_t i; // [esp+7Ch] [ebp-84h]
+</span></span><span class=line><span class=cl>  char v7[128]; // [esp+80h] [ebp-80h] BYREF
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  if ( strlen(Str) &lt;= 4 )
+</span></span><span class=line><span class=cl>    return 0;
+</span></span><span class=line><span class=cl>  i = 4;
+</span></span><span class=line><span class=cl>  v5 = 0;
+</span></span><span class=line><span class=cl>  while ( i &lt; strlen(Str) - 1 )
+</span></span><span class=line><span class=cl>    v7[v5++] = Str[i++];
+</span></span><span class=line><span class=cl>  v7[v5] = 0;
+</span></span><span class=line><span class=cl>  v4 = 0;
+</span></span><span class=line><span class=cl>  v2 = 0;
+</span></span><span class=line><span class=cl>  memset(Str2, 0, sizeof(Str2));
+</span></span><span class=line><span class=cl>  for ( i = 0; i &lt; strlen(v7); ++i )
+</span></span><span class=line><span class=cl>  {
+</span></span><span class=line><span class=cl>    if ( v7[i] &gt;= 97 &amp;&amp; v7[i] &lt;= 122 )
+</span></span><span class=line><span class=cl>    {
+</span></span><span class=line><span class=cl>      v7[i] -= 32;
+</span></span><span class=line><span class=cl>      v2 = 1;
+</span></span><span class=line><span class=cl>    }
+</span></span><span class=line><span class=cl>    if ( !v2 &amp;&amp; v7[i] &gt;= 65 &amp;&amp; v7[i] &lt;= 90 )
+</span></span><span class=line><span class=cl>      v7[i] += 32;
+</span></span><span class=line><span class=cl>    Str2[i] = byte_4420B0[i] ^ sub_4013C0(v7[i]);
+</span></span><span class=line><span class=cl>    v2 = 0;
+</span></span><span class=line><span class=cl>  }
+</span></span><span class=line><span class=cl>  return strcmp(&#34;GONDPHyGjPEKruv{{pj]X@rF&#34;, Str2) == 0;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></div><p>分析程序。只要对于其字符串加密函数即可，包含数组以及返回函数程序</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733472844482-87e8bcd9-ee71-44d9-a91c-5d48f52033ed.png alt loading=lazy decoding=async></figure></p><p>加密数组的字符串，提取出来</p><p>unsigned char ida_chars[] =</p><p>{</p><p>0x0D, 0x13, 0x17, 0x11, 0x02, 0x01, 0x20, 0x1D, 0x0C, 0x02,</p><p>0x19, 0x2F, 0x17, 0x2B, 0x24, 0x1F, 0x1E, 0x16, 0x09, 0x0F,</p><p>0x15, 0x27, 0x13, 0x26, 0x0A, 0x2F, 0x1E, 0x1A, 0x2D, 0x0C,</p><p>0x22, 0x04</p><p>};</p><p>返回函数程序</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733472896516-6621a906-67f0-4aad-82b3-39ae53cafdff.png alt loading=lazy decoding=async></figure></p><p>对a1进行异或再进行+72操作</p><p>写个脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>def reverse_transform(Str2, ida_chars):
+</span></span><span class=line><span class=cl>    # 使用较短的长度作为循环范围
+</span></span><span class=line><span class=cl>    length = min(len(Str2), len(ida_chars))
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    # Convert the target string to bytes for XOR operation
+</span></span><span class=line><span class=cl>    str2_bytes = bytes([ord(c) for c in Str2])
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    # Perform the reverse transformation
+</span></span><span class=line><span class=cl>    v7 = bytearray(length)  # 修改长度
+</span></span><span class=line><span class=cl>    for i in range(length):  # 修改循环范围
+</span></span><span class=line><span class=cl>        # Reverse the operations of sub_4013C0 and XOR with ida_chars
+</span></span><span class=line><span class=cl>        reversed_val = (str2_bytes[i] ^ ida_chars[i]) - 72
+</span></span><span class=line><span class=cl>        v7[i] = reversed_val ^ 0x55
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        # Reverse the case transformation logic
+</span></span><span class=line><span class=cl>        if 65 &lt;= v7[i] &lt;= 90:  # If it&#39;s an uppercase letter, convert it back to lowercase
+</span></span><span class=line><span class=cl>            v7[i] += 32
+</span></span><span class=line><span class=cl>        elif 97 &lt;= v7[i] &lt;= 122:  # If it&#39;s a lowercase letter, convert it back to uppercase
+</span></span><span class=line><span class=cl>            v7[i] -= 32
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    return v7.decode(&#39;ascii&#39;, errors=&#39;replace&#39;)
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># Given data
+</span></span><span class=line><span class=cl>Str2 = &#34;GONDPHyGjPEKruv{{pj]X@rF&#34;
+</span></span><span class=line><span class=cl>ida_chars = [
+</span></span><span class=line><span class=cl>    0x0D, 0x13, 0x17, 0x11, 0x02, 0x01, 0x20, 0x1D, 0x0C, 0x02,
+</span></span><span class=line><span class=cl>    0x19, 0x2F, 0x17, 0x2B, 0x24, 0x1F, 0x1E, 0x16, 0x09, 0x0F,
+</span></span><span class=line><span class=cl>    0x15, 0x27, 0x13, 0x26, 0x0A, 0x2F, 0x1E, 0x1A, 0x2D, 0x0C,
+</span></span><span class=line><span class=cl>    0x22, 0x04
+</span></span><span class=line><span class=cl>]
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># Reverse the transformation
+</span></span><span class=line><span class=cl>original_input = reverse_transform(Str2, ida_chars)
+</span></span><span class=line><span class=cl>print(&#34;Original input (flag):&#34;, original_input)
+</span></span></code></pre></div><p>输出</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733472985739-cc3c5d19-1472-49ac-b02f-5cd11e6e7f17.png alt loading=lazy decoding=async></figure></p><p>结果用EIS{}包裹</p><p>EIS{wadx_tdgk_aihc_ihkn_pjlm}</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733473047012-f41327bc-d7c1-4cc8-8bdf-2e5e46661b32.png alt loading=lazy decoding=async></figure></p><h1 id=14actf新生赛2020rome>14.[ACTF新生赛2020]rome</h1><p>打开附件，查壳，无壳，拖ida32里 ，进入主函数</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733491365034-816b410e-3b16-4942-b6f9-7bd7d0536816.png alt loading=lazy decoding=async></figure></p><p>这里一眼看到<a href="https://so.csdn.net/so/search?q=%E5%87%AF%E6%92%92%E5%8A%A0%E5%AF%86&amp;spm=1001.2101.3001.7020">凯撒加密</a>，妥妥的送分题。先分析代码</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>int func()
+</span></span><span class=line><span class=cl>{
+</span></span><span class=line><span class=cl>    int result; // eax
+</span></span><span class=line><span class=cl>    int v1[4]; // [esp+14h] [ebp-44h]
+</span></span><span class=line><span class=cl>    unsigned __int8 input_str; // [esp+24h] [ebp-34h] BYREF
+</span></span><span class=line><span class=cl>    unsigned __int8 v3; // [esp+25h] [ebp-33h]
+</span></span><span class=line><span class=cl>    unsigned __int8 v4; // [esp+26h] [ebp-32h]
+</span></span><span class=line><span class=cl>    unsigned __int8 v5; // [esp+27h] [ebp-31h]
+</span></span><span class=line><span class=cl>    unsigned __int8 v6; // [esp+28h] [ebp-30h]
+</span></span><span class=line><span class=cl>    int v7; // [esp+29h] [ebp-2Fh]
+</span></span><span class=line><span class=cl>    int v8; // [esp+2Dh] [ebp-2Bh]
+</span></span><span class=line><span class=cl>    int v9; // [esp+31h] [ebp-27h]
+</span></span><span class=line><span class=cl>    int v10; // [esp+35h] [ebp-23h]
+</span></span><span class=line><span class=cl>    unsigned __int8 v11; // [esp+39h] [ebp-1Fh]
+</span></span><span class=line><span class=cl>    char v12[29]; // [esp+3Bh] [ebp-1Dh] BYREF
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    strcpy(v12, &#34;Qsw3sj_lz4_Ujw@l&#34;);              // 原始密文
+</span></span><span class=line><span class=cl>    printf(&#34;Please input:&#34;);
+</span></span><span class=line><span class=cl>    scanf(&#34;%s&#34;, &amp;input_str);                      // 用户输入flag位置
+</span></span><span class=line><span class=cl>    result = input_str;
+</span></span><span class=line><span class=cl>    if ( input_str == 65 )
+</span></span><span class=line><span class=cl>    {
+</span></span><span class=line><span class=cl>        result = v3;
+</span></span><span class=line><span class=cl>        if ( v3 == &#39;C&#39; )
+</span></span><span class=line><span class=cl>        {
+</span></span><span class=line><span class=cl>            result = v4;
+</span></span><span class=line><span class=cl>            if ( v4 == &#39;T&#39; )
+</span></span><span class=line><span class=cl>            {
+</span></span><span class=line><span class=cl>                result = v5;
+</span></span><span class=line><span class=cl>                if ( v5 == &#39;F&#39; )
+</span></span><span class=line><span class=cl>                {
+</span></span><span class=line><span class=cl>                    result = v6;
+</span></span><span class=line><span class=cl>                    if ( v6 == &#39;{&#39; )
+</span></span><span class=line><span class=cl>                    {
+</span></span><span class=line><span class=cl>                        result = v11;
+</span></span><span class=line><span class=cl>                        if ( v11 == &#39;}&#39; )                   // 这几个if判断输入是不是CTF框架
+</span></span><span class=line><span class=cl>                        {
+</span></span><span class=line><span class=cl>                            v1[0] = v7;
+</span></span><span class=line><span class=cl>                            v1[1] = v8;                       // 这里就是框架里面的内容，只不过用数组来存储
+</span></span><span class=line><span class=cl>                            v1[2] = v9;
+</span></span><span class=line><span class=cl>                            v1[3] = v10;
+</span></span><span class=line><span class=cl>                            *(_DWORD *)&amp;v12[17] = 0;
+</span></span><span class=line><span class=cl>                            while ( *(int *)&amp;v12[17] &lt;= 15 )
+</span></span><span class=line><span class=cl>                            {
+</span></span><span class=line><span class=cl>                                if ( *((char *)v1 + *(_DWORD *)&amp;v12[17]) &gt; 64 &amp;&amp; *((char *)v1 + *(_DWORD *)&amp;v12[17]) &lt;= 90 )// 大写字母偏移
+</span></span><span class=line><span class=cl>                                    *((_BYTE *)v1 + *(_DWORD *)&amp;v12[17]) = (*((char *)v1 + *(_DWORD *)&amp;v12[17]) - 51) % 26 + 65;
+</span></span><span class=line><span class=cl>                                if ( *((char *)v1 + *(_DWORD *)&amp;v12[17]) &gt; 96 &amp;&amp; *((char *)v1 + *(_DWORD *)&amp;v12[17]) &lt;= 122 )// 小写字母偏移
+</span></span><span class=line><span class=cl>                                    *((_BYTE *)v1 + *(_DWORD *)&amp;v12[17]) = (*((char *)v1 + *(_DWORD *)&amp;v12[17]) - 79) % 26 + 97;
+</span></span><span class=line><span class=cl>                                ++*(_DWORD *)&amp;v12[17];
+</span></span><span class=line><span class=cl>                            }
+</span></span><span class=line><span class=cl>                            *(_DWORD *)&amp;v12[17] = 0;
+</span></span><span class=line><span class=cl>                            while ( *(int *)&amp;v12[17] &lt;= 15 )
+</span></span><span class=line><span class=cl>                            {
+</span></span><span class=line><span class=cl>                                result = (unsigned __int8)v12[*(_DWORD *)&amp;v12[17]];
+</span></span><span class=line><span class=cl>                                if ( *((_BYTE *)v1 + *(_DWORD *)&amp;v12[17]) != (_BYTE)result )// 判断是否和我们输入的一样
+</span></span><span class=line><span class=cl>                                    return result;
+</span></span><span class=line><span class=cl>                                ++*(_DWORD *)&amp;v12[17];
+</span></span><span class=line><span class=cl>                            }
+</span></span><span class=line><span class=cl>                            return printf(&#34;You are correct!&#34;);
+</span></span><span class=line><span class=cl>                        }
+</span></span><span class=line><span class=cl>                    }
+</span></span><span class=line><span class=cl>                }
+</span></span><span class=line><span class=cl>            }
+</span></span><span class=line><span class=cl>        }
+</span></span><span class=line><span class=cl>    }
+</span></span><span class=line><span class=cl>    return result;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></div><p>然后这里就有两个思路了，第一种就是计算<a href="https://so.csdn.net/so/search?q=%E5%81%8F%E7%A7%BB%E9%87%8F&amp;spm=1001.2101.3001.7020">偏移量</a>进行逆向倒推出flag。第二种就是暴力破解（这个是我一开始逆向没出来看了大佬的文章）。</p><p>这里先讲第一种方法。</p><p>先计算偏移量，看源码大写字母和小写字母的偏移量是不同的。</p><p>ASCII表</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733491440075-ef1edf6e-129f-420c-a1ec-68f14121c10b.png alt loading=lazy decoding=async></figure></p><p>先写出正常凯撒加密的代码假设偏移量为先右偏移了4,W为输入的明文,E为加密后的密文</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>W=input(&#34;输入密文&#34;)
+</span></span><span class=line><span class=cl>E=chr((ord(W)-64+4)%26+64)
+</span></span><span class=line><span class=cl>print(E)
+</span></span></code></pre></div><p>这里没有偏移就是：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>W=input(&#34;输入密文&#34;)
+</span></span><span class=line><span class=cl>E=chr((ord(W)-64)%26+64)
+</span></span><span class=line><span class=cl>print(E)
+</span></span></code></pre></div><p>这里题目中的：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>if ( *((char *)v1 + *(_DWORD *)&amp;v12[17]) &gt; 64 &amp;&amp; *((char *)v1 + *(_DWORD *)&amp;v12[17]) &lt;= 90 )// 大写字母偏移
+</span></span><span class=line><span class=cl>                                    *((_BYTE *)v1 + *(_DWORD *)&amp;v12[17]) = (*((char *)v1 + *(_DWORD *)&amp;v12[17]) - 51) % 26 + 65;
+</span></span></code></pre></div><p>这里计算方法就是用题目中的-51减去-64加上题目中的65-64得出偏移量为14</p><p>偏移量=-51-（-64）+65-64</p><p>分析小写字母的同理</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>if ( *((char *)v1 + *(_DWORD *)&amp;v12[17]) &gt; 96 &amp;&amp; *((char *)v1 + *(_DWORD *)&amp;v12[17]) &lt;= 122 )// 小写字母偏移
+</span></span><span class=line><span class=cl>                                    *((_BYTE *)v1 + *(_DWORD *)&amp;v12[17]) = (*((char *)v1 + *(_DWORD *)&amp;v12[17]) - 79) % 26 + 97;
+</span></span></code></pre></div><p>这里计算方法就是用题目中的-79减去-64加上题目中的97-64得出偏移量为18</p><p>偏移量=-79-（-64）+97-64</p><p>然后可以编写exp了</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>def reverse():
+</span></span><span class=line><span class=cl>    flag=&#34;Qsw3sj_lz4_Ujw@l&#34;
+</span></span><span class=line><span class=cl>    result=[]
+</span></span><span class=line><span class=cl>    flag1=&#34;&#34;
+</span></span><span class=line><span class=cl>    for i in flag:
+</span></span><span class=line><span class=cl>        if ord(i)&gt;64 and ord(i)&lt;=90:
+</span></span><span class=line><span class=cl>            result.append(chr(((ord(i)-64)-14)%26+64))
+</span></span><span class=line><span class=cl>        elif ord(i)&gt;96 and ord(i)&lt;=122:
+</span></span><span class=line><span class=cl>            result.append(chr(((ord(i)-97)-18)%26+97))
+</span></span><span class=line><span class=cl>        else:
+</span></span><span class=line><span class=cl>            result.append(i)
+</span></span><span class=line><span class=cl> 
+</span></span><span class=line><span class=cl> 
+</span></span><span class=line><span class=cl>    for i in range(len(result)):
+</span></span><span class=line><span class=cl>        flag1 += flag1.join(result[i])
+</span></span><span class=line><span class=cl>    print(&#34;flag{&#34;+flag1+&#34;}&#34;)
+</span></span><span class=line><span class=cl> 
+</span></span><span class=line><span class=cl> 
+</span></span><span class=line><span class=cl>reverse()
+</span></span></code></pre></div><p>运行一下</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733491600741-f350599f-c685-4467-820e-1c479fb9eb85.png alt loading=lazy decoding=async></figure></p><p>第二种方法，暴力破解，就不需要分析出偏移量了。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>a= &#39;ACTF{&#39;
+</span></span><span class=line><span class=cl>enc=&#39;Qsw3sj_lz4_Ujw@l&#39;
+</span></span><span class=line><span class=cl>s=&#39;&#39;
+</span></span><span class=line><span class=cl>for i in range(len(enc)):
+</span></span><span class=line><span class=cl>    for n in range(128):
+</span></span><span class=line><span class=cl>        j=n
+</span></span><span class=line><span class=cl>        if j &gt;64 and j&lt;=90:
+</span></span><span class=line><span class=cl>            j=(j-51)%26+65
+</span></span><span class=line><span class=cl>        if j&gt;96 and j&lt;=122:
+</span></span><span class=line><span class=cl>            j= (j-79)%26 +97
+</span></span><span class=line><span class=cl>        if j==ord(enc[i]):
+</span></span><span class=line><span class=cl>            a=a+chr(n)
+</span></span><span class=line><span class=cl>print(a+&#39;}&#39;)
+</span></span><span class=line><span class=cl> 
+</span></span><span class=line><span class=cl>ACTF{Cae3ar_th4_Gre@t}
+</span></span></code></pre></div><h1 id=15wustctf2020level1>15.[WUSTCTF2020]level1</h1><p>打开附件</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733579780838-8f053d3c-c2e6-4c0d-9af7-a09e360f4f4b.png alt loading=lazy decoding=async></figure></p><p>查看output.txt文件</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733579823431-a8ba8d71-06b6-4638-93ea-bf72d61ef533.png alt loading=lazy decoding=async></figure></p><p>对leve1进行查壳</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733579863356-673fb0fd-1011-4ef8-8393-15fdfcd51680.png alt loading=lazy decoding=async></figure></p><p>无壳，Linux64位操作系统</p><p>拖入ida中</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733579891921-47e4b4ca-4e08-4f96-a3f2-8afa74fb1eab.png alt loading=lazy decoding=async></figure></p><p>发现主函数，源代码如下</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=ne>int</span> <span class=n>__fastcall</span> <span class=n>main</span><span class=p>(</span><span class=ne>int</span> <span class=n>argc</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>argv</span><span class=p>,</span> <span class=k>const</span> <span class=n>char</span> <span class=o>**</span><span class=n>envp</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=ne>int</span> <span class=n>i</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>4</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>2</span><span class=n>Ch</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>FILE</span> <span class=o>*</span><span class=n>stream</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>8</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>28</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>char</span> <span class=n>ptr</span><span class=p>[</span><span class=mi>24</span><span class=p>];</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>10</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>20</span><span class=n>h</span><span class=p>]</span> <span class=n>BYREF</span>
+</span></span><span class=line><span class=cl>    <span class=n>unsigned</span> <span class=n>__int64</span> <span class=n>v7</span><span class=p>;</span> <span class=o>//</span> <span class=p>[</span><span class=n>rsp</span><span class=o>+</span><span class=mi>28</span><span class=n>h</span><span class=p>]</span> <span class=p>[</span><span class=n>rbp</span><span class=o>-</span><span class=mi>8</span><span class=n>h</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>v7</span> <span class=o>=</span> <span class=n>__readfsqword</span><span class=p>(</span><span class=mh>0x28</span><span class=n>u</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>stream</span> <span class=o>=</span> <span class=n>fopen</span><span class=p>(</span><span class=s2>&#34;flag&#34;</span><span class=p>,</span> <span class=s2>&#34;r&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>fread</span><span class=p>(</span><span class=n>ptr</span><span class=p>,</span> <span class=mi>1</span><span class=n>uLL</span><span class=p>,</span> <span class=mh>0x14</span><span class=n>uLL</span><span class=p>,</span> <span class=n>stream</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>fclose</span><span class=p>(</span><span class=n>stream</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;=</span> <span class=mi>19</span><span class=p>;</span> <span class=o>++</span><span class=n>i</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span> <span class=p>(</span><span class=n>i</span> <span class=o>&amp;</span> <span class=mi>1</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>printf</span><span class=p>(</span><span class=s2>&#34;</span><span class=si>%ld</span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>,</span> <span class=p>(</span><span class=n>unsigned</span> <span class=ne>int</span><span class=p>)(</span><span class=n>ptr</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&lt;&lt;</span> <span class=n>i</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span>
+</span></span><span class=line><span class=cl>            <span class=n>printf</span><span class=p>(</span><span class=s2>&#34;</span><span class=si>%ld</span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>,</span> <span class=p>(</span><span class=n>unsigned</span> <span class=ne>int</span><span class=p>)(</span><span class=n>i</span> <span class=o>*</span> <span class=n>ptr</span><span class=p>[</span><span class=n>i</span><span class=p>]));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>分析</p><ul><li>如果索引 <code>i</code> 是奇数，那么它会将 <code>ptr[i]</code> 左移 <code>i</code> 位，然后将其作为无符号整数打印出来。</li><li>如果索引 <code>i</code> 是偶数，那么它会将 <code>i</code> 乘以 <code>ptr[i]</code> 的值，然后将其作为无符号整数打印出来</li></ul><p>我们写一个脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>encrypted = [
+</span></span><span class=line><span class=cl>    198, 232, 816, 200, 1536, 300, 6144, 984, 
+</span></span><span class=line><span class=cl>    51200, 570, 92160, 1200, 565248, 756, 
+</span></span><span class=line><span class=cl>    1474560, 800, 6291456, 1782, 65536000
+</span></span><span class=line><span class=cl>]
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># 创建一个空列表来存储解密后的字符
+</span></span><span class=line><span class=cl>flag = [&#39;&#39;] * 20
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl># 解密过程
+</span></span><span class=line><span class=cl>for i in range(1, 20):
+</span></span><span class=line><span class=cl>    if i &amp; 1:  # 奇数位
+</span></span><span class=line><span class=cl>        flag[i-1] = chr(encrypted[i-1] &gt;&gt; i)
+</span></span><span class=line><span class=cl>    else:  # 偶数位
+</span></span><span class=line><span class=cl>        flag[i-1] = chr(encrypted[i-1] // i)
+</span></span><span class=line><span class=cl>result = &#39;&#39;.join(flag)
+</span></span><span class=line><span class=cl>print(result) 
+</span></span></code></pre></div><p>输出</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733580132581-4d4632a2-5f40-474a-a1de-b0d04490f053.png alt loading=lazy decoding=async></figure></p><p>ctf2020{d9-dE6-20c}</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2024/png/46138799/1733579743075-e9794f2f-38f9-43df-b069-bf665b56bf25.png alt loading=lazy decoding=async></figure></p></div><div class=single-tags><a href=/tags/ctf/># CTF</a>
+<a href=/tags/reverse/># Reverse</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>
