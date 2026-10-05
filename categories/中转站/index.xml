@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>中转站 on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/categories/%E4%B8%AD%E8%BD%AC%E7%AB%99/</link><description>Recent content in 中转站 on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 16 Jun 2026 00:19:11 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/categories/%E4%B8%AD%E8%BD%AC%E7%AB%99/index.xml" rel="self" type="application/rss+xml"/><item><title>AI中转站-快速搭建</title><link>https://luxuryzcx.github.io/posts/ai%E4%B8%AD%E8%BD%AC%E7%AB%99-%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA/</link><pubDate>Tue, 16 Jun 2026 00:19:11 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/ai%E4%B8%AD%E8%BD%AC%E7%AB%99-%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA/</guid><description>&lt;h1 id="前置"&gt;前置&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;mkdir&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;opt&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sub2api&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;cd&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;opt&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sub2api&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;curl&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;sSL&lt;/span&gt; &lt;span class="nl"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/docker-deploy.sh | bash
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;docker&lt;/span&gt; &lt;span class="n"&gt;compose&lt;/span&gt; &lt;span class="n"&gt;up&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;docker&lt;/span&gt; &lt;span class="n"&gt;compose&lt;/span&gt; &lt;span class="n"&gt;logs&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="n"&gt;sub2api&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sed&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;/^&lt;/span&gt;&lt;span class="n"&gt;ADMIN_PASSWORD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="err"&gt;*/&lt;/span&gt;&lt;span class="n"&gt;ADMIN_PASSWORD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;you_password&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;env&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;sed&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;/^&lt;/span&gt;&lt;span class="n"&gt;SERVER_PORT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="err"&gt;*/&lt;/span&gt;&lt;span class="n"&gt;SERVER_PORT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;2390&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;env&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//38.76.203.187:2390/login
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;admin&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;sub2api&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;local&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="mi"&gt;12&lt;/span&gt;&lt;span class="n"&gt;SqweR&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511234648049.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="分组管理"&gt;分组管理&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511234957640.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="创建新分组"&gt;创建新分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235320699.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="分组名称"&gt;分组名称&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235336745.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="选择平台"&gt;选择平台&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235354950.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="费率倍数"&gt;费率倍数&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235454464.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="专属分组"&gt;专属分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235824188.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="保存分组"&gt;保存分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235803908.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="添加账号"&gt;添加账号&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235853076.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="添加新账号"&gt;添加新账号&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235912035.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="账号名称"&gt;账号名称&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235942147.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="选择平台-1"&gt;选择平台&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260511235953730.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="授权方式"&gt;授权方式&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000013888.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="优先级"&gt;优先级&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000028977.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="分配分组"&gt;分配分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000047778.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="保存账号"&gt;保存账号&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000103331.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="生成密钥"&gt;生成密钥&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000116785.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="创建密钥"&gt;创建密钥&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000140044.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="密钥名称"&gt;密钥名称&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000157002.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="选择分组"&gt;选择分组&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000212984.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h1 id="生成并复制"&gt;生成并复制&lt;/h1&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260512000232150.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item></channel></rss>

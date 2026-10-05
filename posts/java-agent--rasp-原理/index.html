@@ -1,0 +1,167 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Java-agent RASP 原理 | 1ux4ry Archive</title><meta name=description content="由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><ul><li><a href=#前言>前言</a></li><li><a href=#简单实现一下>简单实现一下</a><ul><li><a href=#核心原理>核心原理</a></li><li><a href=#未拦截版本>未拦截版本</a></li><li><a href=#拦截后版本>拦截后版本</a></li></ul></li></ul></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label="Java-agent  RASP 原理"><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA_安全_持续学习</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java 安全 持续学习</span>
+<span class=article-hero-card__title-sub>Java-agent RASP 原理</span></div><p class=article-hero-card__meta>安全研究 / Java 安全 持续学习 / 1ux4ry Archive</p><p class=article-hero-card__desc>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java 安全 持续学习</p><h1>Java-agent RASP 原理</h1><div class=single-meta><span>2026-06-14</span>
+<span>安全研究</span>
+<span># Java安全 # 安全研究</span></div></header><div class="page-copy content-body"><h2 id=前言>前言</h2><p>RASP (运用时应用自我保护)</p><p>是一种应用程序内部实现的主动防御技术。与传统的WAF不同，RASP直接嵌入到应用程序的运行环境中（通常通过Java agent 等技术）通过监控，分析和拦截恶意调用来保护应用。</p><p>核心原理</p><p>钩子机制:RASP利用jvm的instrumentation 能力 在 应用程序的关键函数如 Runtime.exec(),
+java.sql.Statement.file.open()上设置钩子。</p><p>上下文感知:执行敏感操作，会检查此时的上下文，谁发起的请求，请求参数是什么，是否符合正常行为。</p><p>防御决策：识别攻击行为，RASP会立即阻止该调用并记录日志，然后终止该请求。</p><h2 id=简单实现一下>简单实现一下</h2><h3 id=核心原理>核心原理</h3><ul><li><p><strong><code>ClassPool.getDefault()</code></strong>：获取 Javassist 的类池，它负责在内存中寻找和管理类。</p></li><li><p><strong><code>CtClass</code> 和 <code>CtMethod</code></strong>：分别代表类和方法，通过它们可以动态获取类结构。</p></li><li><p><strong><code>insertBefore(String src)</code></strong>：Javassist 提供的强大方法，允许直接把一段合法的 Java 字符串代码插入到目标方法体的最前面。在 RASP 中，我们通过 <code>$1</code> 获取传入的命令参数进行审查，一旦发现恶意特征（如 <code>calc.exe</code>）直接抛出 <code>SecurityException</code> 阻断后续流程。</p></li></ul><h3 id=未拦截版本>未拦截版本</h3><p>发现跳出计算机</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>java</span> <span class=o>-</span><span class=n>cp</span> <span class=n>target</span><span class=o>/</span><span class=n>javassist</span><span class=o>-</span><span class=n>rasp</span><span class=o>-</span><span class=mf>1.0</span><span class=o>-</span><span class=n>SNAPSHOT</span><span class=p>.</span><span class=n>jar</span> <span class=n>com</span><span class=p>.</span><span class=n>rasp</span><span class=p>.</span><span class=n>CalcTest</span>
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260610191703556.png alt=image.png loading=lazy decoding=async></figure></p><p>源码</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=w>  </span><span class=kn>package</span><span class=w> </span><span class=nn>com.rasp</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>   * 简单测试 - 直接弹出计算器（无 RASP 拦截）
+</span></span></span><span class=line><span class=cl><span class=cm>   *
+</span></span></span><span class=line><span class=cl><span class=cm>   * 运行命令:
+</span></span></span><span class=line><span class=cl><span class=cm>   * java -cp target/javassist-rasp-1.0-SNAPSHOT.jar com.rasp.CalcTest
+</span></span></span><span class=line><span class=cl><span class=cm>   */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>CalcTest</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;正在启动计算器...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=n>Runtime</span><span class=p>.</span><span class=na>getRuntime</span><span class=p>().</span><span class=na>exec</span><span class=p>(</span><span class=s>&#34;calc.exe&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;计算器已启动！&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><h3 id=拦截后版本>拦截后版本</h3><p>这是拦截之后的效果</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>java</span> <span class=o>-</span><span class=nl>javaagent</span><span class=p>:</span><span class=n>target</span><span class=o>/</span><span class=n>javassist</span><span class=o>-</span><span class=n>rasp</span><span class=o>-</span><span class=mf>1.0</span><span class=o>-</span><span class=n>SNAPSHOT</span><span class=p>.</span><span class=n>jar</span> <span class=o>-</span><span class=n>cp</span> <span class=n>target</span><span class=o>/</span><span class=n>javassist</span><span class=o>-</span><span class=n>rasp</span><span class=o>-</span><span class=mf>1.0</span><span class=o>-</span><span class=n>SNAPSHOT</span><span class=p>.</span><span class=n>jar</span> <span class=n>com</span><span class=p>.</span><span class=n>rasp</span><span class=p>.</span><span class=n>ComprehensiveTest</span>
+</span></span><span class=line><span class=cl><span class=err>╔══════════════════════════════════════════════════════════╗</span>
+</span></span><span class=line><span class=cl><span class=err>║</span>              <span class=nf>RASP</span> <span class=p>(</span><span class=n>Runtime</span> <span class=n>Application</span> <span class=n>Self</span><span class=o>-</span><span class=n>Protection</span><span class=p>)</span>  <span class=err>║</span>
+</span></span><span class=line><span class=cl><span class=err>║</span>                    <span class=n>Java</span> <span class=n>Agent</span> <span class=n>v1</span><span class=mf>.0</span>                        <span class=err>║</span>
+</span></span><span class=line><span class=cl><span class=err>╚══════════════════════════════════════════════════════════╝</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>Agent</span> <span class=err>启动成功，开始注册拦截器</span><span class=p>...</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>注册</span> <span class=n>Runtime</span><span class=p>.</span><span class=n>exec</span> <span class=err>拦截器</span><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>注册</span> <span class=n>ProcessBuilder</span> <span class=err>拦截器</span><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>注册文件操作拦截器</span><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>注册反射调用拦截器</span><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>注册网络连接拦截器</span><span class=p>...</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>所有拦截器注册完成！</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>监控列表</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>  <span class=err>├──</span> <span class=err>命令执行</span><span class=o>:</span> <span class=n>Runtime</span><span class=p>.</span><span class=n>exec</span><span class=p>,</span> <span class=n>ProcessBuilder</span><span class=p>.</span><span class=n>start</span>
+</span></span><span class=line><span class=cl>  <span class=err>├──</span> <span class=err>文件操作</span><span class=o>:</span> <span class=n>FileInputStream</span><span class=p>,</span> <span class=n>FileOutputStream</span><span class=p>,</span> <span class=n>File</span><span class=p>.</span><span class=n>delete</span>
+</span></span><span class=line><span class=cl>  <span class=err>├──</span> <span class=err>反射调用</span><span class=o>:</span> <span class=n>Method</span><span class=p>.</span><span class=n>invoke</span><span class=p>,</span> <span class=n>Class</span><span class=p>.</span><span class=n>forName</span>
+</span></span><span class=line><span class=cl>  <span class=err>└──</span> <span class=err>网络连接</span><span class=o>:</span> <span class=n>Socket</span><span class=p>,</span> <span class=n>URL</span><span class=p>.</span><span class=n>openConnection</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>┌─────────────────────────────────────────────────────────┐</span>
+</span></span><span class=line><span class=cl><span class=err>│</span>           <span class=n>RASP</span> <span class=err>综合测试程序</span>                              <span class=err>│</span>
+</span></span><span class=line><span class=cl><span class=err>└─────────────────────────────────────────────────────────┘</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl><span class=err>测试</span><span class=mi>1</span><span class=o>:</span> <span class=n>Runtime</span><span class=p>.</span><span class=n>exec</span> <span class=err>命令执行</span>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试执行</span><span class=o>:</span> <span class=n>calc</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>检测到</span> <span class=n>ProcessBuilder</span> <span class=err>类加载，注入拦截器</span><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>ProcessBuilder</span><span class=p>.</span><span class=nf>start</span><span class=p>()</span> <span class=err>注入成功</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>ProcessBuilder</span> <span class=err>拦截到危险命令</span><span class=o>:</span> <span class=n>calc</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>命令被拦截</span><span class=o>:</span> <span class=n>RASP拦截</span><span class=err>：禁止执行该命令！</span><span class=n>calc</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试执行</span><span class=o>:</span> <span class=n>whoami</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>ProcessBuilder</span> <span class=err>拦截到危险命令</span><span class=o>:</span> <span class=n>whoami</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>命令被拦截</span><span class=o>:</span> <span class=n>RASP拦截</span><span class=err>：禁止执行该命令！</span><span class=n>whoami</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试执行</span><span class=o>:</span> <span class=n>notepad</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>ProcessBuilder</span> <span class=err>拦截到危险命令</span><span class=o>:</span> <span class=n>notepad</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>命令被拦截</span><span class=o>:</span> <span class=n>RASP拦截</span><span class=err>：禁止执行该命令！</span><span class=n>notepad</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl><span class=err>测试</span><span class=mi>2</span><span class=o>:</span> <span class=n>ProcessBuilder</span> <span class=err>进程创建</span>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试执行</span><span class=o>:</span> <span class=n>cmd</span><span class=p>.</span><span class=n>exe</span> <span class=o>/</span><span class=n>c</span> <span class=n>dir</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>ProcessBuilder</span> <span class=err>拦截到危险命令</span><span class=o>:</span> <span class=n>cmd</span><span class=p>.</span><span class=n>exe</span> <span class=o>/</span><span class=n>c</span> <span class=n>dir</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>进程被拦截</span><span class=o>:</span> <span class=n>RASP拦截</span><span class=err>：禁止执行该命令！</span><span class=n>cmd</span><span class=p>.</span><span class=n>exe</span> <span class=o>/</span><span class=n>c</span> <span class=n>dir</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试执行</span><span class=o>:</span> <span class=n>powershell</span> <span class=n>Get</span><span class=o>-</span><span class=n>Process</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>ProcessBuilder</span> <span class=err>拦截到危险命令</span><span class=o>:</span> <span class=n>powershell</span> <span class=n>get</span><span class=o>-</span><span class=n>process</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>进程被拦截</span><span class=o>:</span> <span class=n>RASP拦截</span><span class=err>：禁止执行该命令！</span><span class=n>powershell</span> <span class=n>get</span><span class=o>-</span><span class=n>process</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试执行</span><span class=o>:</span> <span class=n>notepad</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>ProcessBuilder</span> <span class=err>拦截到危险命令</span><span class=o>:</span> <span class=n>notepad</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>进程被拦截</span><span class=o>:</span> <span class=n>RASP拦截</span><span class=err>：禁止执行该命令！</span><span class=n>notepad</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl><span class=err>测试</span><span class=mi>3</span><span class=o>:</span> <span class=err>文件操作</span>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试读取</span><span class=o>:</span> <span class=nl>C</span><span class=p>:</span><span class=err>\</span><span class=n>Windows</span><span class=err>\</span><span class=n>System32</span><span class=err>\</span><span class=n>drivers</span><span class=err>\</span><span class=n>etc</span><span class=err>\</span><span class=n>hosts</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>文件读取成功（未被拦截）</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试读取</span><span class=o>:</span> <span class=n>test</span><span class=p>.</span><span class=n>txt</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=nl>IO异常</span><span class=p>:</span> <span class=n>test</span><span class=p>.</span><span class=nf>txt</span> <span class=p>(</span><span class=err>系统找不到指定的文件。</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试写入</span><span class=o>:</span> <span class=n>test_output</span><span class=p>.</span><span class=n>txt</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>文件写入成功</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl><span class=err>测试</span><span class=mi>4</span><span class=o>:</span> <span class=err>反射调用</span>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>通过反射加载</span> <span class=n>Runtime</span> <span class=err>类</span><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=err>通过反射获取</span> <span class=n>exec</span> <span class=err>方法</span><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=err>通过反射调用</span> <span class=nf>exec</span><span class=p>(</span><span class=s>&#34;calc.exe&#34;</span><span class=p>)...</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>ProcessBuilder</span> <span class=err>拦截到危险命令</span><span class=o>:</span> <span class=n>calc</span><span class=p>.</span><span class=n>exe</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>异常</span><span class=o>:</span> <span class=n>null</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl><span class=err>测试</span><span class=mi>5</span><span class=o>:</span> <span class=err>网络连接</span>
+</span></span><span class=line><span class=cl><span class=err>═══════════════════════════════════════════════════════════</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试连接</span><span class=o>:</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>22</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>检测到</span> <span class=n>Socket</span> <span class=err>类加载，注入网络拦截器</span><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=n>Socket</span> <span class=err>注入成功</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>网络连接请求</span><span class=o>:</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>22</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>警告：连接到敏感端口</span> <span class=mi>22</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>连接失败</span><span class=o>:</span> <span class=n>Connection</span> <span class=nl>refused</span><span class=p>:</span> <span class=n>connect</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试连接</span><span class=o>:</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>80</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>网络连接请求</span><span class=o>:</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>80</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>连接失败</span><span class=o>:</span> <span class=n>Connection</span> <span class=nl>refused</span><span class=p>:</span> <span class=n>connect</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试连接</span><span class=o>:</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>3306</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>网络连接请求</span><span class=o>:</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>3306</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>警告：连接到敏感端口</span> <span class=mi>3306</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>连接失败</span><span class=o>:</span> <span class=n>Connection</span> <span class=nl>refused</span><span class=p>:</span> <span class=n>connect</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试连接</span><span class=o>:</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>8080</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>网络连接请求</span><span class=o>:</span> <span class=mf>127.0.0.1</span><span class=o>:</span><span class=mi>8080</span>
+</span></span><span class=line><span class=cl><span class=o>?</span> <span class=err>连接成功（未被拦截）</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>尝试连接</span><span class=o>:</span> <span class=mf>192.168.1.1</span><span class=o>:</span><span class=mi>22</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>网络连接请求</span><span class=o>:</span> <span class=mf>192.168.1.1</span><span class=o>:</span><span class=mi>22</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>警告：连接到敏感端口</span> <span class=mi>22</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=n>RASP</span><span class=p>]</span> <span class=err>警告：连接到可疑地址</span> <span class=mf>192.168.1.1</span>
+</span></span></code></pre></div><p>发现都已经被拦截了</p><p>源码</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>com.rasp</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>   * 简单测试 - 弹出计算器（带 RASP 拦截）
+</span></span></span><span class=line><span class=cl><span class=cm>   *
+</span></span></span><span class=line><span class=cl><span class=cm>   * 运行命令:
+</span></span></span><span class=line><span class=cl><span class=cm>   * java -javaagent:target/javassist-rasp-1.0-SNAPSHOT.jar -cp target/javassist-rasp-1.0-SNAPSHOT.jar com.rasp.CalcTest
+</span></span></span><span class=line><span class=cl><span class=cm>   */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>CalcTest</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;正在启动计算器...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>              </span><span class=n>Runtime</span><span class=p>.</span><span class=na>getRuntime</span><span class=p>().</span><span class=na>exec</span><span class=p>(</span><span class=s>&#34;calc.exe&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>              </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;计算器已启动！&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>SecurityException</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>              </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;计算器被拦截！&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>              </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;拦截原因: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>getMessage</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>原因是加载了agent</p></div><div class=single-tags><a href=/tags/java%E5%AE%89%E5%85%A8/># Java安全</a>
+<a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

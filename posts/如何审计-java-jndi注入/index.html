@@ -1,0 +1,632 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>如何审计 Java JNDI注入 | 1ux4ry Archive</title><meta name=description content="由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><ul><li><a href=#前言>前言</a></li><li><a href=#核心要点>核心要点</a></li><li><a href=#漏洞代码示例>漏洞代码示例</a></li><li><a href=#审计工具>审计工具</a></li><li><a href=#安全代码示例>安全代码示例</a></li></ul></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label="如何审计 Java JNDI注入"><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA_安全_持续学习</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java 安全 持续学习</span>
+<span class=article-hero-card__title-sub>如何审计 Java JNDI注入</span></div><p class=article-hero-card__meta>安全研究 / Java 安全 持续学习 / 1ux4ry Archive</p><p class=article-hero-card__desc>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java 安全 持续学习</p><h1>如何审计 Java JNDI注入</h1><div class=single-meta><span>2026-06-14</span>
+<span>安全研究</span>
+<span># Java安全 # 安全研究</span></div></header><div class="page-copy content-body"><h2 id=前言>前言</h2><p>由于很多框架是 Java 写的，所以研究 Java 安全刻不容缓。这篇文章收录在「Java 安全 持续学习」系列中，用来沉淀对应主题的分析与记录。</p><h2 id=核心要点>核心要点</h2><ol><li>核心触发点：lookup(), InitialContext</li><li>高危框架：Log4j2, 数据库连接池, RMI/LDAP</li><li>高危依赖：Tomcat, Groovy, Commons Collections</li><li>JDK 版本：检查限制和绕过条件</li></ol><h2 id=漏洞代码示例>漏洞代码示例</h2><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>com.audit.examples</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.Context</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.InitialContext</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.NamingException</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.servlet.http.HttpServletRequest</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * JNDI 注入漏洞示例代码
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 这些代码仅用于安全审计学习，请勿在生产环境中使用
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>VulnerableExamples</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 漏洞示例 1：直接用户输入
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 危险等级：高危
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 原因：用户输入直接传入 lookup，无任何过滤
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>vulnerableExample1</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>NamingException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Source: 用户输入可控</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;jndiName&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Sink: 直接传入 lookup，未作任何过滤</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Context</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InitialContext</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>ctx</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 漏洞示例 2：动态拼接
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 危险等级：高危
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 原因：用户输入参与 JNDI 名称拼接
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>vulnerableExample2</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>NamingException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Source: 用户输入可控</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>prefix</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;prefix&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Sink: 动态拼接用户输入</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;java:comp/env/&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>prefix</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Context</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InitialContext</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>ctx</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 漏洞示例 3：配置文件注入
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 危险等级：中危
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 原因：配置文件可被修改
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>vulnerableExample3</span><span class=p>()</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>NamingException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Source: 配置文件（可能被修改）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>System</span><span class=p>.</span><span class=na>getProperty</span><span class=p>(</span><span class=s>&#34;jndi.name&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Sink: 直接使用配置值</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Context</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InitialContext</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>ctx</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 漏洞示例 4：数据库连接池注入
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 危险等级：高危
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 原因：数据源名称可被外部控制
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>vulnerableExample4</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>dataSourceName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;dataSource&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>com</span><span class=p>.</span><span class=na>alibaba</span><span class=p>.</span><span class=na>druid</span><span class=p>.</span><span class=na>pool</span><span class=p>.</span><span class=na>DruidDataSource</span><span class=w> </span><span class=n>dataSource</span><span class=w> </span><span class=o>=</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>new</span><span class=w> </span><span class=n>com</span><span class=p>.</span><span class=na>alibaba</span><span class=p>.</span><span class=na>druid</span><span class=p>.</span><span class=na>pool</span><span class=p>.</span><span class=na>DruidDataSource</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Sink: 数据源名称可被外部控制</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>dataSource</span><span class=p>.</span><span class=na>setDataSourceName</span><span class=p>(</span><span class=n>dataSourceName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 漏洞示例 5：RMI 绑定注入
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 危险等级：高危
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 原因：绑定的名称可被外部控制
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>vulnerableExample5</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>bindName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;bindName&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>java</span><span class=p>.</span><span class=na>rmi</span><span class=p>.</span><span class=na>registry</span><span class=p>.</span><span class=na>Registry</span><span class=w> </span><span class=n>registry</span><span class=w> </span><span class=o>=</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>java</span><span class=p>.</span><span class=na>rmi</span><span class=p>.</span><span class=na>registry</span><span class=p>.</span><span class=na>LocateRegistry</span><span class=p>.</span><span class=na>getRegistry</span><span class=p>(</span><span class=n>1099</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Sink: 绑定名称可被外部控制</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>registry</span><span class=p>.</span><span class=na>bind</span><span class=p>(</span><span class=n>bindName</span><span class=p>,</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>java</span><span class=p>.</span><span class=na>rmi</span><span class=p>.</span><span class=na>server</span><span class=p>.</span><span class=na>UnicastRemoteObject</span><span class=p>()</span><span class=w> </span><span class=p>{});</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 漏洞示例 6：Log4j2 注入（需要 Log4j2 2.14.1 或更早版本）
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 危险等级：极高危
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 原因：Log4j2 的 JNDI Lookup 功能
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>vulnerableExample6</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>userInput</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;userInput&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// Sink: Log4j2 会解析 ${jndi:...} 语法</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>org</span><span class=p>.</span><span class=na>apache</span><span class=p>.</span><span class=na>logging</span><span class=p>.</span><span class=na>log4j</span><span class=p>.</span><span class=na>Logger</span><span class=w> </span><span class=n>logger</span><span class=w> </span><span class=o>=</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>org</span><span class=p>.</span><span class=na>apache</span><span class=p>.</span><span class=na>logging</span><span class=p>.</span><span class=na>log4j</span><span class=p>.</span><span class=na>LogManager</span><span class=p>.</span><span class=na>getLogger</span><span class=p>(</span><span class=n>getClass</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>logger</span><span class=p>.</span><span class=na>info</span><span class=p>(</span><span class=s>&#34;User input: {}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>userInput</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><h2 id=审计工具>审计工具</h2><p>依据相应的规则库进行匹配</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>sys</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>re</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>audit_jndi</span><span class=p>(</span><span class=n>file_path</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 敏感的规则列表（JNDI核心Sinks、Log4j触发点等）</span>
+</span></span><span class=line><span class=cl>    <span class=n>rules</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=sa>r</span><span class=s1>&#39;(\.lookup\s*\(.*?\))&#39;</span><span class=p>:</span> <span class=s2>&#34;高危：发现明确的 JNDI lookup() 命名查询，请检查参数是否用户可控！&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=sa>r</span><span class=s1>&#39;(InitialContext)&#39;</span><span class=p>:</span> <span class=s2>&#34;提示：实例化了 InitialContext，请追踪其后续的 lookup 动作。&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=sa>r</span><span class=s1>&#39;(logger\.(info|error|warn)\s*\(.*?\))&#39;</span><span class=p>:</span> <span class=s2>&#34;提示：发现日志记录，若为旧版 Log4j2 且参数可控，可能触发 $</span><span class=si>{jndi:}</span><span class=s2> 注入。&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;=&#34;</span> <span class=o>*</span> <span class=mi>60</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34; 开始审计目标文件: </span><span class=si>{</span><span class=n>file_path</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;=&#34;</span> <span class=o>*</span> <span class=mi>60</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=n>file_path</span><span class=p>,</span> <span class=s1>&#39;r&#39;</span><span class=p>,</span> <span class=n>encoding</span><span class=o>=</span><span class=s1>&#39;utf-8&#39;</span><span class=p>,</span> <span class=n>errors</span><span class=o>=</span><span class=s1>&#39;ignore&#39;</span><span class=p>)</span> <span class=k>as</span> <span class=n>f</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>lines</span> <span class=o>=</span> <span class=n>f</span><span class=o>.</span><span class=n>readlines</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=n>vuln_count</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>line_num</span><span class=p>,</span> <span class=n>line_content</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>lines</span><span class=p>,</span> <span class=mi>1</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=n>line_content_strip</span> <span class=o>=</span> <span class=n>line_content</span><span class=o>.</span><span class=n>strip</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=c1># 跳过注释行</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=n>line_content_strip</span><span class=o>.</span><span class=n>startswith</span><span class=p>(</span><span class=s2>&#34;//&#34;</span><span class=p>)</span> <span class=ow>or</span> <span class=n>line_content_strip</span><span class=o>.</span><span class=n>startswith</span><span class=p>(</span><span class=s2>&#34;*&#34;</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>                <span class=k>continue</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=n>pattern</span><span class=p>,</span> <span class=n>desc</span> <span class=ow>in</span> <span class=n>rules</span><span class=o>.</span><span class=n>items</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=n>re</span><span class=o>.</span><span class=n>search</span><span class=p>(</span><span class=n>pattern</span><span class=p>,</span> <span class=n>line_content_strip</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>                    <span class=n>vuln_count</span> <span class=o>+=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>                    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;[!] 行号 </span><span class=si>{</span><span class=n>line_num</span><span class=si>}</span><span class=s2>: </span><span class=si>{</span><span class=n>line_content_strip</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;    └─ 审计结论: </span><span class=si>{</span><span class=n>desc</span><span class=si>}</span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;=&#34;</span> <span class=o>*</span> <span class=mi>60</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34; 审计完成！共发现 </span><span class=si>{</span><span class=n>vuln_count</span><span class=si>}</span><span class=s2> 处潜在的 JNDI/Log4j 安全隐患。&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;=&#34;</span> <span class=o>*</span> <span class=mi>60</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>except</span> <span class=ne>Exception</span> <span class=k>as</span> <span class=n>e</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34; 读取文件错误: </span><span class=si>{</span><span class=n>e</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=vm>__name__</span> <span class=o>==</span> <span class=s2>&#34;__main__&#34;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>sys</span><span class=o>.</span><span class=n>argv</span><span class=p>)</span> <span class=o>&lt;</span> <span class=mi>2</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;使用方法: python jndi_audit.py &lt;Java文件路径&gt;&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>audit_jndi</span><span class=p>(</span><span class=n>sys</span><span class=o>.</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+</span></span></code></pre></div><p>然后我们接下来运行脚本进行审计</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260528213039892.png alt=image.png loading=lazy decoding=async></figure></p><p>发现审计结果</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>PS</span> <span class=nl>Z</span><span class=p>:</span><span class=err>\</span><span class=n>Desktop</span><span class=err>\日常学习\</span><span class=n>Java_security</span><span class=err>\</span><span class=n>JNDI_Audit</span><span class=err>\</span><span class=n>tools</span><span class=o>&gt;</span> <span class=n>python</span> <span class=p>.</span><span class=err>\</span><span class=n>jndi_audit</span><span class=p>.</span><span class=n>py</span> <span class=s>&#34;Z:\Desktop\日常学习\Java_security\JNDI_Audit\examples\VulnerableExamples.java&#34;</span>
+</span></span><span class=line><span class=cl><span class=o>============================================================</span>
+</span></span><span class=line><span class=cl> <span class=err>开始审计目标文件</span><span class=o>:</span> <span class=nl>Z</span><span class=p>:</span><span class=err>\</span><span class=n>Desktop</span><span class=err>\日常学习\</span><span class=n>Java_security</span><span class=err>\</span><span class=n>JNDI_Audit</span><span class=err>\</span><span class=n>examples</span><span class=err>\</span><span class=n>VulnerableExamples</span><span class=p>.</span><span class=n>java</span>
+</span></span><span class=line><span class=cl><span class=o>============================================================</span>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=o>!</span><span class=p>]</span> <span class=err>行号</span> <span class=mi>4</span><span class=o>:</span> <span class=n>import</span> <span class=n>javax</span><span class=p>.</span><span class=n>naming</span><span class=p>.</span><span class=n>InitialContext</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=err>└─</span> <span class=err>审计结论</span><span class=o>:</span> <span class=err>提示：实例化了</span> <span class=n>InitialContext</span><span class=err>，请追踪其后续的</span> <span class=n>lookup</span> <span class=err>动作。</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=o>!</span><span class=p>]</span> <span class=err>行号</span> <span class=mi>26</span><span class=o>:</span> <span class=n>Context</span> <span class=n>ctx</span> <span class=o>=</span> <span class=n>new</span> <span class=nf>InitialContext</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=err>└─</span> <span class=err>审计结论</span><span class=o>:</span> <span class=err>提示：实例化了</span> <span class=n>InitialContext</span><span class=err>，请追踪其后续的</span> <span class=n>lookup</span> <span class=err>动作。</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=o>!</span><span class=p>]</span> <span class=err>行号</span> <span class=mi>27</span><span class=o>:</span> <span class=k>return</span> <span class=n>ctx</span><span class=p>.</span><span class=nf>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=err>└─</span> <span class=err>审计结论</span><span class=o>:</span> <span class=err>高危：发现明确的</span> <span class=n>JNDI</span> <span class=nf>lookup</span><span class=p>()</span> <span class=err>命名查询，请检查参数是否用户可控！</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=o>!</span><span class=p>]</span> <span class=err>行号</span> <span class=mi>42</span><span class=o>:</span> <span class=n>Context</span> <span class=n>ctx</span> <span class=o>=</span> <span class=n>new</span> <span class=nf>InitialContext</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=err>└─</span> <span class=err>审计结论</span><span class=o>:</span> <span class=err>提示：实例化了</span> <span class=n>InitialContext</span><span class=err>，请追踪其后续的</span> <span class=n>lookup</span> <span class=err>动作。</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=o>!</span><span class=p>]</span> <span class=err>行号</span> <span class=mi>43</span><span class=o>:</span> <span class=k>return</span> <span class=n>ctx</span><span class=p>.</span><span class=nf>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=err>└─</span> <span class=err>审计结论</span><span class=o>:</span> <span class=err>高危：发现明确的</span> <span class=n>JNDI</span> <span class=nf>lookup</span><span class=p>()</span> <span class=err>命名查询，请检查参数是否用户可控！</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=o>!</span><span class=p>]</span> <span class=err>行号</span> <span class=mi>57</span><span class=o>:</span> <span class=n>Context</span> <span class=n>ctx</span> <span class=o>=</span> <span class=n>new</span> <span class=nf>InitialContext</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=err>└─</span> <span class=err>审计结论</span><span class=o>:</span> <span class=err>提示：实例化了</span> <span class=n>InitialContext</span><span class=err>，请追踪其后续的</span> <span class=n>lookup</span> <span class=err>动作。</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=o>!</span><span class=p>]</span> <span class=err>行号</span> <span class=mi>58</span><span class=o>:</span> <span class=k>return</span> <span class=n>ctx</span><span class=p>.</span><span class=nf>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=err>└─</span> <span class=err>审计结论</span><span class=o>:</span> <span class=err>高危：发现明确的</span> <span class=n>JNDI</span> <span class=nf>lookup</span><span class=p>()</span> <span class=err>命名查询，请检查参数是否用户可控！</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>[</span><span class=o>!</span><span class=p>]</span> <span class=err>行号</span> <span class=mi>105</span><span class=o>:</span> <span class=n>logger</span><span class=p>.</span><span class=nf>info</span><span class=p>(</span><span class=s>&#34;User input: {}&#34;</span><span class=p>,</span> <span class=n>userInput</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=err>└─</span> <span class=err>审计结论</span><span class=o>:</span> <span class=err>提示：发现日志记录，若为旧版</span> <span class=n>Log4j2</span> <span class=err>且参数可控，可能触发</span> <span class=err>$</span><span class=p>{</span><span class=nl>jndi</span><span class=p>:}</span> <span class=err>注入。</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>============================================================</span>
+</span></span><span class=line><span class=cl> <span class=err>审计完成！共发现</span> <span class=mi>8</span> <span class=err>处潜在的</span> <span class=n>JNDI</span><span class=o>/</span><span class=n>Log4j</span> <span class=err>安全隐患。</span>
+</span></span></code></pre></div><h2 id=安全代码示例>安全代码示例</h2><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>com.audit.examples</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.Context</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.InitialContext</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.naming.NamingException</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>javax.servlet.http.HttpServletRequest</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.Set</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.util.HashSet</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * JNDI 安全代码示例
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 这些代码展示了如何安全地使用 JNDI
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>SecureExamples</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全示例 1：白名单验证
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全原因：使用白名单限制可查询的 JNDI 名称
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>Set</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>ALLOWED_JNDI_NAMES</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>HashSet</span><span class=o>&lt;&gt;</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>static</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ALLOWED_JNDI_NAMES</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=s>&#34;java:comp/env/jdbc/mysql&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ALLOWED_JNDI_NAMES</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=s>&#34;java:comp/env/jdbc/postgres&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ALLOWED_JNDI_NAMES</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=s>&#34;java:comp/env/jdbc/oracle&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>secureExample1</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>NamingException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>dbType</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;type&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;java:comp/env/jdbc/&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>dbType</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 白名单验证</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>ALLOWED_JNDI_NAMES</span><span class=p>.</span><span class=na>contains</span><span class=p>(</span><span class=n>jndiName</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>SecurityException</span><span class=p>(</span><span class=s>&#34;Invalid JNDI name: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Context</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InitialContext</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>ctx</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全示例 2：硬编码安全名称
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全原因：JNDI 名称完全硬编码，不依赖外部输入
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>secureExample2</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>NamingException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>dbType</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;type&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 使用 switch 语句硬编码安全名称</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>switch</span><span class=w> </span><span class=p>(</span><span class=n>dbType</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>case</span><span class=w> </span><span class=s>&#34;mysql&#34;</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;java:comp/env/jdbc/mysqldb&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>break</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>case</span><span class=w> </span><span class=s>&#34;postgres&#34;</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;java:comp/env/jdbc/postgresdb&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>break</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>case</span><span class=w> </span><span class=s>&#34;oracle&#34;</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;java:comp/env/jdbc/oracledb&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>break</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>default</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>IllegalArgumentException</span><span class=p>(</span><span class=s>&#34;Unknown database type: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>dbType</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Context</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InitialContext</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>ctx</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全示例 3：输入验证和清理
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全原因：对用户输入进行严格验证
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>secureExample3</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>NamingException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;jndiName&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 输入验证：只允许字母、数字、下划线</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>jndiName</span><span class=p>.</span><span class=na>matches</span><span class=p>(</span><span class=s>&#34;^[a-zA-Z0-9_]+$&#34;</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>SecurityException</span><span class=p>(</span><span class=s>&#34;Invalid JNDI name format&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 限制长度</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>jndiName</span><span class=p>.</span><span class=na>length</span><span class=p>()</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=n>50</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>SecurityException</span><span class=p>(</span><span class=s>&#34;JNDI name too long&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 构造安全的 JNDI 名称</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>safeJndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;java:comp/env/jdbc/&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>jndiName</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Context</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InitialContext</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>ctx</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>safeJndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全示例 4：使用环境变量
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全原因：使用环境变量而非用户输入
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>secureExample4</span><span class=p>()</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>NamingException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 从环境变量获取（需要管理员配置）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>System</span><span class=p>.</span><span class=na>getenv</span><span class=p>(</span><span class=s>&#34;DB_JNDI_NAME&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 验证环境变量是否设置</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>jndiName</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=w> </span><span class=o>||</span><span class=w> </span><span class=n>jndiName</span><span class=p>.</span><span class=na>isEmpty</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>IllegalStateException</span><span class=p>(</span><span class=s>&#34;DB_JNDI_NAME environment variable not set&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 验证格式</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>jndiName</span><span class=p>.</span><span class=na>startsWith</span><span class=p>(</span><span class=s>&#34;java:comp/env/&#34;</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>SecurityException</span><span class=p>(</span><span class=s>&#34;Invalid JNDI name format&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Context</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InitialContext</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>ctx</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全示例 5：禁用 JNDI 远程加载
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全原因：在应用启动时禁用 JNDI 远程加载
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>secureInitialization</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 禁用 JNDI 远程加载（JDK 8u121+）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>setProperty</span><span class=p>(</span><span class=s>&#34;com.sun.jndi.rmi.object.trustURLCodebase&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;false&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>setProperty</span><span class=p>(</span><span class=s>&#34;com.sun.jndi.ldap.object.trustURLCodebase&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;false&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 禁用 JNDI 命名工厂（可选）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>setProperty</span><span class=p>(</span><span class=s>&#34;javax.naming.factory.initial&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全示例 6：使用 Spring 的 JndiTemplate
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全原因：Spring 提供了额外的安全层
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>secureExample6</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>dbType</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getParameter</span><span class=p>(</span><span class=s>&#34;type&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 使用 Spring 的 JndiTemplate</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>org</span><span class=p>.</span><span class=na>springframework</span><span class=p>.</span><span class=na>jndi</span><span class=p>.</span><span class=na>JndiTemplate</span><span class=w> </span><span class=n>jndiTemplate</span><span class=w> </span><span class=o>=</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>new</span><span class=w> </span><span class=n>org</span><span class=p>.</span><span class=na>springframework</span><span class=p>.</span><span class=na>jndi</span><span class=p>.</span><span class=na>JndiTemplate</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>jndiName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;java:comp/env/jdbc/&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>dbType</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// Spring 会进行额外的验证</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>jndiTemplate</span><span class=p>.</span><span class=na>lookup</span><span class=p>(</span><span class=n>jndiName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>NamingException</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>RuntimeException</span><span class=p>(</span><span class=s>&#34;Failed to lookup JNDI resource&#34;</span><span class=p>,</span><span class=w> </span><span class=n>e</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全示例 7：使用依赖注入
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     * 安全原因：使用 Spring 或 Jakarta EE 的依赖注入，避免直接 JNDI 查询
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@javax.annotation.Resource</span><span class=p>(</span><span class=n>lookup</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=s>&#34;java:comp/env/jdbc/mydb&#34;</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>javax</span><span class=p>.</span><span class=na>sql</span><span class=p>.</span><span class=na>DataSource</span><span class=w> </span><span class=n>dataSource</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=nf>secureExample7</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 使用依赖注入，无需手动 JNDI 查询</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>dataSource</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>再来一次审计 结果发现就没有了</p></div><div class=single-tags><a href=/tags/java%E5%AE%89%E5%85%A8/># Java安全</a>
+<a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

