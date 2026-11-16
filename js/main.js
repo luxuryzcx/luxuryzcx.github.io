@@ -100,3 +100,14 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   initCodeBlocks();
 });
+
+
+/* hugo-blog-manager: 全站导航注入「圈子」入口 */
+(function(){
+  var nav=document.querySelector(".main-nav");
+  if(!nav||document.getElementById("nav-circle"))return;
+  var a=document.createElement("a");
+  a.id="nav-circle";a.href="/circle/";a.textContent="圈子";
+  var gh=Array.from(nav.querySelectorAll("a")).find(function(x){return /github/i.test(x.textContent)});
+  nav.insertBefore(a,gh||null);
+})();
