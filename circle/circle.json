@@ -1,0 +1,20 @@
+[
+  {
+    "name": "QQ 交流群",
+    "url": "123456789",
+    "desc": "安全交流群，改成你的真实群号（后台「圈子」页签可随时改）",
+    "tag": "QQ群"
+  },
+  {
+    "name": "Telegram",
+    "url": "https://t.me/your_channel",
+    "desc": "改成你的 TG 频道/群组链接",
+    "tag": "TG"
+  },
+  {
+    "name": "Email",
+    "url": "mailto:hello@example.com",
+    "desc": "改成你的邮箱",
+    "tag": "Mail"
+  }
+]
